@@ -1,0 +1,26 @@
+{
+  "name": "translatordiscord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "groq-sdk": "^0.3.2",
+    "languagedetect": "^2.0.0",
+    "node-fetch": "^2.7.0",
+    "nodemon": "^3.1.0",
+    "path": "^0.12.7",
+    "url": "^0.11.3",
+    "uuid": "^9.0.1",
+  }
+}
