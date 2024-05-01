@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node http.js",
+    "dev": "nodemon http.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,6 @@
     "nodemon": "^3.1.0",
     "path": "^0.12.7",
     "url": "^0.11.3",
-    "uuid": "^9.0.1",
+    "uuid": "^9.0.1"
   }
 }
