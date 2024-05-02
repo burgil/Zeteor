@@ -1,11 +1,11 @@
 const fs = require('fs');
 // Example JSON file database:
 let example_db = {};
-function db_save() {
+function db_save(){
     try {
         fs.writeFileSync('./example_db.json', JSON.stringify(example_db), 'utf8');
         return true;
-    } catch (dbError) {
+    } catch (dbError){
         return false;
     }
 }
