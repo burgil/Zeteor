@@ -17,12 +17,26 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname + '/public/login.html'));
+app.get('/commands', (req, res) => {
+    res.sendFile(path.join(__dirname + '/private/commands.html'));
+});
+app.get('/settings', (req, res) => {
+    res.sendFile(path.join(__dirname + '/private/settings.html'));
+});
+app.get('/ai', (req, res) => {
+    res.sendFile(path.join(__dirname + '/private/ai.html'));
 });
 app.get('/logout', (req, res) => {
-    res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-    res.redirect('/');
+    if (example_db[req.cookies.auth_token]) {
+        example_db[req.cookies.auth_token] = undefined;
+        db_save();
+        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        res.redirect('/');
+    } else {
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+    }
 });
 app.get('/get-user', (req, res) => {
     try {
