@@ -1,4 +1,5 @@
 secret
+example_db.json
 # Logs
 logs
 *.log
