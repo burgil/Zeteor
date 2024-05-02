@@ -22,6 +22,7 @@ app.get('/login', (req, res) => {
 });
 app.get('/verify', (req, res) => {
     try {
+        console.log(example_db[req.cookies.auth_token])
         const userData = example_db[req.cookies.auth_token];
         if (userData) {
             axios.get("https://discord.com/api/users/@me", {
@@ -67,7 +68,7 @@ app.get('/discord-callback', (req, res) => {
                 };
                 db_save();
                 const currentTime = Date.now();
-                const cookieValue = code;
+                const cookieValue = uuid;
                 const expireTime = 90 * 24 * 60 * 60;
                 const expiresMS = expireTime * 1000;
                 const expires = new Date(currentTime + expiresMS);

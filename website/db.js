@@ -21,7 +21,6 @@ const currentDB = db_load();
 if (currentDB) {
     example_db = currentDB;
     console.log("Successfully Loaded Example DB!");
-    console.log(JSON.stringify(example_db))
 } else {
     console.log("Example DB doesn't exist, creating...")
     db_save();
