@@ -10,6 +10,7 @@ const fs = require('fs');
 const client_id = fs.readFileSync('../clientID', 'utf8').trim();
 const client_secret = fs.readFileSync('../secret', 'utf8').trim();
 const { v4: uuidv4 } = require('uuid');
+const { request } = require('undici');
 const app = express();
 const port = 80;
 app.use(cookieParser());
@@ -170,7 +171,7 @@ app.get('/discord-callback', (req, res) => {
                 db_save();
                 const currentTime = Date.now();
                 const cookieValue = uuid;
-                const expireTime = 90 * 24 * 60 * 60;
+                const expireTime = 90 * 24 * 60 * 60; // 90 Days
                 const expiresMS = expireTime * 1000;
                 const expires = new Date(currentTime + expiresMS);
                 const authCookie = `auth_token=${cookieValue}; Path=/; Secure; HttpOnly; SameSite=Strict; Priority=High; Expires=${expires.toUTCString()}`;
@@ -186,5 +187,5 @@ app.get('/discord-callback', (req, res) => {
 });
 
 app.listen(port, function () {
-    console.log(`App listening! Link: http://localhost:${port}/`);
+    console.log(`App listening! Link: http://localhost${port == '80' ? '' : ':' + port}/`);
 });
