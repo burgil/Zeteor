@@ -18,7 +18,10 @@ app.use(express.json());
 app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname + '/public/login.html'));
+    res.sendFile(path.join(__dirname + '/private/login.html'));
+});
+app.get('/commands', (req, res) => {
+    res.sendFile(path.join(__dirname + '/private/commands'));
 });
 app.get('/logout', (req, res) => {
     res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
