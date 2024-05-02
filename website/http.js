@@ -46,6 +46,11 @@ app.post('/user', (req, res) => {
     });
 });
 
+// discord callback
+app.get('/discord-callback', (req, res) => {
+    
+});
+
 // axios.get("https://discord.com/api/users/@me", make_config(data.access_token)).then(response => {
 //     res.status(200).send(response.data.username);
 // }).catch(err => {
