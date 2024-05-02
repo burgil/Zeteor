@@ -1,0 +1,18 @@
+#login-link {
+    background-color: whitesmoke;
+    border-radius: 8px;
+    color: black;
+    padding: 15px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+}
+
+#login-link:hover {
+    cursor: pointer;
+}
+
+#logout {
+    display: none;
+}

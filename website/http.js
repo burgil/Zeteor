@@ -20,6 +20,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname + '/public/login.html'));
 });
+app.get('/logout', (req, res) => {
+    res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+    res.redirect('/');
+});
 app.get('/get-user', (req, res) => {
     try {
         const userData = example_db[req.cookies.auth_token];
@@ -45,14 +49,19 @@ app.get('/get-user', (req, res) => {
                     avatar: avatarUrl
                 }));
             }).catch(err => {
-                console.log(err);
-                res.sendStatus(500);
+                res.send(JSON.stringify({
+                    error: err.message
+                }));
             });
         } else {
-            res.status(400).send('Missing code parameter');
+            res.send(JSON.stringify({
+                error: 'Missing code parameter'
+            }));
         }
     } catch (severError) {
-        res.status(500).send('Server Error');
+        res.send(JSON.stringify({
+            error: 'Server Error'
+        }));
     }
 });
 app.get('/discord-callback', (req, res) => {

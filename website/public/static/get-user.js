@@ -6,9 +6,17 @@ async function getUser() {
         const userName = document.getElementById('user-name');
         userName.textContent = userData.global_name;
         userPic.src = userData.avatar;
-        notify(`Welcome back, ${userData.username}!`, 'success', 3500);
+        if (userData.error) {
+            console.log(userData.error);
+            // notify(userData.error, 'error', 3500);
+            loadLoggedOutInterface();
+        } else {
+            notify(`Welcome back, ${userData.username}!`, 'success', 3500);
+        }
     } catch (e) {
-        notify(e.message, 'error', 3500);
+        console.log(e.message);
+        // notify(e.message, 'error', 3500);
+        loadLoggedOutInterface();
     }
 }
 getUser()

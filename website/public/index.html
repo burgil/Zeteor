@@ -7,6 +7,7 @@
         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css'>
         <link rel="stylesheet" href="./style.css">
         <link rel="stylesheet" href="./static/burgil-notify.css">
+        <link rel="stylesheet" href="./static/login.css">
     </head>
     <body>
         <div class="notification-container" id="notification-container"></div>
@@ -82,6 +83,9 @@
                 <div class="left-content">
                     <div class="slider-container">
                         <h1>Welcome to Zeteor 👽</h1>
+                        <div id="logout">
+                            <a id='login-link' href='https://discord.com/oauth2/authorize?client_id=1186414586996478044&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fdiscord-callback&scope=identify+guilds'>Login with Discord</a>
+                        </div>
                         <div class="swiper">
                             <div class="swiper-wrapper">
                                 <div class="swiper-slide">
@@ -453,5 +457,6 @@
         <script src="./script.js"></script>
         <script src="./static/burgil-notify.js"></script>
         <script src="./static/get-user.js"></script>
+        <script src="./static/logout.js"></script>
     </body>
 </html>
