@@ -20,9 +20,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname + '/public/login.html'));
 });
-app.get('/verify', (req, res) => {
+app.get('/get-user', (req, res) => {
     try {
-        console.log(example_db[req.cookies.auth_token])
         const userData = example_db[req.cookies.auth_token];
         if (userData) {
             axios.get("https://discord.com/api/users/@me", {
@@ -30,9 +29,21 @@ app.get('/verify', (req, res) => {
                     "authorization": `Bearer ${userData.data.access_token}`
                 }
             }).then(response => {
-                console.log("user data:", response.data);
-                example_db[uuid].username = response.data.username;
-                res.status(200).send(response.data.username);
+                example_db[req.cookies.auth_token].username = response.data.username;
+                example_db[req.cookies.auth_token].id = response.data.id;
+                example_db[req.cookies.auth_token].global_name = response.data.global_name;
+                db_save();
+                let avatarUrl;
+                if (response.data.avatar.startsWith('a_')) {
+                    avatarUrl = `https://cdn.discordapp.com/avatars/${response.data.id}/${response.data.avatar}.gif`;
+                } else {
+                    avatarUrl = `https://cdn.discordapp.com/avatars/${response.data.id}/${response.data.avatar}.png`;
+                }
+                res.status(200).send(JSON.stringify({
+                    username: response.data.username,
+                    global_name: response.data.global_name,
+                    avatar: avatarUrl
+                }));
             }).catch(err => {
                 console.log(err);
                 res.sendStatus(500);

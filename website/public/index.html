@@ -6,14 +6,16 @@
         <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css'>
         <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css'>
         <link rel="stylesheet" href="./style.css">
+        <link rel="stylesheet" href="./static/burgil-notify.css">
     </head>
     <body>
+        <div class="notification-container" id="notification-container"></div>
         <main>
             <nav class="main-menu">
                 <div>
                     <div class="user-info">
-                        <img src="./profile.webp" alt="user" />
-                        <p>👽🅱🆄🆁🅶🅸🅻🧙</p>
+                        <img id="user-pic" src="./images/loading.gif" alt="user" />
+                        <p id="user-name">Loading...</p>
                     </div>
                     <ul>
                         <li class="nav-item active">
@@ -449,5 +451,7 @@
         <!-- partial -->
         <script src='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'></script>
         <script src="./script.js"></script>
+        <script src="./static/burgil-notify.js"></script>
+        <script src="./static/get-user.js"></script>
     </body>
 </html>
