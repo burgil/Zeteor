@@ -4,6 +4,8 @@ Welcome!
 
 # Installation:
 
+Make a new file on the root folder named secret
+
 ```
 cd website
 
