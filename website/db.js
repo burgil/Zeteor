@@ -1,3 +1,4 @@
+const fs = require('fs');
 // Example JSON file database:
 let example_db = {};
 function db_save() {
