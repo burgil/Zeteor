@@ -3,8 +3,7 @@ const fs = require('fs');
 let example_db = {};
 function db_save() {
     try {
-        const exampleDB = fs.writeFileSync('./example_db.json', JSON.stringify(example_db), 'utf8');
-        example_db = JSON.parse(exampleDB);
+        fs.writeFileSync('./example_db.json', JSON.stringify(example_db), 'utf8');
         return true;
     } catch (dbError) {
         return false;
@@ -13,8 +12,7 @@ function db_save() {
 function db_load() {
     try {
         const exampleDB = fs.readFileSync('./example_db.json', 'utf8');
-        example_db = JSON.parse(exampleDB);
-        return true;
+        return JSON.parse(exampleDB);
     } catch (dbError) {
         return false;
     }
@@ -23,6 +21,7 @@ const currentDB = db_load();
 if (currentDB) {
     example_db = currentDB;
     console.log("Successfully Loaded Example DB!");
+    console.log(JSON.stringify(example_db))
 } else {
     console.log("Example DB doesn't exist, creating...")
     db_save();
