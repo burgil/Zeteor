@@ -149,6 +149,7 @@ main {
   width: 100%;
   padding: 16px 0 20px;
   margin-bottom: 50px;
+  user-select: none;
 }
 
 .swiper-slide {
@@ -432,6 +433,7 @@ main {
   position: relative;
   width: 60px;
   border-radius: 6px;
+  user-select: none;
 }
 
 .song-img img {
