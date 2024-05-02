@@ -4,9 +4,9 @@ const axios = require('axios');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-
-const client_id = '1186414586996478044';
-const client_secret = '';
+const fs = require('fs');
+const client_id = fs.readFileSync('../secret', 'utf8').trim();
+const client_secret = fs.readFileSync('../clientID', 'utf8').trim();
 
 //create a new express application and creates a function that will generate headers for a Discord API request.
 const app = express(); // Create a web app
