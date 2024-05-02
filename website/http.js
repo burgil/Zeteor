@@ -27,8 +27,16 @@ app.get('/ai', (req, res) => {
     res.sendFile(path.join(__dirname + '/private/ai.html'));
 });
 app.get('/logout', (req, res) => {
-    res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-    res.redirect('/');
+    if (example_db[req.cookies.auth_token]) {
+        example_db[req.cookies.auth_token] = undefined;
+        db_save();
+        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        res.redirect('/');
+    } else {
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+    }
 });
 app.get('/get-user', (req, res) => {
     try {
