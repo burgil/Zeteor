@@ -7,4 +7,6 @@ function loadLoggedOutInterface() {
     document.querySelector('.main-section').style.display = 'none';
     // add logged out elements:
     document.getElementById('logout').style.display = 'block';
+    const discordAppMount = document.querySelector('.discord-app-mount');
+    discordAppMount.style.display = 'block';
 }

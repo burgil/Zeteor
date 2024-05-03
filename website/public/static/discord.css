@@ -53,6 +53,7 @@
   color: #2e363d;
 }
 #discord-bot .discord-app-mount {
+  display: none;
   text-align: left;
   height: 700px;
   position: relative;

@@ -4,6 +4,8 @@ function loadLoggedInInterface(userData) {
     userName.textContent = userData.global_name;
     userPic.src = userData.avatar;
     notify(`Welcome back, ${userData.username}!`, 'success', 3500);
+    const discordAppMount = document.querySelector('.discord-app-mount');
+    discordAppMount.style.display = 'none';
     const serversContainer = document.querySelector('.servers-container');
     let serverCount = 0;
     for (const guildID in userData.guilds) {
