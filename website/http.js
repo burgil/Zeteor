@@ -191,10 +191,6 @@ app.post('/generate-image', (req, res) => {
         const prompt = req.body.prompt;
         const numImages = req.body.numImages;
         const resolution = req.body.resolution;
-        console.log("prompt", typeof prompt, prompt)
-        console.log("numImages", typeof numImages, numImages)
-        console.log("resolution0", typeof resolution.split('x')[0], resolution.split('x')[0])
-        console.log("resolution1", typeof resolution.split('x')[1], resolution.split('x')[1])
         axios.post('https://api.together.xyz/api/inference', {
             "model": "SG161222/Realistic_Vision_V3.0_VAE",
             "prompt": prompt,
@@ -205,7 +201,6 @@ app.post('/generate-image', (req, res) => {
             "steps": 20,
             "n": parseInt(numImages),
             "seed": 7241,
-            "sessionKey": "b57cfa79-d514-404b-a78e-cab6d91d1a21"
         }, {
             headers: {
                 Authorization: 'Bearer ' + togetherAPIKey
