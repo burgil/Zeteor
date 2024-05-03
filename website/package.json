@@ -20,8 +20,8 @@
     "languagedetect": "^2.0.0",
     "node-fetch": "^2.7.0",
     "nodemon": "^3.1.0",
+    "openai": "^4.40.1",
     "path": "^0.12.7",
-    "undici": "^6.15.0",
     "url": "^0.11.3",
     "uuid": "^9.0.1"
   },

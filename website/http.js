@@ -9,8 +9,8 @@ const { example_db, db_save } = require('./db.js');
 const fs = require('fs');
 const client_id = fs.readFileSync('../clientID', 'utf8').trim();
 const client_secret = fs.readFileSync('../secret', 'utf8').trim();
+const togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
 const { v4: uuidv4 } = require('uuid');
-const { request } = require('undici');
 const app = express();
 const port = 80;
 app.use(cookieParser());
@@ -183,6 +183,46 @@ app.get('/discord-callback', (req, res) => {
         }
     } catch (severError) {
         res.status(500).send('Server Error');
+    }
+});
+
+app.post('/generate-image', (req, res) => {
+    try {
+        const prompt = req.body.prompt;
+        const numImages = req.body.numImages;
+        const resolution = req.body.resolution;
+        console.log("prompt", typeof prompt, prompt)
+        console.log("numImages", typeof numImages, numImages)
+        console.log("resolution0", typeof resolution.split('x')[0], resolution.split('x')[0])
+        console.log("resolution1", typeof resolution.split('x')[1], resolution.split('x')[1])
+        axios.post('https://api.together.xyz/api/inference', {
+            "model": "SG161222/Realistic_Vision_V3.0_VAE",
+            "prompt": prompt,
+            "negative_prompt": "",
+            "request_type": "image-model-inference",
+            "width": parseInt(resolution.split('x')[0]),
+            "height": parseInt(resolution.split('x')[1]),
+            "steps": 20,
+            "n": parseInt(numImages),
+            "seed": 7241,
+            "sessionKey": "b57cfa79-d514-404b-a78e-cab6d91d1a21"
+        }, {
+            headers: {
+                Authorization: 'Bearer ' + togetherAPIKey
+            }
+        }).then((response) => {
+            const base64Image = response.data.output.choices[0].image_base64;
+            res.send(base64Image);
+        }).catch((error) => {
+            console.error(error.message);
+            res.json({
+                error: error.message
+            });
+        });
+    } catch (serverError) {
+        res.json({
+            error: error.message
+        });
     }
 });
 

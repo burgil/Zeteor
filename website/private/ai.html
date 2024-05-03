@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Image Generation</title>
+    </head>
+    <body>
+        <h1>Image Generation</h1>
+        <input type="text" id="prompt" value="robot cat that wears alien green tshirt" placeholder="Enter prompt">
+        <select id="numImages">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+        <select id="resolution">
+            <option value="1024x1024">1024x1024</option>
+            <option value="512x512">512x512</option>
+            <option value="256x256">256x256</option>
+        </select>
+        <button id="generate-button">Generate</button>
+
+        <div id="images"></div>
+
+        <script>
+            document.getElementById('generate-button').addEventListener('click', function () {
+                fetch('/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: document.getElementById('prompt').value,
+                        numImages: document.getElementById('numImages').value,
+                        resolution: document.getElementById('resolution').value
+                    })
+                }).then(response => response.text()).then(data => {
+                    const imageDiv = document.getElementById('images');
+                    const img = new Image();
+                    img.onload = function() {
+                        URL.revokeObjectURL(this.src);
+                    };
+                    img.src = 'data:image/jpeg;base64,' + data;
+                    imageDiv.appendChild(img);
+                });
+            });
+        </script>
+    </body>
+</html>
