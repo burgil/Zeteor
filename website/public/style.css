@@ -887,3 +887,12 @@ main {
     grid-template-columns: 25% auto 8%;
   }
 }
+
+.normal-link {
+  text-decoration: unset;
+  color: #e8e5e5;
+}
+
+.link-parent:hover .normal-link {
+  color: #000;
+}

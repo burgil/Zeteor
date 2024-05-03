@@ -14,7 +14,7 @@ var users = {
 		username: 'Zeteor 👽',
 		nameColor: 'hsl(212, 51%, 59%)',
 		bot: true,
-		avatar: 'https://cdn.discordapp.com/app-icons/1186414586996478044/573fb2243f9dadd9a850e12001aefc1f.png??size=128'
+		avatar: 'https://cdn.discordapp.com/app-icons/1186414586996478044/ec3d60b2dcbb6290dcb6a6381e613fd8.png?size=128'
 	}
 };
 
