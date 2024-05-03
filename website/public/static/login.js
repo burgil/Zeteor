@@ -32,7 +32,7 @@ function loadLoggedInInterface(userData) {
             } else {
                 notify('Please add the bot to the server first', 'warning', 2000);
                 setTimeout(function () {
-                    window.open("https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands&redirect_uri=http%3A%2F%2Flocalhost%2F&guild_id=" + guildID);
+                    window.open("https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands&guild_id=" + guildID);
                 }, 2000);
             }
         }

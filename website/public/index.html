@@ -8,6 +8,8 @@
         <link rel="stylesheet" href="./style.css">
         <link rel="stylesheet" href="./static/burgil-notify.css">
         <link rel="stylesheet" href="./static/login.css">
+        <link rel="stylesheet" href="./static/discord.css">
+        <script src="https://kit.fontawesome.com/71f9fe673e.js" crossorigin="anonymous"></script>
     </head>
     <body>
         <div class="notification-container" id="notification-container"></div>
@@ -83,8 +85,41 @@
                 <div class="left-content">
                     <div class="slider-container">
                         <h1>Welcome to Zeteor 👽</h1>
-                        <div id="logout">
-                            <a id='login-link' href='https://discord.com/oauth2/authorize?client_id=1186414586996478044&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fdiscord-callback&scope=identify+guilds'>Login with Discord</a>
+                        <div id="discord-bot">
+                            <div id="logout">
+                                <div class="title">The last Discord bot you'll ever need.</div>
+                                <div class="invite-now-wrapper">
+                                    <div class="invite-now"><a href="https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands">Invite Now</a></div>
+                                </div>
+                                <a class="discord-button" href="https://discord.com/oauth2/authorize?client_id=1186414586996478044&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fdiscord-callback&scope=identify+guilds"><i class="fab fa-discord"></i> Log in with Discord</a>
+                                <a id='login-link' href='/blog'><i class="fa-solid fa-circle-play"></i> Watch How It Work!</a>
+                            </div>
+                            <div class="discord-app-mount">
+                                <div class="discord-app">
+                                    <div class="app-buttons"></div>
+                                    <div class="guilds">
+                                        <div class="guild selected" style="background-image: url(https://cdn.discordapp.com/app-icons/1186414586996478044/573fb2243f9dadd9a850e12001aefc1f.png?size=128);"></div>
+                                        <div class="guild"></div>
+                                        <div class="guild guild-add"></div>
+                                    </div>
+                                    <div class="channels">
+                                        <div class="header">Your Server Name</div>
+                                        <div class="channel-wrapper"></div>
+                                        <div class="user"></div>
+                                    </div>
+                                    <div class="chat">
+                                        <div class="header">general</div>
+                                        <div class="messages-wrapper">
+                                            <div class="messages"></div>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <div class="input">
+                                                <textarea placeholder="Message #general" disabled="disabled"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="swiper">
                             <div class="swiper-wrapper">
@@ -386,5 +421,6 @@
         <script src="./static/login.js"></script>
         <script src="./static/logout.js"></script>
         <script src="./static/get-user.js"></script>
+        <script src="./static/discord.js"></script>
     </body>
 </html>
