@@ -2,6 +2,19 @@
 <html>
     <head>
         <title>Image Generation</title>
+        <style>
+            #images {
+                display: flex;
+                gap: 5px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            #images img {
+                max-width: 512px;
+            }
+
+        </style>
     </head>
     <body>
         <h1>Image Generation</h1>
@@ -39,13 +52,15 @@
                         resolution: document.getElementById('resolution').value
                     })
                 }).then(response => response.text()).then(data => {
-                    const imageDiv = document.getElementById('images');
-                    const img = new Image();
-                    img.onload = function() {
-                        URL.revokeObjectURL(this.src);
-                    };
-                    img.src = 'data:image/jpeg;base64,' + data;
-                    imageDiv.appendChild(img);
+                    for (const aiIMG of JSON.parse(data)) {
+                        const imageDiv = document.getElementById('images');
+                        const img = new Image();
+                        img.onload = function () {
+                            URL.revokeObjectURL(this.src);
+                        };
+                        img.src = 'data:image/jpeg;base64,' + aiIMG;
+                        imageDiv.appendChild(img);
+                    }
                 });
             });
         </script>

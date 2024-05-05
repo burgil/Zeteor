@@ -102,10 +102,15 @@ app.get('/get-user', (req, res) => {
                                     serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
                                 }
                             }
+                            if (!example_db['guildSettings_' + guild.id]) example_db['guildSettings_' + guild.id] = {};
+                            if (!example_db['guildCommands_' + guild.id]) example_db['guildCommands_' + guild.id] = {};
+                            db_save();
                             adminGuilds[guild.id] = {
                                 name: guild.name,
                                 icon: serverAvatarUrl,
-                                isBotExist: checkBotServers(guild.id)
+                                isBotExist: checkBotServers(guild.id),
+                                settings: example_db['guildSettings_' + guild.id],
+                                commands: example_db['guildCommands_' + guild.id],
                             }
                         }
                     }
@@ -146,6 +151,7 @@ app.get('/get-user', (req, res) => {
         }));
     }
 });
+
 app.get('/discord-callback', (req, res) => {
     try {
         const code = req.query.code;
@@ -206,8 +212,11 @@ app.post('/generate-image', (req, res) => {
                 Authorization: 'Bearer ' + togetherAPIKey
             }
         }).then((response) => {
-            const base64Image = response.data.output.choices[0].image_base64;
-            res.send(base64Image);
+            const aiIMGS = [];
+            for (const aiIMG of response.data.output.choices) {
+                aiIMGS.push(aiIMG.image_base64);
+            }
+            res.send(JSON.stringify(aiIMGS));
         }).catch((error) => {
             console.error(error.message);
             res.json({

@@ -9,6 +9,9 @@
         <link rel="stylesheet" href="./static/burgil-notify.css">
         <link rel="stylesheet" href="./static/login.css">
         <link rel="stylesheet" href="./static/discord.css">
+        <link rel="stylesheet" href="./static/modal.css">
+        <link rel="stylesheet" href="./static/langs.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css">
         <script src="https://kit.fontawesome.com/71f9fe673e.js" crossorigin="anonymous"></script>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -16,6 +19,101 @@
         <link rel="manifest" href="/site.webmanifest">
         <meta name="msapplication-TileColor" content="#da532c">
         <meta name="theme-color" content="#ffffff">
+        <style>
+            .popup-server-icon {
+                max-width: 128px;
+                border-radius: 50%;
+                border: 2px solid rgba(169, 150, 253, 0.5);
+                box-shadow: rgba(221, 221, 221, 0.3) 0px 6px 18px -3px, rgba(221, 221, 221, 0.2) 0px -3px
+            }
+
+            .popup-server-name-container {
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+                align-items: center;
+                max-width: fit-content;
+                gap: 10px;
+            }
+
+            .multipleSelect {
+                width: 300px;
+            }
+
+            .select2-container {
+                z-index: 10002;
+            }
+
+            .jw-modal-body {
+                color: white;
+            }
+
+            .select2-container--default .select2-selection--multiple {
+                background-color: transparent;
+                background: linear-gradient(281deg, #080c2b, #1c2d35);
+                border-color: #676767;
+                filter: drop-shadow(0px 0px 4px #1c2d35);
+            }
+
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                background-color: transparent;
+                border: 1px solid #4d5289;
+                border-radius: 8px;
+                padding-left: 6px;
+                padding-right: 10px;
+                padding-top: 1px;
+                padding-bottom: 1px;
+            }
+
+            .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+                margin-right: 4px;
+            }
+
+            .select2-dropdown {
+                background-color: #090a2b;
+            }
+
+            .select2-results__option[aria-selected] {
+                color: white;
+            }
+
+            .select2-container--default .select2-results__option--highlighted[aria-selected] {
+                background-color: transparent;
+                filter: drop-shadow(0px 0px 3px rgba(255, 255, 255, 0.5));
+                border: 1px solid #24288d8c;
+            }
+
+            .select2-container--default .select2-results__option[aria-selected=true] {
+                background-color: transparent;
+                background: linear-gradient(160deg, #151515, #041915);
+            }
+
+            .select2-dropdown {
+                border: 0;
+                border-bottom-left-radius: 10px;
+                overflow: hidden;
+                border-left: 1px solid #ffffff17;
+            }
+
+            .dropdown-content {
+                z-index: 10003;
+            }
+
+            .select2-container--default .select2-search--inline .select2-search__field {
+                padding: 0 5px;
+            }
+
+            .select2-container--default .select2-search--inline .select2-search__field::placeholder {
+                color: #7f7f7f;
+            }
+
+            .select2-container .select2-selection--multiple .select2-selection__rendered {
+                display: flex;
+                flex-wrap: wrap;
+                padding-bottom: 5px;
+            }
+
+        </style>
     </head>
     <body>
         <div class="notification-container" id="notification-container"></div>
@@ -418,10 +516,22 @@
                 </div>
             </section>
         </main>
-        <!-- partial -->
+
+        <div id="modal-popup" class="jw-modal">
+            <div class="jw-modal-body">
+                <div id="modal-content"></div>
+                <button class="popup-close" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+
         <script src='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'></script>
-        <script src="./script.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js'></script>
+        <script src="./static/swiper.js"></script>
+        <script src="./static/modal.js"></script>
         <script src="./static/burgil-notify.js"></script>
+        <script src="./static/langs.js"></script>
+        <script src="./static/select.js"></script>
         <script src="./static/login.js"></script>
         <script src="./static/logout.js"></script>
         <script src="./static/get-user.js"></script>

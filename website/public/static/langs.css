@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@500&family=Noto+Sans+JP:wght@400;500&family=Noto+Sans+KR:wght@500&family=Open+Sans:wght@400;500&display=swap");
+.dropdown button {
+    background-color: #253849;
+    min-width: 130px;
+    width: max-content;
+    height: 40px;
+    border-radius: 5px;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    justify-content: space-evenly;
+}
+.dropdown button img {
+    margin: 0 5px 0 0;
+}
+.dropdown button img,
+.dropdown-content li img {
+    width: 28px;
+}
+.dropdown button,
+.dropdown-content li {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-family: "Open Sans", sans-serif;
+    font-family: "Noto Sans JP", sans-serif;
+    font-family: "Noto Sans Arabic", sans-serif;
+    font-family: "Noto Sans KR", sans-serif;
+    font-weight: 500;
+}
+.arrow-down {
+    width: 0;
+    height: 0;
+    display: inline-block;
+    vertical-align: middle;
+    border-style: solid;
+    border-width: 4px 4px 0 4px;
+    border-color: #fff transparent transparent transparent;
+    margin: 0 0 0 5px;
+}
+
+.dropdown button:hover {
+    cursor: pointer;
+    background-color: #3c5b77;
+}
+/* Style for the dropdown content */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    margin: 1px 0 0 0;
+    padding: 0;
+    background-color: #000000ee;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 5px;
+    overflow-y: scroll;
+    max-height: 315px;
+}
+/* Style for the dropdown content items */
+.dropdown-content li {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    justify-content: end;
+}
+.dropdown-content li img {
+    margin: 0 20px 0px 20px;
+}
+/* Style for the dropdown content items on hover */
+.dropdown-content li:hover {
+    background-color: #0e1b20e1;
+    cursor: pointer;
+    color: blue;
+    border-radius: 5px;
+}
+/* Show the dropdown content when the dropdown button is clicked */
+.dropdown:focus-within .dropdown-content {
+    display: block;
+}
+/* Animate the dropdown content */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.dropdown-content {
+    animation: slideIn 0.3s ease-out;
+}
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: #c2c9d2;
+}
