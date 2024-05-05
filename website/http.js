@@ -238,7 +238,7 @@ const port = isSecure ? 443 : 80;
     key: fs.readFileSync('./ssl/zeteor.roboticeva.com.key'),
 } : {}, app).listen(port, '0.0.0.0', function () {
     if (isSecure) {
-        console.log(`App listening! Link: https://zeteor.roboticeva.com${port == '80' ? '' : ':' + port}/`);
+        console.log(`App listening! Link: https://zeteor.roboticeva.com${port == '443' ? '' : ':' + port}/`);
     } else {
         console.log(`App listening! Link: http://localhost${port == '80' ? '' : ':' + port}/`);
     }
