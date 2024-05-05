@@ -14,7 +14,6 @@ const client_secret = fs.readFileSync('../secret', 'utf8').trim();
 const togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
 const { v4: uuidv4 } = require('uuid');
 const app = express();
-const port = 80;
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -233,6 +232,7 @@ app.post('/generate-image', (req, res) => {
 });
 
 const isSecure = process.platform !== 'win32';
+const port = isSecure ? 443 : 80;
 (isSecure ? https : http).createServer(isSecure ? {
     cert: fs.readFileSync('./ssl/zeteor.roboticeva.com.pem'),
     key: fs.readFileSync('./ssl/zeteor.roboticeva.com.key'),
