@@ -234,8 +234,8 @@ app.post('/generate-image', (req, res) => {
 
 const isSecure = process.platform !== 'win32';
 (isSecure ? https : http).createServer(isSecure ? {
-    key: fs.readFileSync('./ssl/privatekey.pem'),
-    cert: fs.readFileSync('./ssl/certificate.pem'),
+    cert: fs.readFileSync('./ssl/zeteor.roboticeva.com.pem'),
+    key: fs.readFileSync('./ssl/zeteor.roboticeva.com.key'),
 } : {}, app).listen(port, '0.0.0.0', function () {
     console.log(`App listening! Link: http://localhost${port == '80' ? '' : ':' + port}/`);
 });
