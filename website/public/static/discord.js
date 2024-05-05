@@ -47,11 +47,6 @@ var channelData = [{
         value: '/ailisten - Enable listen mode - will listen to speech, translate, and speak in the other language.\n/aionly - Make the bot only listen to burgil!\n/ailong - Make the bot speak longer responses!\n/pingai - Test the bot responsiveness!\n/aidc - Force voice channel disconnect!\n/aidebug - Test the AI bot\'s responsiveness with a simple ping command'
 			}]
 		}
-	}, {
-		type: 'input',
-		delay: 1500,
-		text: 'Wow this is so cool!!',
-		user: users.burgil
 	}]
 }, {
 	name: 'translator',
@@ -84,7 +79,7 @@ var channelData = [{
 	}, {
 		type: 'input',
 		text: '/en Hello World!',
-		user: users.phineas
+		user: users.burgil
 	}, {
 		type: 'message',
 		delay: 350,
