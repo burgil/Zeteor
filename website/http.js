@@ -14,6 +14,7 @@ const client_secret = fs.readFileSync('../secret', 'utf8').trim();
 const togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
 const { v4: uuidv4 } = require('uuid');
 const app = express();
+const isSecure = process.platform !== 'win32';
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -161,7 +162,7 @@ app.get('/discord-callback', (req, res) => {
             data_1.append('client_id', client_id);
             data_1.append('client_secret', client_secret);
             data_1.append('grant_type', 'authorization_code');
-            data_1.append('redirect_uri', `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
+            data_1.append('redirect_uri', isSecure ? 'https://zeteor.roboticeva.com/discord-callback' : `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
             data_1.append('scope', 'identify');
             data_1.append('code', code);
             fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => {
@@ -231,7 +232,6 @@ app.post('/generate-image', (req, res) => {
     }
 });
 
-const isSecure = process.platform !== 'win32';
 const port = isSecure ? 443 : 80;
 (isSecure ? https : http).createServer(isSecure ? {
     cert: fs.readFileSync('./ssl/zeteor.roboticeva.com.pem'),
