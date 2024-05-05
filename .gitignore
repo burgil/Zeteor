@@ -1,4 +1,9 @@
 secret
+ssl/*.pem
+ssl/*.ca
+ssl/*.cert
+ssl/*.key
+ssl/*.crt
 togetherAPIKey
 togetherAPIKey2
 example_db.json
