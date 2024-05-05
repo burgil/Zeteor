@@ -236,6 +236,8 @@ const port = isSecure ? 443 : 80;
 (isSecure ? https : http).createServer(isSecure ? {
     cert: fs.readFileSync('./ssl/zeteor.roboticeva.com.pem'),
     key: fs.readFileSync('./ssl/zeteor.roboticeva.com.key'),
+    requestCert: true,
+    rejectUnauthorized: true
 } : {}, app).listen(port, '0.0.0.0', function () {
     if (isSecure) {
         console.log(`App listening! Link: https://zeteor.roboticeva.com${port == '443' ? '' : ':' + port}/`);
