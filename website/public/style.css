@@ -51,7 +51,6 @@ main {
   display: grid;
   grid-template-columns: 11% 89%;
   width: 95%;
-  margin: 40px;
   background: rgba(16, 21, 61, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -127,6 +126,7 @@ main {
 /* CONTENT */
 
 .content {
+  max-height: 90vh;
   display: grid;
   grid-template-columns: 75% 25%;
 }
@@ -232,8 +232,7 @@ main {
   color: #000;
 }
 
-.right-content {
-  max-height: 90vh;
+.right-content, .left-content {
   overflow-y: scroll;
 }
 
