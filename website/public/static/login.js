@@ -3,7 +3,6 @@ function loadLoggedInInterface(userData) {
     const userName = document.getElementById('user-name');
     userName.textContent = userData.global_name;
     userPic.src = userData.avatar;
-    notify(`Welcome back, ${userData.username}!`, 'success', 3500);
     const discordAppMount = document.querySelector('.discord-app-mount');
     discordAppMount.style.display = 'none';
     const serversContainer = document.querySelector('.servers-container');
@@ -17,10 +16,13 @@ function loadLoggedInInterface(userData) {
         if (guild.icon) {
             newServerIMG.src = guild.icon;
         } else {
+            let guildLetter = guild.name[0].toUpperCase();
+            guildLetter = guildLetter.replace(/[^a-z]+/i, '');
+            if (guildLetter == '') guildLetter = '�';
             newServerIMG.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
                 `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="white">${guild.name[0].toUpperCase()}</text>
-                </svg>`
+                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="white">REPLACEME</text>
+                </svg>`.replace('REPLACEME', guildLetter)
             );
         }
         newServer.append(newServerIMG);
@@ -44,5 +46,5 @@ function loadLoggedInInterface(userData) {
         noServers.textContent = 'You do not have any server!'
         serversContainer.append(noServers);
     }
-
+    notify(`Welcome back, ${userData.username}!`, 'success', 3500);
 }

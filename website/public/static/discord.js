@@ -5,12 +5,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var demoEle = { lastMsgGroup: null };
 
 var users = {
-	phineas: {
+	burgil: {
 		username: '👽🅱🆄🆁🅶🅸🅻🧙',
 		nameColor: 'hsl(345, 50%, 52%)',
 		avatar: 'https://cdn.discordapp.com/avatars/243439234294349834/a_3aafe5af825b083d50a464860df2e203.gif?size=128'
 	},
-	paragon: {
+	zeteor: {
 		username: 'Zeteor 👽',
 		nameColor: 'hsl(212, 51%, 59%)',
 		bot: true,
@@ -24,11 +24,11 @@ var channelData = [{
 	messages: [{
 		type: 'input',
 		text: '/aihelp',
-		user: users.phineas
+		user: users.burgil
 	}, {
 		type: 'message',
 		delay: 350,
-		user: users.paragon,
+		user: users.zeteor,
 		embedData: {
 			title: '-=-=-=-=-= Help =-=-=-=-=-',
 			pill: 'hsl(202, 35%, 68%)',
@@ -47,17 +47,22 @@ var channelData = [{
         value: '/ailisten - Enable listen mode - will listen to speech, translate, and speak in the other language.\n/aionly - Make the bot only listen to burgil!\n/ailong - Make the bot speak longer responses!\n/pingai - Test the bot responsiveness!\n/aidc - Force voice channel disconnect!\n/aidebug - Test the AI bot\'s responsiveness with a simple ping command'
 			}]
 		}
+	}, {
+		type: 'input',
+		delay: 1500,
+		text: 'Wow this is so cool!!',
+		user: users.burgil
 	}]
 }, {
 	name: 'translator',
 	messages: [{
 		type: 'input',
 		text: '/pt Olá Mundo!',
-		user: users.phineas
+		user: users.burgil
 	}, {
 		type: 'message',
 		delay: 350,
-		user: users.paragon,
+		user: users.zeteor,
 		text: '[emoji id="1f5d2"] Hello World!',
 		// embedData: {
 		// 	title: '-=-=-=-=-= Music =-=-=-=-=-',
@@ -73,8 +78,8 @@ var channelData = [{
 		// 		name: 'Channel',
 		// 		value: 'Uploaded by [strong text="Trap Nation"]'
 		// 	}],
-		// 	footerIcon: users.phineas.avatar,
-		// 	footer: 'Requested By ' + users.phineas.username
+		// 	footerIcon: users.burgil.avatar,
+		// 	footer: 'Requested By ' + users.burgil.username
 		// }
 	}, {
 		type: 'input',
@@ -83,7 +88,7 @@ var channelData = [{
 	}, {
 		type: 'message',
 		delay: 350,
-		user: users.paragon,
+		user: users.zeteor,
 		text: '[emoji id="1f5d2"] Olá Mundo!',
 		// embedData: {
 		// 	title: '-=-=-=-=-= Music =-=-=-=-=-',

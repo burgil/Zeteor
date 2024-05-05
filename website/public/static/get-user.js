@@ -10,8 +10,7 @@ async function getUser() {
             loadLoggedInInterface(userData);
         }
     } catch (e) {
-        console.log(e.message);
-        // notify(e.message, 'error', 3500);
+        notify(e.message, 'error', 3500);
         loadLoggedOutInterface();
     }
 }
