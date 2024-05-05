@@ -25,7 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 function checkBotServers(serverID) {
     const botServers = [
         "1112920281367973900",
-        "1234408445525098527"
+        "1234408445525098527",
+        "764695230146281483"
     ];
     let isBotInServer = false;
     for (const botServerID of botServers) {
