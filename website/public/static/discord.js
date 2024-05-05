@@ -4,6 +4,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var demoEle = { lastMsgGroup: null };
 
+/*
+function getUserLanguage() {
+            return navigator.language || navigator.userLanguage;
+        }
+
+        // Function to set the greeting based on language
+        function setGreeting() {
+            var language = getUserLanguage();
+            var greetingElement = document.getElementById('greeting');
+*/
 var users = {
 	burgil: {
 		username: '👽🅱🆄🆁🅶🅸🅻🧙',
