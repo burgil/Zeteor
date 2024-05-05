@@ -1,6 +1,8 @@
 const express = require('express');
 const { URLSearchParams } = require('url');
 const axios = require('axios');
+const http = require('http');
+const https = require('https');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -230,6 +232,10 @@ app.post('/generate-image', (req, res) => {
     }
 });
 
-app.listen(port, function () {
+const isSecure = process.platform !== 'win32';
+(isSecure ? https : http).createServer(isSecure ? {
+    key: fs.readFileSync('./ssl/privatekey.pem'),
+    cert: fs.readFileSync('./ssl/certificate.pem'),
+} : {}, app).listen(port, '0.0.0.0', function () {
     console.log(`App listening! Link: http://localhost${port == '80' ? '' : ':' + port}/`);
 });
