@@ -237,5 +237,9 @@ const isSecure = process.platform !== 'win32';
     cert: fs.readFileSync('./ssl/zeteor.roboticeva.com.pem'),
     key: fs.readFileSync('./ssl/zeteor.roboticeva.com.key'),
 } : {}, app).listen(port, '0.0.0.0', function () {
-    console.log(`App listening! Link: http://localhost${port == '80' ? '' : ':' + port}/`);
+    if (isSecure) {
+        console.log(`App listening! Link: https://zeteor.roboticeva.com${port == '80' ? '' : ':' + port}/`);
+    } else {
+        console.log(`App listening! Link: http://localhost${port == '80' ? '' : ':' + port}/`);
+    }
 });
