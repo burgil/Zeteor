@@ -5,7 +5,7 @@ const { Client } = require('pg');
 const client = new Client({
     user: 'postgres', // string | undefined
     database: 'zeteordb', // string | undefined
-    password: 'postgres', // string | (() => string | Promise<string>) | undefined
+    password: '1234', // string | (() => string | Promise<string>) | undefined
     // port: 5432, // number | undefined
     // host: '127.0.0.1', // string | undefined
     // connectionString: '', // string | undefined
@@ -25,15 +25,15 @@ const client = new Client({
 client.connect(async (err) => {
     console.log("Connected to DB!");
     try {
-        console.log("Trying...");
+        console.log("Trying to use the DB...");
         const res = await client.query('SELECT $1::text as message', ['Hello world!'])
         console.log(res.rows[0].message)
-        console.log("Got it");
+        console.log("DB is working!");
     } catch (err) {
         console.error(err.message);
         console.log("Please install Postgres to use the synced database.")
     } finally {
-        console.log("Finished");
+        console.log("Database connection ended.");
         await client.end()
     }
 });
