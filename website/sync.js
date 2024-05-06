@@ -1,11 +1,19 @@
 const { Client } = require('pg');
-// port 5432
-// pass 1234
-// C:\Program Files\PostgreSQL\16\bin>psql -U postgres
+// port: 5432
+// pass: postgres
+// "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres
+/*
+sudo -u postgres psql
+sudo su
+sudo -i -u postgres
+\d
+\connect zeteordb
+ALTER USER postgres WITH PASSWORD 'new_password';
+*/
 const client = new Client({
     user: 'postgres', // string | undefined
     database: 'zeteordb', // string | undefined
-    password: '1234', // string | (() => string | Promise<string>) | undefined
+    password: 'postgres', // string | (() => string | Promise<string>) | undefined
     // port: 5432, // number | undefined
     // host: '127.0.0.1', // string | undefined
     // connectionString: '', // string | undefined
