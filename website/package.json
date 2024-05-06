@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node http.js",
+    "start": "node http.js /ZeteorMainWebsite",
     "dev": "nodemon http.js"
   },
   "keywords": [],
