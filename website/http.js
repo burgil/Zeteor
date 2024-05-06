@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { example_db, db_save } = require('./db.js');
 const { addQueue } = require('./queue.js');
+const { test } = require('./sync.js');
 const fs = require('fs');
 const client_id = fs.readFileSync('../clientID', 'utf8').trim();
 const client_secret = fs.readFileSync('../secret', 'utf8').trim();
@@ -106,16 +107,6 @@ app.post('/edit-server/commands', (req, res) => {
     });
 });
 
-app.get('/test1', (req, res) => {
-    setTimeout(function() {
-        res.send('hi');
-    }, 2000);
-});
-app.get('/test2', (req, res) => {
-    setTimeout(function() {
-        res.send('hi');
-    }, 10000);
-});
 app.get('/get-user', (req, res) => {
     addQueue(req, res, function (req, res, responder) {
         try {
