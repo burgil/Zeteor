@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { example_db, db_save } = require('./db.js');
+const { addQueue } = require('./queue.js');
 const fs = require('fs');
 const client_id = fs.readFileSync('../clientID', 'utf8').trim();
 const client_secret = fs.readFileSync('../secret', 'utf8').trim();
@@ -15,12 +16,35 @@ const togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
 const { v4: uuidv4 } = require('uuid');
 const app = express();
 const isSecure = process.platform !== 'win32';
+const Fingerprint = require('express-fingerprint');
+const requestIp = require('request-ip');
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(requestIp.mw())
+app.use(Fingerprint({
+    parameters:[
+        // Defaults
+        Fingerprint.useragent,
+        Fingerprint.acceptHeaders,
+        Fingerprint.geoip,
+        // // Additional parameters
+        // function(next) {
+        //     // ...do something...
+        //     next(null,{
+        //     'param1':'value1'
+        //     })
+        // },
+        // function(next) {
+        //     // ...do something...
+        //     next(null,{
+        //     'param2':'value2'
+        //     })
+        // },
+    ]
+}))
 //
 function checkBotServers(serverID) {
     const botServers = [
@@ -61,138 +85,157 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/edit-server/commands', (req, res) => {
-    // get the server ID
-    const serverID = '';
-    // get action:
-    const action = ''; // examples: edit-command , disable-command , change-command-permissions
-    // check if the user has permissions to modify this server
-    axios.get("https://discord.com/api/users/@me/guilds", {
-        headers: {
-            "authorization": `Bearer ${userData.data.access_token}`
-        }
-    }).then(guilds => {
-        let hasPermissions = false;
-        for (const guildID in guilds.data) {
-            if (guildID != serverID) continue;
-            const guild = guilds.data[guildID];
-            if (guild.permissions == 2147483647 && checkBotServers(guildID)) hasPermissions = true;
+    addQueue(req, res, function (req, res, responder) {
+        // get the server ID
+        const serverID = '';
+        // get action:
+        const action = ''; // examples: edit-command , disable-command , change-command-permissions
+        // check if the user has permissions to modify this server
+        axios.get("https://discord.com/api/users/@me/guilds", {
+            headers: {
+                "authorization": `Bearer ${userData.data.access_token}`
+            }
+        }).then(guilds => {
+            let hasPermissions = false;
+            for (const guildID in guilds.data) {
+                if (guildID != serverID) continue;
+                const guild = guilds.data[guildID];
+                if (guild.permissions == 2147483647 && checkBotServers(guildID)) hasPermissions = true;
+            }
+        });
+    });
+});
+
+app.get('/test1', (req, res) => {
+    setTimeout(function() {
+        res.send('hi');
+    }, 2000);
+});
+app.get('/test2', (req, res) => {
+    setTimeout(function() {
+        res.send('hi');
+    }, 10000);
+});
+app.get('/get-user', (req, res) => {
+    addQueue(req, res, function (req, res, responder) {
+        try {
+            const userData = example_db[req.cookies.auth_token];
+            if (userData) {
+                axios.get("https://discord.com/api/users/@me", {
+                    headers: {
+                        "authorization": `Bearer ${userData.data.access_token}`
+                    }
+                }).then(user => {
+                    setTimeout(function() {
+                        axios.get("https://discord.com/api/users/@me/guilds", {
+                            headers: {
+                                "authorization": `Bearer ${userData.data.access_token}`
+                            }
+                        }).then(guilds => {
+                            const adminGuilds = {};
+                            for (const guild of guilds.data) {
+                                if (guild.permissions == 2147483647) {
+                                    let serverAvatarUrl;
+                                    if (guild.icon) {
+                                        if (guild.icon.startsWith('a_')) {
+                                            serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.gif`;
+                                        } else {
+                                            serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
+                                        }
+                                    }
+                                    if (!example_db['guildSettings_' + guild.id]) example_db['guildSettings_' + guild.id] = {};
+                                    if (!example_db['guildCommands_' + guild.id]) example_db['guildCommands_' + guild.id] = {};
+                                    db_save();
+                                    adminGuilds[guild.id] = {
+                                        name: guild.name,
+                                        icon: serverAvatarUrl,
+                                        isBotExist: checkBotServers(guild.id),
+                                        settings: example_db['guildSettings_' + guild.id],
+                                        commands: example_db['guildCommands_' + guild.id],
+                                    }
+                                }
+                            }
+                            example_db[req.cookies.auth_token].username = user.data.username;
+                            example_db[req.cookies.auth_token].id = user.data.id;
+                            example_db[req.cookies.auth_token].global_name = user.data.global_name;
+                            db_save();
+                            let avatarUrl;
+                            if (user.data.avatar.startsWith('a_')) {
+                                avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
+                            } else {
+                                avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
+                            }
+                            responder(JSON.stringify({
+                                username: user.data.username,
+                                global_name: user.data.global_name,
+                                avatar: avatarUrl,
+                                guilds: adminGuilds
+                            }));
+                        }).catch(err => {
+                            responder(JSON.stringify({
+                                error: err.message
+                            }));
+                        });
+                    }, 500);
+                }).catch(err => {
+                    responder(JSON.stringify({
+                        error: err.message
+                    }));
+                });
+            } else {
+                responder(JSON.stringify({
+                    error: 'Missing code parameter'
+                }));
+            }
+        } catch (severError) {
+            responder(JSON.stringify({
+                error: 'Server Error'
+            }));
         }
     });
 });
 
-app.get('/get-user', (req, res) => {
-    try {
-        const userData = example_db[req.cookies.auth_token];
-        if (userData) {
-            axios.get("https://discord.com/api/users/@me", {
-                headers: {
-                    "authorization": `Bearer ${userData.data.access_token}`
-                }
-            }).then(user => {
-                axios.get("https://discord.com/api/users/@me/guilds", {
-                    headers: {
-                        "authorization": `Bearer ${userData.data.access_token}`
-                    }
-                }).then(guilds => {
-                    const adminGuilds = {};
-                    for (const guild of guilds.data) {
-                        if (guild.permissions == 2147483647) {
-                            let serverAvatarUrl;
-                            if (guild.icon) {
-                                if (guild.icon.startsWith('a_')) {
-                                    serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.gif`;
-                                } else {
-                                    serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
-                                }
-                            }
-                            if (!example_db['guildSettings_' + guild.id]) example_db['guildSettings_' + guild.id] = {};
-                            if (!example_db['guildCommands_' + guild.id]) example_db['guildCommands_' + guild.id] = {};
-                            db_save();
-                            adminGuilds[guild.id] = {
-                                name: guild.name,
-                                icon: serverAvatarUrl,
-                                isBotExist: checkBotServers(guild.id),
-                                settings: example_db['guildSettings_' + guild.id],
-                                commands: example_db['guildCommands_' + guild.id],
-                            }
-                        }
-                    }
-                    example_db[req.cookies.auth_token].username = user.data.username;
-                    example_db[req.cookies.auth_token].id = user.data.id;
-                    example_db[req.cookies.auth_token].global_name = user.data.global_name;
-                    db_save();
-                    let avatarUrl;
-                    if (user.data.avatar.startsWith('a_')) {
-                        avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
-                    } else {
-                        avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
-                    }
-                    res.status(200).send(JSON.stringify({
-                        username: user.data.username,
-                        global_name: user.data.global_name,
-                        avatar: avatarUrl,
-                        guilds: adminGuilds
-                    }));
-                }).catch(err => {
-                    res.send(JSON.stringify({
-                        error: err.message
-                    }));
-                });
-            }).catch(err => {
-                res.send(JSON.stringify({
-                    error: err.message
-                }));
-            });
-        } else {
-            res.send(JSON.stringify({
-                error: 'Missing code parameter'
-            }));
-        }
-    } catch (severError) {
-        res.send(JSON.stringify({
-            error: 'Server Error'
-        }));
-    }
-});
-
 app.get('/discord-callback', (req, res) => {
-    try {
-        const code = req.query.code;
-        if (code) {
-            const data_1 = new URLSearchParams();
-            data_1.append('client_id', client_id);
-            data_1.append('client_secret', client_secret);
-            data_1.append('grant_type', 'authorization_code');
-            data_1.append('redirect_uri', isSecure ? 'https://zeteor.roboticeva.com/discord-callback' : `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
-            data_1.append('scope', 'identify');
-            data_1.append('code', code);
-            fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => {
-                if (data.error) {
-                    console.log(data)
-                    res.status(400).send('Invalid code');
-                    return;
-                }
-                const uuid = uuidv4();
-                example_db[uuid] = { // userData
-                    data,
-                    code
-                };
-                db_save();
-                const currentTime = Date.now();
-                const cookieValue = uuid;
-                const expireTime = 90 * 24 * 60 * 60; // 90 Days
-                const expiresMS = expireTime * 1000;
-                const expires = new Date(currentTime + expiresMS);
-                const authCookie = `auth_token=${cookieValue}; Path=/; Secure; HttpOnly; SameSite=Strict; Priority=High; Expires=${expires.toUTCString()}`;
-                res.setHeader("Set-Cookie", authCookie);
-                res.redirect('/');
-            });
-        } else {
-            res.status(400).send('Missing code parameter');
+    addQueue(req, res, function (req, res, responder) {
+        try {
+            const code = req.query.code;
+            if (code) {
+                const data_1 = new URLSearchParams();
+                data_1.append('client_id', client_id);
+                data_1.append('client_secret', client_secret);
+                data_1.append('grant_type', 'authorization_code');
+                data_1.append('redirect_uri', isSecure ? 'https://zeteor.roboticeva.com/discord-callback' : `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
+                data_1.append('scope', 'identify');
+                data_1.append('code', code);
+                fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => {
+                    if (data.error) {
+                        console.log(data)
+                        responder('Invalid code');
+                        return;
+                    }
+                    const uuid = uuidv4();
+                    example_db[uuid] = { // userData
+                        data,
+                        code
+                    };
+                    db_save();
+                    const currentTime = Date.now();
+                    const cookieValue = uuid;
+                    const expireTime = 90 * 24 * 60 * 60; // 90 Days
+                    const expiresMS = expireTime * 1000;
+                    const expires = new Date(currentTime + expiresMS);
+                    const authCookie = `auth_token=${cookieValue}; Path=/; Secure; HttpOnly; SameSite=Strict; Priority=High; Expires=${expires.toUTCString()}`;
+                    res.setHeader("Set-Cookie", authCookie);
+                    res.redirect('/');
+                    res.end();
+                });
+            } else {
+                responder('Missing code parameter');
+            }
+        } catch (severError) {
+            responder('Server Error');
         }
-    } catch (severError) {
-        res.status(500).send('Server Error');
-    }
+    });
 });
 
 app.post('/generate-image', (req, res) => {

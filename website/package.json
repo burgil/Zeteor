@@ -15,6 +15,7 @@
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "express": "^4.19.2",
+    "express-fingerprint": "^1.2.2",
     "fs": "^0.0.1-security",
     "groq-sdk": "^0.3.2",
     "languagedetect": "^2.0.0",
@@ -22,6 +23,7 @@
     "nodemon": "^3.1.0",
     "openai": "^4.40.1",
     "path": "^0.12.7",
+    "request-ip": "^3.3.0",
     "url": "^0.11.3",
     "uuid": "^9.0.1"
   },
