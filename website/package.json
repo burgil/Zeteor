@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node http.js /ZeteorMainWebsite",
-    "dev": "nodemon http.js"
+    "dev": "nodemon http.js",
+    "fix": "git checkout -- website/update.sh",
+    "updater": "nohup ./update.sh &"
   },
   "keywords": [],
   "author": "",
