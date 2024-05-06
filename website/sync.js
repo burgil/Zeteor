@@ -6,8 +6,8 @@ const client = new Client({
     user: 'postgres', // string | undefined
     database: 'zeteordb', // string | undefined
     password: '1234', // string | (() => string | Promise<string>) | undefined
-    port: 5432, // number | undefined
-    host: '127.0.0.1', // string | undefined
+    // port: 5432, // number | undefined
+    // host: '127.0.0.1', // string | undefined
     // connectionString: '', // string | undefined
     // keepAlive: true, // boolean | undefined
     // stream: , // () => stream.Duplex | stream.Duplex | undefined
