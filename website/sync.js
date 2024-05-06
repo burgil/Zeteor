@@ -1,4 +1,29 @@
 const { Client } = require('pg');
+
+const skipYesNo = true;
+
+const tables = {
+    'users': [
+        {
+            column_name: 'c1',
+            data_type: 'integer',
+            sql_type: 'INT',
+        },
+        {
+            column_name: 'c2',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(10)',
+        },
+    ],
+    't2': [
+        {
+            column_name: 'c1',
+            data_type: 'integer',
+            sql_type: 'INT',
+        },
+    ],
+}
+
 // port: 5432
 // pass: postgres
 // "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres
@@ -30,6 +55,30 @@ const client = new Client({
     // options: '', // string | undefined
 });
 
+async function yesNo(callback) {
+    process.stdout.write("(y/n)? ");
+    skipYesNo ? await callback() : await new Promise((resolve, reject) => {
+        try {
+            process.stdin.on("data", async function (data) {
+                try {
+                    if (data.toString().trim().toLowerCase() === "y" || data.toString().trim().toLowerCase() === "ye" || data.toString().trim().toLowerCase() === "yes") {
+                        process.stdin.end();
+                        await callback();
+                        resolve();
+                    } else if (data.toString().trim().toLowerCase() === "n" || data.toString().trim().toLowerCase() === "no") {
+                        process.stdin.end();
+                        resolve();
+                    }
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
 async function listTables() {
     try {
         const res = await client.query(`
@@ -45,98 +94,154 @@ async function listTables() {
     }
 }
 
-const dbs = {
-    't1': `
-        c1 INT,
-        c2 VARCHAR(10)
-    `,
-    't2': `
-        c1 INT,
-        c2 VARCHAR(10)
-    `,
-}
-
-const db_patches = [
-    {
-        't1': `ADD COLUMN new_column INT;`
-    },
-    {
-        't2': `DROP COLUMN c2;`
-    },
-]
-
-async function dropDatabase(dbName) {
-    console.log("Deleting Database...", dbName);
-    await client.query(`DROP TABLE ${dbName};`);
-}
-
-async function alterTable() {
-    try {
-        // Add a new column
-        await client.query(`
-            ALTER TABLE t1
-            ADD COLUMN new_column INT;
-        `);
-        // Remove a column
-        await client.query(`
-            ALTER TABLE t1
-            DROP COLUMN column_to_remove;
-        `);
-        console.log("Table altered successfully!");
-    } catch (err) {
-        console.error("Error altering table:", err);
-    }
-}
-
-async function checkTableAlteration(dbName) {
+async function checkTableAlteration(tableName) {
     try {
         const currentColumns = await client.query(`
             SELECT column_name, data_type
             FROM information_schema.columns
-            WHERE table_name = '${dbName}';
+            WHERE table_name = '${tableName}';
         `);
         return currentColumns.rows;
     } catch (err) {
-        console.error("Error checking table alteration:", err);
+        console.error('DB TABLE:', tableName, '-> ERROR ->', "Error checking table alteration:", err.message);
     }
 }
 
-async function createDatabases() {
-    const tables = await listTables();
-    for (const table of tables) {
-        if (!dbs[table]) {
-            console.log("Database is missing from configuration, Delete?");
-            // dropDatabase(table);
+async function dropTable(tableName) {
+    console.log("Deleting Table...", tableName);
+    const sql = `DROP TABLE ${tableName};`;
+    console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql);
+    await client.query(sql);
+}
+
+function validateSQL(tableName, newDBColumn) {
+    if (newDBColumn.sql_type.includes('VARCHAR') && newDBColumn.data_type !== 'character varying') {
+        console.log('DB TABLE:', tableName, '-> WARNING ->', newDBColumn.column_name, "Column of type VARCHAR must be of data_type 'character varying'...", 'But got instead:', newDBColumn.data_type)
+        return false;
+    }
+    if (newDBColumn.sql_type == 'INT' && newDBColumn.data_type !== 'integer') {
+        console.log('DB TABLE:', tableName, '-> WARNING ->', newDBColumn.column_name, "Column of type INT must be of data_type 'integer'...", 'But got instead:', newDBColumn.data_type)
+        return false;
+    }
+    return true;
+}
+
+async function alterTable(tableName, currentDBColumns, newDBColumns) {
+    try {
+        const cols = [];
+        for (const newDBColumn of newDBColumns) {
+            if (cols.includes(newDBColumn.column_name)) {
+                console.log('DB TABLE:', tableName, '-> ERROR ->', newDBColumn.column_name, "Column already exists.");
+                console.log("DB Tables Schema Fix Required! Exiting DB Creator...");
+                return;
+            } else {
+                cols.push(newDBColumn.column_name);
+            }
+        }
+        for (const currentDBColumn of currentDBColumns) {
+            let columnExist = false;
+            for (const newDBColumn of newDBColumns) {
+                if (currentDBColumn.column_name === newDBColumn.column_name) {
+                    // console.warn('DB TABLE:', tableName, '->', "Column Exist.. no need to remove...", currentDBColumn.column_name)
+                    columnExist = true;
+                    if (!validateSQL(tableName, newDBColumn)) break;
+                    if (currentDBColumn.data_type !== newDBColumn.data_type) {
+                        console.log('DB TABLE:', tableName, '-> QUESTION ->', "Columns data type doesn't match, alter required!" + (skipYesNo ? ' Change it?' : ''), currentDBColumn.column_name, 'current:', currentDBColumn.data_type, 'new:', newDBColumn.data_type)
+                        await yesNo(async () => {
+                            const sql = `
+                                ALTER TABLE ${tableName}
+                                ADD COLUMN ${newDBColumn.column_name} ${newDBColumn.sql_type};
+                            `;
+                            console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql);
+                            await client.query(sql);
+                        });
+                    }
+                    break;
+                }
+            }
+            if (!columnExist) {
+                console.log('DB TABLE:', tableName, '-> QUESTION ->', "Column doesn't exist!" + (skipYesNo ? ' Delete it?' : ''), currentDBColumn.column_name)
+                await yesNo(async () => {
+                    const sql = `
+                        ALTER TABLE ${tableName}
+                        DROP COLUMN ${currentDBColumn.column_name};
+                    `;
+                    console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql);
+                    await client.query(sql);
+                });
+            }
+        }
+        for (const newDBColumn of newDBColumns) {
+            let columnExist = false;
+            for (const currentDBColumn of currentDBColumns) {
+                if (currentDBColumn.column_name === newDBColumn.column_name) {
+                    // console.warn('DB TABLE:', tableName, '->', "Column Already Exist.. no need to add...", currentDBColumn.column_name);
+                    columnExist = true;
+                }
+            }
+            if (!columnExist) {
+                if (!validateSQL(tableName, newDBColumn)) continue;
+                console.log('DB TABLE:', tableName, '-> QUESTION ->', "Column Need to be added..." + (skipYesNo ? ' Add it?' : ''), newDBColumn.column_name);
+                await yesNo(async () => {
+                    const sql = `
+                        ALTER TABLE ${tableName}
+                        ADD COLUMN ${newDBColumn.column_name} ${newDBColumn.sql_type};
+                    `;
+                    console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql);
+                    await client.query(sql);
+                });
+            }
+        }
+        // console.warn('- DB TABLE:', tableName, "Finished Checking Table.");
+    } catch (err) {
+        console.error('DB TABLE:', tableName, '-> ERROR ->', "Error altering table:", err.message);
+    }
+}
+
+async function createTables() {
+    const dbTables = await listTables();
+    for (const tableName of dbTables) {
+        if (!tables[tableName]) {
+            console.log('DB TABLE:', tableName, "Table is missing from configuration..." + (skipYesNo ? ' Delete it?' : ''));
+            await yesNo(() => {
+                dropTable(tableName);
+            });
         }
     }
-    for (const db in dbs) {
-        if (!tables.includes(db)) {
-            console.log("Creating Database...", db);
-            await client.query(`CREATE TABLE IF NOT EXISTS ${db} (${dbs[db]});`);
+    for (const tableName in tables) {
+        if (!dbTables.includes(tableName)) {
+            console.log('DB TABLE:', tableName, "Creating Table...", tableName);
+            const sql_cols = [];
+            for (const col of tables[tableName]) {
+                sql_cols.push(col.column_name + ' ' + col.sql_type);
+            }
+            const sql = `CREATE TABLE IF NOT EXISTS ${tableName} (${sql_cols.join(',')});`;
+            console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql);
+            await client.query(sql);
         } else {
-            const dbColumns = await checkTableAlteration(db);
-            console.log("Checking Database...", db, dbColumns);
+            const dbColumns = await checkTableAlteration(tableName);
+            // console.warn('- DB TABLE:', tableName, "Checking Table...");
+            await alterTable(tableName, dbColumns, tables[tableName]);
         }
     }
-    const res = await client.query(`SELECT * FROM t1;`)
-    console.log(res.rows)
+    console.log("DB Creator Finished!");
 }
 
 client.connect(async (err) => {
-    console.log("Connected to DB!");
+    // console.log("Connected to DB!");
     try {
-        console.log("Trying to use the DB...");
-        const res = await client.query('SELECT $1::text as message', ['Hello world!'])
-        console.log(res.rows[0].message)
+        // console.warn("Trying to use the DB...");
+        // const res = await client.query('SELECT $1::text as message', ['Hello world!'])
+        // console.warn(res.rows[0].message)
         console.log("DB is working!");
-        await createDatabases();
-        // dropDatabase('t1');
-        // dropDatabase('t2');
+        await createTables();
+        // const res = await client.query(`SELECT * FROM t1;`)
+        // console.warn(res.rows)
     } catch (err) {
         console.error(err.message);
-        console.log("Please install Postgres to use the synced database.")
+        console.warn("Please install Postgres to use the DB.")
     } finally {
-        // console.log("Database connection ended.");
+        // console.warn("DB connection ended.");
         // await client.end()
     }
 });
