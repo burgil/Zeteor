@@ -25,5 +25,5 @@ while true; do
         nohup npm start &
         echo "Website Restarted!"
     fi
-    sleep 30
+    sleep 120
 done
