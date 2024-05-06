@@ -5,7 +5,7 @@ const { Client } = require('pg');
 const client = new Client({
     user: 'postgres', // string | undefined
     database: 'zeteordb', // string | undefined
-    password: '1234', // string | (() => string | Promise<string>) | undefined
+    password: 'postgres', // string | (() => string | Promise<string>) | undefined
     // port: 5432, // number | undefined
     // host: '127.0.0.1', // string | undefined
     // connectionString: '', // string | undefined
