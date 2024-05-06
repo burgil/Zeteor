@@ -38,8 +38,8 @@ function checkBotServers(serverID) {
     return isBotInServer;
 }
 
-app.get('/commands', (req, res) => {
-    res.sendFile(path.join(__dirname + '/private/commands.html'));
+app.get('/personas', (req, res) => {
+    res.sendFile(path.join(__dirname + '/private/personas.html'));
 });
 app.get('/settings', (req, res) => {
     res.sendFile(path.join(__dirname + '/private/settings.html'));
