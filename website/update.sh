@@ -14,15 +14,15 @@ while true; do
         echo "Changes detected in the repository!"
         LAST_COMMIT=$LATEST_COMMIT
         echo "Restarting Website..."
-        # ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
-        # cd ..
+        ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+        cd ..
         echo "Fetching Updates..."
-        # git fetch
+        git fetch
         echo "Pulling Updates..."
-        # git pull
-        # cd website
+        git pull
+        cd website
         echo "Starting Website..."
-        # nohup npm start &
+        nohup npm start &
         echo "Website Restarted!"
     fi
     sleep 30
