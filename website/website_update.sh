@@ -17,31 +17,29 @@ while true; do
     echo "LATEST COMMIT: $LATEST_COMMIT"
     if [ "$LATEST_COMMIT" != "$LAST_COMMIT" ]; then
         if [ "$LATEST_COMMIT" != "" ]; then
-            if [ "" != "$LAST_COMMIT" ]; then
-                echo "Changes detected in the repository!"
-                LAST_COMMIT=$LATEST_COMMIT
-                echo "Restarting Website..."
-                sleep 1
-                ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
-                sleep 1
-                cd ..
-                echo "Fetching Updates..."
-                sleep 1
-                git fetch
-                echo "Pulling Updates..."
-                sleep 1
-                git pull
-                cd website
-                echo "Installing Website..."
-                sleep 1
-                npm install
-                sleep 1
-                rm nohup.out
-                sleep 1
-                echo "Starting Website..."
-                nohup npm start &
-                echo "Website Restarted!"
-            fi
+            echo "Changes detected in the repository!"
+            LAST_COMMIT=$LATEST_COMMIT
+            echo "Restarting Website..."
+            sleep 1
+            ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+            sleep 1
+            cd ..
+            echo "Fetching Updates..."
+            sleep 1
+            git fetch
+            echo "Pulling Updates..."
+            sleep 1
+            git pull
+            cd website
+            echo "Installing Website..."
+            sleep 1
+            npm install
+            sleep 1
+            rm nohup.out
+            sleep 1
+            echo "Starting Website..."
+            nohup npm start &
+            echo "Website Restarted!"
         fi
     fi
     sleep 140
