@@ -34,6 +34,7 @@ sudo -i -u postgres
 \d
 \connect zeteordb
 ALTER USER postgres WITH PASSWORD 'new_password';
+git checkout -- website/update.sh
 */
 const client = new Client({
     user: 'postgres', // string | undefined
