@@ -23,7 +23,7 @@ while true; do
         cd website
         echo "Installing Website..."
         npm install
-        rm nohup.hup
+        rm nohup.out
         echo "Starting Website..."
         nohup npm start &
         echo "Website Restarted!"
