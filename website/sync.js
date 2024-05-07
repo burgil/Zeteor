@@ -199,7 +199,8 @@ async function listTables() {
         // console.log("Tables in the public schema:", res.rows.map(row => row.table_name));
         return res.rows.map(row => row.table_name);
     } catch (err) {
-        console.error("Error listing tables:", err);
+        console.error("Error listing tables:", err.message);
+        return false;
     }
 }
 
@@ -313,6 +314,7 @@ async function alterTable(tableName, currentDBColumns, newDBColumns) {
 
 async function createTables() {
     const dbTables = await listTables();
+    if (!dbTables) return false;
     for (const tableName of dbTables) {
         if (!tables[tableName]) {
             console.log('DB TABLE:', tableName, "Table is missing from configuration..." + (skipYesNo ? ' Delete it?' : ''));
@@ -338,6 +340,7 @@ async function createTables() {
         }
     }
     console.log("DB Creator Finished!");
+    return true;
 }
 
 client.connect(async (err) => {
@@ -346,8 +349,11 @@ client.connect(async (err) => {
         // console.warn("Trying to use the DB...");
         // const res = await client.query('SELECT $1::text as message', ['Hello world!'])
         // console.warn(res.rows[0].message)
-        console.log("DB is working!");
-        await createTables();
+        if (await createTables()) {
+            console.log("Postgres is Working!");
+        } else {
+            console.log("Error in Postgres, Check connection string!");
+        }
         // Clean DB
         // await sql(`DELETE FROM users;`)
         // await sql(`DELETE FROM personas;`)
