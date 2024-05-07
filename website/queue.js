@@ -18,7 +18,7 @@ function processQueue() {
     delete queue[firstKey];
 }
 
-setInterval(processQueue, 2000);
+setInterval(processQueue, 2500);
 
 module.exports = {
     addQueue
