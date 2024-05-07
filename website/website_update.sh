@@ -7,9 +7,13 @@ rm nohup.out
 cd ..
 rm nohup.out
 cd website
+sleep 1
 ps aux | grep "ZeteorMainWebsiteUpdater" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+sleep 1
 ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+sleep 1
 nohup npm start &
+sleep 1
 
 get_latest_commit() {
     curl -s "https://api.github.com/repos/$OWNER/$REPO_NAME/commits/main" | grep '"sha"' | head -n 1 | cut -d '"' -f 4
@@ -24,16 +28,23 @@ while true; do
                 echo "Changes detected in the repository!"
                 LAST_COMMIT=$LATEST_COMMIT
                 echo "Restarting Website..."
+                sleep 1
                 ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+                sleep 1
                 cd ..
                 echo "Fetching Updates..."
+                sleep 1
                 git fetch
                 echo "Pulling Updates..."
+                sleep 1
                 git pull
                 cd website
                 echo "Installing Website..."
+                sleep 1
                 npm install
+                sleep 1
                 rm nohup.out
+                sleep 1
                 echo "Starting Website..."
                 nohup npm start &
                 echo "Website Restarted!"
