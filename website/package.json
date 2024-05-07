@@ -7,8 +7,9 @@
     "start": "node http.js /ZeteorMainWebsite",
     "dev": "nodemon http.js",
     "fix": "git checkout -- website_update.sh",
-    "updater": "nohup ./website_update.sh /ZeteorMainWebsiteUpdater &",
-    "close": "ps aux | grep \"ZeteorMainWebsiteUpdater\" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}"
+    "updater": "nohup ./website_update.sh /ZeteorWebsiteUpdater &",
+    "close": "ps aux | grep \"ZeteorWebsiteUpdater\" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}",
+    "close2": "ps aux | grep \"ZeteorMainWebsite\" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}"
   },
   "keywords": [],
   "author": "",
