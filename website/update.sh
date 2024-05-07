@@ -21,6 +21,8 @@ while true; do
         echo "Pulling Updates..."
         git pull
         cd website
+        echo "Installing Website..."
+        npm install
         echo "Starting Website..."
         nohup npm start &
         echo "Website Restarted!"
