@@ -124,6 +124,7 @@ const serverCommands = {
 
 app.post('/edit-server/commands', (req, res) => {
     addQueue(req, res, function (req, res, responder) {
+        res.write('');
         try {
             const targetCommand = req.body.targetCommand;
             let commandExist = false;
@@ -199,6 +200,7 @@ app.post('/edit-server/commands', (req, res) => {
 
 app.get('/get-user', (req, res) => {
     addQueue(req, res, function (req, res, responder) {
+        res.write('');
         try {
             const userData = example_db[req.cookies.auth_token];
             if (userData) {
@@ -278,6 +280,7 @@ app.get('/get-user', (req, res) => {
 
 app.get('/discord-callback', (req, res) => {
     addQueue(req, res, function (req, res, responder) {
+        // res.write('');
         try {
             const code = req.query.code;
             if (code) {
@@ -308,7 +311,7 @@ app.get('/discord-callback', (req, res) => {
                     const authCookie = `auth_token=${cookieValue}; Path=/; Secure; HttpOnly; SameSite=Strict; Priority=High; Expires=${expires.toUTCString()}`;
                     res.setHeader("Set-Cookie", authCookie);
                     res.redirect('/');
-                    res.end();
+                    // res.end();
                 });
             } else {
                 responder('Missing code parameter');

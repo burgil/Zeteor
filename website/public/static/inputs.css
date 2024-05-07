@@ -1,0 +1,54 @@
+.popup-server-inputs .form-group {
+    display: block;
+    margin-bottom: 32px;
+}
+
+.popup-server-inputs label {
+    border: 1px solid #DDD;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+.popup-server-inputs input, .popup-server-inputs textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.popup-server-inputs input, .popup-server-inputs span, .popup-server-inputs textarea {
+    font-size: 24px;
+    font-family: "Arial", sans-serif;
+    padding: 16px;
+    border: 0;
+    outline: none;
+    border-radius: 4px;
+}
+
+.popup-server-inputs span {
+    display: inline-block;
+    position: absolute;
+    margin-top: -60px;
+    color: transparent;
+    transition: all 0.1s ease-in-out;
+}
+
+.popup-server-inputs label:focus-within {
+    border-color: blue;
+}
+
+.popup-server-inputs label:focus-within span,
+.popup-server-inputs label input:not(:placeholder-shown)+span,
+.popup-server-inputs label textarea:not(:placeholder-shown)+span {
+    font-size: 14px;
+    background-color: rgb(0, 0, 0);
+    padding: 0 4px;
+    color: rgb(255, 255, 255);
+    margin: -70px 0 0 8px;
+}
+
+.popup-server-inputs label textarea:focus+span,
+.popup-server-inputs label textarea:not(:placeholder-shown)+span {
+    margin-top: -96px;
+}

@@ -1,7 +1,6 @@
 const queue = [];
 
 function addQueue(req, res, func) {
-    res.write('');
     const user = req.clientIp + '_' + req.fingerprint.hash;
     queue[user] = { req, res, func };
 }

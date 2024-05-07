@@ -106,6 +106,32 @@ function loadLoggedInInterface(userData) {
                                 },
                                 {
                                     type: 'div',
+                                    class: 'popup-server-inputs',
+                                    html: `
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="text" placeholder="Your name" />
+                                            <span>Your name</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="email" placeholder="Your email address" />
+                                            <span>Your email address</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>
+                                            <textarea placeholder="Your message"></textarea>
+                                            <span>Your message</span>
+                                        </label>
+                                    </div>
+                                    `
+                                },
+                                {
+                                    type: 'div',
                                     class: 'popup-server-commands',
                                     html: `
                                     <div class="popup-command">
@@ -258,7 +284,7 @@ function loadLoggedInInterface(userData) {
                                         </div>
                                     </div>
                                     `
-                                }
+                                },
                             ]
                         },
                     ]);
