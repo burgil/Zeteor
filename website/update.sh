@@ -3,6 +3,7 @@
 OWNER="burgil"
 REPO_NAME="Zeteor"
 
+rm nohup.out
 get_latest_commit() {
     curl -s "https://api.github.com/repos/$OWNER/$REPO_NAME/commits/main" | grep '"sha"' | head -n 1 | cut -d '"' -f 4
 }
