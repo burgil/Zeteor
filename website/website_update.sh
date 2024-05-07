@@ -3,14 +3,6 @@
 OWNER="burgil"
 REPO_NAME="Zeteor"
 
-rm nohup.out
-cd ..
-rm nohup.out
-cd website
-sleep 1
-current_pid=$$
-ps aux | grep "ZeteorMainWebsiteUpdater" | grep -v grep | awk -v pid="$current_pid" '$2 != pid {print $2}' | xargs -I{} kill -9 {}
-sleep 1
 ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
 sleep 1
 nohup npm start &
