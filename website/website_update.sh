@@ -4,7 +4,12 @@ OWNER="burgil"
 REPO_NAME="Zeteor"
 
 rm nohup.out
+cd ..
+rm nohup.out
+cd website
 ps aux | grep "ZeteorMainWebsiteUpdater" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
+nohup npm start &
 
 get_latest_commit() {
     curl -s "https://api.github.com/repos/$OWNER/$REPO_NAME/commits/main" | grep '"sha"' | head -n 1 | cut -d '"' -f 4
