@@ -2,8 +2,29 @@ const locales = ["en-GB", "ar-SA", "zh-CN", "de-DE", "es-ES", "fr-FR", "hi-IN", 
 function getFlagSrc(countryCode) {
     return /^[A-Z]{2}$/.test(countryCode) ? `https://flagsapi.com/${countryCode.toUpperCase()}/shiny/64.png` : "";
 }
+let selectedLocale;
+
+function getSelectedLocale() {
+    return selectedLocale;
+}
+
+function getSelectedLangs() {
+    const multiLangs = document.getElementById("multiLangs");
+    const result = [];
+    const options = multiLangs && multiLangs.options;
+    let opt;
+    for (let i = 0, iLen = options.length; i < iLen; i++) {
+        opt = options[i];
+
+        if (opt.selected) {
+            result.push(opt.value || opt.text);
+        }
+    }
+    return result;
+}
 
 function setSelectedLocale(locale, dropdownBtn, dropdownContent) {
+    selectedLocale = locale;
     const intlLocale = new Intl.Locale(locale);
     const langName = new Intl.DisplayNames([locale], {
         type: "language",

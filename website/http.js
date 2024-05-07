@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { example_db, db_save } = require('./db.js');
 const { addQueue } = require('./queue.js');
-const { test } = require('./sync.js');
+const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
 const client_id = fs.readFileSync('../clientID', 'utf8').trim();
 const client_secret = fs.readFileSync('../secret', 'utf8').trim();
@@ -26,7 +26,7 @@ app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(requestIp.mw())
 app.use(Fingerprint({
-    parameters:[
+    parameters: [
         // Defaults
         Fingerprint.useragent,
         Fingerprint.acceptHeaders,
@@ -85,25 +85,115 @@ app.get('/logout', (req, res) => {
     }
 });
 
+const serverCommands = {
+    '1': [
+        'aijoin',
+        'aileave',
+        'burgil',
+    ],
+    '2': [
+        'aihelp',
+        'aihelp en',
+        'aihelp pt',
+    ],
+    '3': [
+        'en',
+        'pt',
+        'a',
+    ],
+    '4': [
+        'aipause',
+        'ailisten',
+        'aionly',
+        'ailong',
+        'pingai',
+        'aidc',
+        'aidebug',
+        'airap',
+    ],
+    '5': [
+        'v',
+        'vpt',
+        'ven',
+        'va',
+    ],
+    '6': [
+        'ai',
+    ],
+};
+
 app.post('/edit-server/commands', (req, res) => {
     addQueue(req, res, function (req, res, responder) {
-        // get the server ID
-        const serverID = '';
-        // get action:
-        const action = ''; // examples: edit-command , disable-command , change-command-permissions
-        // check if the user has permissions to modify this server
-        axios.get("https://discord.com/api/users/@me/guilds", {
-            headers: {
-                "authorization": `Bearer ${userData.data.access_token}`
+        try {
+            const targetCommand = req.body.targetCommand;
+            let commandExist = false;
+            for (const serverCommandID in serverCommands) {
+                for (const command of serverCommands[serverCommandID]) {
+                    if (targetCommand === command) {
+                        commandExist = true;
+                        break;
+                    }
+                }
             }
-        }).then(guilds => {
-            let hasPermissions = false;
-            for (const guildID in guilds.data) {
-                if (guildID != serverID) continue;
-                const guild = guilds.data[guildID];
-                if (guild.permissions == 2147483647 && checkBotServers(guildID)) hasPermissions = true;
+            if (!commandExist) {
+                responder(JSON.stringify({
+                    error: "Command doesn't exist!"
+                }));
+            } else {
+                console.log(targetCommand, "Command exist!")
+                const serverID = req.body.serverID;
+                const action = req.body.action;
+                axios.get("https://discord.com/api/users/@me/guilds", {
+                    headers: {
+                        "authorization": `Bearer ${userData.data.access_token}`
+                    }
+                }).then(guilds => {
+                    let hasPermissions = false;
+                    for (const guildID in guilds.data) {
+                        if (guildID != serverID) continue;
+                        const guild = guilds.data[guildID];
+                        if (guild.permissions == 2147483647 && checkBotServers(guildID)) hasPermissions = true;
+                    }
+                    if (!hasPermissions) {
+                        responder(JSON.stringify({
+                            error: "No Permission!"
+                        }));
+                    } else {
+                        switch (action) {
+                            case 'enable-command':
+                                responder(JSON.stringify({
+                                    error: "Enabled Command!"
+                                }));
+                                break;
+                            case 'disable-command':
+                                responder(JSON.stringify({
+                                    error: "Disabled Command!"
+                                }));
+                                break;
+                            case 'add-command':
+                                responder(JSON.stringify({
+                                    error: "Added Command!"
+                                }));
+                                break;
+                            case 'remove-command':
+                                responder(JSON.stringify({
+                                    error: "Removed Command!"
+                                }));
+                                break;
+                            case 'change-command-permissions':
+                                responder(JSON.stringify({
+                                    error: "Changed Command Permissions!"
+                                }));
+                                break;
+                        }
+                    }
+                });
             }
-        });
+        } catch (serverError) {
+            responder(JSON.stringify({
+                error: error.message
+            }));
+        }
     });
 });
 
@@ -117,7 +207,7 @@ app.get('/get-user', (req, res) => {
                         "authorization": `Bearer ${userData.data.access_token}`
                     }
                 }).then(user => {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         axios.get("https://discord.com/api/users/@me/guilds", {
                             headers: {
                                 "authorization": `Bearer ${userData.data.access_token}`

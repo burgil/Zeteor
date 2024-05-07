@@ -5,41 +5,110 @@ const skipYesNo = true;
 const tables = {
     'users': [
         {
-            column_name: 'c1',
-            data_type: 'integer',
-            sql_type: 'INT',
-        },
-        {
-            column_name: 'c2',
+            column_name: 'discord_id',
             data_type: 'character varying',
-            sql_type: 'VARCHAR(10)',
+            sql_type: 'VARCHAR(50)',
         },
-    ],
-    't2': [
         {
-            column_name: 'c1',
-            data_type: 'integer',
-            sql_type: 'INT',
+            column_name: 'settings',
+            data_type: 'json',
+            sql_type: 'JSON',
         },
     ],
-}
+    'personas': [
+        {
+            column_name: 'slug',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'title',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'description',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(500)',
+        },
+        {
+            column_name: 'price',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'image',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(500)',
+        },
+        {
+            column_name: 'ai_prompt',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(500)',
+        },
+    ],
+    'servers': [
+        {
+            column_name: 'name',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'discord_id',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'commands',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+        {
+            column_name: 'persona',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'settings',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+        {
+            column_name: 'image',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(500)',
+        },
+    ],
+    'ai': [
+        {
+            column_name: 'image',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(500)',
+        },
+        {
+            column_name: 'discord_id',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+    ],
+};
 
-// port: 5432
-// pass: postgres
-// "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres
 /*
-sudo -u postgres psql
-sudo su
-sudo -i -u postgres
-\d
-\connect zeteordb
-ALTER USER postgres WITH PASSWORD 'new_password';
-git checkout -- website/website_update.sh
-git fetch
-git pull
-chmod +x website/website_update.sh
-cd website
-./website_update.sh
+    // port: 5432
+    // pass: postgres
+    // "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres
+    sudo -u postgres psql
+    sudo su
+    sudo -i -u postgres
+    \d
+    \connect zeteordb
+    ALTER USER postgres WITH PASSWORD 'new_password';
+    git checkout -- website/website_update.sh
+    git fetch
+    git pull
+    chmod +x website/website_update.sh
+    cd website
+    ./website_update.sh
 */
 const client = new Client({
     user: 'postgres', // string | undefined
@@ -60,6 +129,40 @@ const client = new Client({
     // types: '', // CustomTypesConfig | undefined
     // options: '', // string | undefined
 });
+
+async function sql(sql, values) {
+    console.log("RUNNING SQL:", sql, values ? values : '');
+    return await client.query(sql, values);
+}
+
+async function generateInsertStatement(tableName, values) {
+    const tableColumns = tables[tableName];
+    const columns = tableColumns.map((column) => column.column_name);
+    const placeholders = columns.map((_, index) => `$${index + 1}`);
+    const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+    return { sql, values };
+}
+
+async function generateUpdateStatement(tableName, discord_id, updates, custom_selector = 'discord_id') {
+    const tableColumns = tables[tableName];
+    const setClauses = [];
+    const values = [];
+    for (const [column, value] of Object.entries(updates)) {
+        const columnDef = tableColumns.find((col) => col.column_name === column);
+        if (columnDef) {
+            setClauses.push(`${column} = $${values.length + 1}`);
+            values.push(value);
+        }
+    }
+    const sql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE ${custom_selector} = $${values.length + 1}`;
+    values.push(discord_id);
+    return { sql, values };
+}
+
+async function generateDeleteStatement(tableName, id, custom_selector = 'discord_id') {
+    const sql = `DELETE FROM ${tableName} WHERE ${custom_selector} = $1`;
+    return { sql, values: [id] };
+}
 
 async function yesNo(callback) {
     process.stdout.write("(y/n)? ");
@@ -125,6 +228,10 @@ function validateSQL(tableName, newDBColumn) {
         console.log('DB TABLE:', tableName, '-> WARNING ->', newDBColumn.column_name, "Column of type VARCHAR must be of data_type 'character varying'...", 'But got instead:', newDBColumn.data_type)
         return false;
     }
+    if (newDBColumn.sql_type.includes('JSON') && newDBColumn.data_type !== 'json') {
+        console.log('DB TABLE:', tableName, '-> WARNING ->', newDBColumn.column_name, "Column of type JSON must be of data_type 'json'...", 'But got instead:', newDBColumn.data_type)
+        return false;
+    }
     if (newDBColumn.sql_type == 'INT' && newDBColumn.data_type !== 'integer') {
         console.log('DB TABLE:', tableName, '-> WARNING ->', newDBColumn.column_name, "Column of type INT must be of data_type 'integer'...", 'But got instead:', newDBColumn.data_type)
         return false;
@@ -148,7 +255,7 @@ async function alterTable(tableName, currentDBColumns, newDBColumns) {
             let columnExist = false;
             for (const newDBColumn of newDBColumns) {
                 if (currentDBColumn.column_name === newDBColumn.column_name) {
-                    // console.warn('DB TABLE:', tableName, '->', "Column Exist.. no need to remove...", currentDBColumn.column_name)
+                    // console.warn('DB TABLE:', tableName, '->', currentDBColumn.column_name, "Column Exist.. no need to remove...")
                     columnExist = true;
                     if (!validateSQL(tableName, newDBColumn)) break;
                     if (currentDBColumn.data_type !== newDBColumn.data_type) {
@@ -166,7 +273,7 @@ async function alterTable(tableName, currentDBColumns, newDBColumns) {
                 }
             }
             if (!columnExist) {
-                console.log('DB TABLE:', tableName, '-> QUESTION ->', "Column doesn't exist!" + (skipYesNo ? ' Delete it?' : ''), currentDBColumn.column_name)
+                console.log('DB TABLE:', tableName, '-> QUESTION ->', currentDBColumn.column_name, "Column doesn't exist!" + (skipYesNo ? ' Delete it?' : ''))
                 await yesNo(async () => {
                     const sql = `
                         ALTER TABLE ${tableName}
@@ -181,13 +288,13 @@ async function alterTable(tableName, currentDBColumns, newDBColumns) {
             let columnExist = false;
             for (const currentDBColumn of currentDBColumns) {
                 if (currentDBColumn.column_name === newDBColumn.column_name) {
-                    // console.warn('DB TABLE:', tableName, '->', "Column Already Exist.. no need to add...", currentDBColumn.column_name);
+                    // console.warn('DB TABLE:', tableName, '->', currentDBColumn.column_name, "Column Already Exist.. no need to add...");
                     columnExist = true;
                 }
             }
             if (!columnExist) {
                 if (!validateSQL(tableName, newDBColumn)) continue;
-                console.log('DB TABLE:', tableName, '-> QUESTION ->', "Column Need to be added..." + (skipYesNo ? ' Add it?' : ''), newDBColumn.column_name);
+                console.log('DB TABLE:', tableName, '-> QUESTION ->', newDBColumn.column_name, "Column Need to be added..." + (skipYesNo ? ' Add it?' : ''));
                 await yesNo(async () => {
                     const sql = `
                         ALTER TABLE ${tableName}
@@ -241,8 +348,104 @@ client.connect(async (err) => {
         // console.warn(res.rows[0].message)
         console.log("DB is working!");
         await createTables();
-        // const res = await client.query(`SELECT * FROM t1;`)
-        // console.warn(res.rows)
+        // Clean DB
+        // await sql(`DELETE FROM users;`)
+        // await sql(`DELETE FROM personas;`)
+        // await sql(`DELETE FROM servers;`)
+        // await sql(`DELETE FROM ai;`)
+        // Select DB
+        // const usersDB = await sql(`SELECT * FROM users;`)
+        // console.warn('users:', usersDB.rows)
+        // const personasDB = await sql(`SELECT * FROM personas;`)
+        // console.warn('personas:', personasDB.rows)
+        // const serversDB = await sql(`SELECT * FROM servers;`)
+        // console.warn('servers:', serversDB.rows)
+        // const aiDB = await sql(`SELECT * FROM ai;`)
+        // console.warn('ai:', aiDB.rows)
+        /*
+        // ------------------------------------------------------------------- users
+        console.log('INSERT example');
+        const insertUser = await generateInsertStatement('users', ['1', {
+            test: 42
+        }]);
+        await sql(insertUser.sql, insertUser.values)
+        //
+        console.log('UPDATE example');
+        const updateUser = await generateUpdateStatement('users', '1', {
+            discord_id: '1',
+            settings: {
+                test: 42
+            },
+        });
+        const updatedUser = await sql(updateUser.sql, updateUser.values)
+        console.warn(updatedUser.rows)
+        //
+        console.log('DELETE example');
+        const deleteUser = await generateDeleteStatement('users', '1');
+        await sql(deleteUser.sql, deleteUser.values)
+        // ------------------------------------------------------------------- personas
+        console.log('INSERT example');
+        const insertPersona = await generateInsertStatement('personas', ['1', 'title', 'description', 'price', 'image', 'ai_prompt'], 'slug')
+        await sql(insertPersona.sql, insertPersona.values)
+        //
+        console.log('UPDATE example');
+        const updatePersona = await generateUpdateStatement('personas', '1', {
+            title: 'New Title',
+            description: 'New Description',
+            price: 42,
+            image: 'New image',
+            ai_prompt: 'ai_prompt',
+        }, 'slug')
+        const updatedPersona = await sql(updatePersona.sql, updatePersona.values)
+        console.warn(updatedPersona.rows)
+        //
+        console.log('DELETE example');
+        const deletePersona = await generateDeleteStatement('personas', '1', 'slug');
+        await sql(deletePersona.sql, deletePersona.values)
+        // ------------------------------------------------------------------- servers
+        console.log('INSERT example');
+        const insertServer = await generateInsertStatement('servers', ['name', '1', {
+            hello: 42 // commands
+        }, 'persona', {
+            hello: 42 // settings
+        }, 'image'])
+        await sql(insertServer.sql, insertServer.values)
+        //
+        console.log('UPDATE example');
+        const updateServer = await generateUpdateStatement('servers', '1', {
+            name: 'New name',
+            discord_id: '1',
+            commands: {
+                hello: 42
+            },
+            persona: 'New persona',
+            settings: {
+                hello: 42
+            },
+            image: 'New image',
+        });
+        const updatedServer = await sql(updateServer.sql, updateServer.values)
+        console.warn(updatedServer.rows)
+        //
+        console.log('DELETE example');
+        const deleteServer = await generateDeleteStatement('servers', '1');
+        await sql(deleteServer.sql, deleteServer.values)
+        // ------------------------------------------------------------------- ai
+        console.log('INSERT example');
+        const insertAI = await generateInsertStatement('ai', ['image', '1'])
+        await sql(insertAI.sql, insertAI.values)
+        //
+        console.log('UPDATE example');
+        const updateAI = await generateUpdateStatement('ai', '1', {
+            image: 'New image',
+        });
+        const updatedAI = await sql(updateAI.sql, updateAI.values)
+        console.warn(updatedAI.rows)
+        //
+        console.log('DELETE example');
+        const deleteAI = await generateDeleteStatement('ai', '1');
+        await sql(deleteAI.sql, deleteAI.values)
+        */
     } catch (err) {
         console.error(err.message);
         console.warn("Please install Postgres to use the DB.")
@@ -253,5 +456,8 @@ client.connect(async (err) => {
 });
 
 module.exports = {
-    test: 42
+    sql,
+    generateInsertStatement,
+    generateUpdateStatement,
+    generateDeleteStatement,
 };

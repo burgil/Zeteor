@@ -28,14 +28,14 @@ body.jw-modal-open {
 }
 
 .popup-close {
-    position: absolute;
-    bottom: 0;
+    position: fixed;
     outline: 0;
+    top: 50px;
     border: 0;
     background: linear-gradient(339deg, #0e0012, black);
     color: white;
     border-radius: 20px;
-    right: 5px;
+    right: 60px;
     max-width: 90px;
     width: 100%;
     margin: auto;

@@ -1,0 +1,51 @@
+.switch {
+    display: flex;
+  }
+  
+  .switch input[type='checkbox'] {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+  }
+  
+  .switch label {
+    cursor: pointer;
+    width: 45px;
+    height: 20px;
+    background-color: rgb(255 255 255 / 28%);
+    display: block;
+    border-radius: 50em;
+    position: relative;
+    transition: 0.3s;
+    padding: 4px;
+    box-sizing: content-box;
+  }
+  
+  .switch label > .slider.round {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border-radius: 50em;
+    transition: 0.3s;
+  }
+  
+  .switch input:checked + label {
+    background-color: #5549f1;
+  }
+  
+  .switch input:checked + label > .slider.round {
+    transform: translateX(calc(100% + 5px));
+    color: black;
+  }
+  
+  .slider.round {
+    width: auto;
+    height: auto;
+    font-family: sans-serif;
+    text-align: center;
+    color: gray;
+    margin: 0;
+    padding: 0;
+  }

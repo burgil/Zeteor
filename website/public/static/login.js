@@ -55,7 +55,6 @@ function loadLoggedInInterface(userData) {
                                     ]
                                 },
                                 {
-                                    // server settings: guild.settings
                                     type: 'div',
                                     class: 'popup-server-settings',
                                     elements: [
@@ -91,7 +90,7 @@ function loadLoggedInInterface(userData) {
                                             elements: [
                                                 {
                                                     type: 'div',
-                                                    html: `<select class="multipleSelect" multiple="true">
+                                                    html: `<select class="multipleSelect" id="multiLangs" multiple="true">
                                                       ${locales.map((otherLocale) => {
                                                         const otherIntlLocale = new Intl.Locale(otherLocale);
                                                         const otherLangName = new Intl.DisplayNames([otherLocale], {
@@ -106,77 +105,159 @@ function loadLoggedInInterface(userData) {
                                     ]
                                 },
                                 {
-                                    // server commands: guild.commands
                                     type: 'div',
                                     class: 'popup-server-commands',
-                                    elements: [
-                                        {
-                                            type: 'span',
-                                            txt: 'test2',
-                                        },
-                                        {
-                                            type: 'div',
-                                            html: `
-                                            <h1>Commands</h1>
-                                            <br>
-                                            <div class="container">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="commands">
-                                                            <ul class="list-group">
-                                                                <li class="list-group-item">
-                                                                    <span class="categorias">General Commands: &nbsp</span>
-                                                                    <span class="comando">/aihelp</span> - Help Command &nbsp
-                                                                    <span class="comando">/pt ola</span> - Translate Portuguese to English &nbsp
-                                                                    <span class="comando">/en hello</span> - Translate English to Portuguese &nbsp
-                                                                    <span class="comando">/a hello</span> - Auto Detect Language & Translate &nbsp
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br><br>
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="commands">
-                                                            <ul class="list-group">
-                                                                <li class="list-group-item">
-                                                                    <span class="categorias">Voice Commands: &nbsp</span>
-                                                                    <span class="comando">/aijoin</span> - Make the bot join/leave the voice channel. &nbsp
-                                                                    <span class="comando">/aileave</span> - Make the bot join/leave the voice channel. &nbsp
-                                                                    <span class="comando">/burgil</span> - Make the bot join/leave the voice channel. &nbsp
-                                                                    <span class="comando">/ai ola or hello</span> - Speak to the AI. &nbsp
-                                                                    <span class="comando">/aipause</span> - Pause the AI from speaking. &nbsp
-                                                                    <span class="comando">/v ola</span> - Speak Portuguese in English. &nbsp
-                                                                    <span class="comando">/vpt ola</span> - Speak Portuguese in English. &nbsp
-                                                                    <span class="comando">/ven hello</span> - Speak English in Portuguese. &nbsp
-                                                                    <span class="comando">/va hello or ola</span> - Auto Detect Language, Translate & Speak
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br><br>
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="commands">
-                                                            <ul class="list-group">
-                                                                <li class="list-group-item">
-                                                                    <span class="categorias">Advanced Commands: &nbsp</span>
-                                                                    <span class="comando">/ailisten</span> - Enable listen mode - will listen to speech, translate, and speak in the other language. &nbsp
-                                                                    <span class="comando">/aionly</span> - Make the bot only listen to burgil! &nbsp
-                                                                    <span class="comando">/ailong</span> - Make the bot speak longer responses! &nbsp
-                                                                    <span class="comando">/pingai</span> - Test the bot responsiveness! &nbsp
-                                                                    <span class="comando">/aidc</span> - Force voice channel disconnect! &nbsp
-                                                                    <span class="comando">/aidebug</span> - Test the AI bot's responsiveness with a simple ping command &nbsp
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>`,
-                                        },
-                                    ]
+                                    html: `
+                                    <div class="popup-command">
+                                        <h3><b>Commands:</b></h3>
+                                        <label class="popup-command-info"><b>/aihelp</b> - Help command</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aihelp" checked />
+                                            <label for="aihelp">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/pt ola</b> - Translate Portuguese to English</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="pt" checked />
+                                            <label for="pt">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/en hello</b> - Translate English to Portuguese</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="en" checked />
+                                            <label for="en">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/a hello or ola</b> - Auto Detect Language & Translate</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="a" checked />
+                                            <label for="a">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="popup-command">
+                                        <h3><b>Voice Commands:</b></h3>
+                                        <label class="popup-command-info"><b>/aijoin</b> - Make the bot join/leave the voice channel.</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aijoin" checked />
+                                            <label for="aijoin">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/aileave</b> - Make the bot join/leave the voice channel.</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aileave" checked />
+                                            <label for="aileave">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/burgil</b> - Make the bot join/leave the voice channel.</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="burgil" checked />
+                                            <label for="burgil">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/ai ola or hello</b> - Speak to the AI.</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="ai" checked />
+                                            <label for="ai">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/aipause</b> - Pause the AI from speaking.</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aipause" checked />
+                                            <label for="aipause">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/v ola</b> - Speak Portuguese in English</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="v" checked />
+                                            <label for="v">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/vpt ola</b> - Speak Portuguese in English</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="vpt" checked />
+                                            <label for="vpt">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/ven hello</b> - Speak English in Portuguese</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="ven" checked />
+                                            <label for="ven">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/va hello or ola</b> - Auto Detect Language, Translate & Speak</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="va" checked />
+                                            <label for="va">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="popup-command">
+                                        <h3><b>Advanced Commands:</b></h3>
+                                        <label class="popup-command-info"><b>/ailisten</b> - The bot will listen to speech, translate, and speak in the other language.</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="ailisten" checked />
+                                            <label for="ailisten">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/aionly</b> - Make the bot only listen to burgil!</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aionly" checked />
+                                            <label for="aionly">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/ailong</b> - Make the bot speak longer responses!</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="ailong" checked />
+                                            <label for="ailong">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/pingai</b> - Test the bot responsiveness!</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="pingai" checked />
+                                            <label for="pingai">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/aidc</b> - Force voice channel disconnect!</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aidc" checked />
+                                            <label for="aidc">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/aidebug</b> - Test the AI bot's responsiveness with a simple ping command</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="aidebug" checked />
+                                            <label for="aidebug">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <label class="popup-command-info"><b>/airap</b> - Make the bot rap or sing a random song</label>
+                                        <div class="switch">
+                                            <input type="checkbox" id="airap" checked />
+                                            <label for="airap">
+                                            <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    `
                                 }
                             ]
                         },
