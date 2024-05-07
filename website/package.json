@@ -7,7 +7,7 @@
     "start": "node http.js /ZeteorMainWebsite",
     "dev": "nodemon http.js",
     "fix": "git checkout -- website_update.sh",
-    "updater": "nohup ./update.sh /ZeteorMainWebsiteUpdater &"
+    "updater": "nohup ./website_update.sh /ZeteorMainWebsiteUpdater &"
   },
   "keywords": [],
   "author": "",
