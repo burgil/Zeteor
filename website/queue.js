@@ -11,6 +11,7 @@ function processQueue() {
     const firstKey = queueKeys[0];
     const currentQueue = queue[firstKey];
     try { currentQueue.func(currentQueue.req, currentQueue.res, (output) => {
+        // console.log(output)
         currentQueue.res.write(output);
         currentQueue.res.end();
     }); } catch (e) { console.error("Server Error:", e) }

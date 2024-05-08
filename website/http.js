@@ -199,6 +199,20 @@ app.post('/edit-server/commands', (req, res) => {
 });
 
 app.get('/get-user', (req, res) => {
+    if (!req.cookies.auth_token) {
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+        return;
+    }
+    const userData = example_db[req.cookies.auth_token];
+    if (!userData) {
+        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+        return;
+    }
     addQueue(req, res, function (req, res, responder) {
         res.write('');
         try {
