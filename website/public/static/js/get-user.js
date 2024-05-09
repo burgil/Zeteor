@@ -5,9 +5,13 @@ async function getUser(retries = 0) {
         const guildIdURL = parsedUrl.searchParams.get('guild_id');
         const permissionsURL = parsedUrl.searchParams.get('permissions');
         const codeURL = parsedUrl.searchParams.get('code');
+        const error_descriptionURL = parsedUrl.searchParams.get('error_description');
+        const errorURL = parsedUrl.searchParams.get('error');
         if (guildIdURL) parsedUrl.searchParams.delete('guild_id');
         if (permissionsURL) parsedUrl.searchParams.delete('permissions');
         if (codeURL) parsedUrl.searchParams.delete('code');
+        if (error_descriptionURL) parsedUrl.searchParams.delete('error_description');
+        if (errorURL) parsedUrl.searchParams.delete('error');
         window.history.replaceState({}, document.title, parsedUrl.toString());
         if (guildIdURL) {
             updater = '?update=1';
