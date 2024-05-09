@@ -7,55 +7,39 @@ function loadLoggedInInterface(userData) {
     if (discordAppMount) discordAppMount.style.display = 'none';
     const serversContainer = document.querySelector('.servers-container');
     if (serversContainer) {
-        let serverCount = 0;
-        for (const guildID in userData.guilds) {
-            const guild = userData.guilds[guildID];
-            serverCount += 1;
-            const newServer = document.createElement('div');
-            newServer.classList.add('server');
-            const newServerIMG = document.createElement('img');
-            if (guild.icon) {
-                newServerIMG.src = guild.icon;
-            } else {
-                let guildLetter = guild.name[0].toUpperCase();
-                guildLetter = guildLetter.replace(/[^a-z]+/i, '');
-                if (guildLetter == '') guildLetter = '�';
-                newServerIMG.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-                    `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="80" fill="white">REPLACEME</text>
-                    </svg>`).replace('REPLACEME', guildLetter);
-            }
-            newServer.append(newServerIMG);
-            const newServerName = document.createElement('p');
-            newServerName.textContent = guild.name;
-            newServer.append(newServerName);
-            serversContainer.append(newServer);
-            newServer.onclick = function () {
-                if (guild.isBotExist) {
-                    // show a popup with the server settings
-                    modalBuilder(document.getElementById('modal-content'), serverModal(newServerIMG.src, guild));
-                    requestAnimationFrame(function () {
-                        setupLangs();
-                    });
-                    requestAnimationFrame(function () {
-                        openModal('modal-popup');
-                    });
-                    requestAnimationFrame(function () {
-                        initSelector(".multipleSelect", "Translation Commands...");
-                    });
+        document.getElementById('server-loader').remove();
+        loadServers(userData, serversContainer);
+        document.getElementById('refresh-servers').addEventListener('click', async function () {
+            serversContainer.innerHTML = `<div class="server" id="server-loader">
+                <div class="server-img"><img src="./images/loading.gif">
+                </div>
+                <p>Loading...</p>
+            </div>`;
+            userName.textContent = 'Loading...';
+            userPic.src = './images/loading.gif';
+            const user = await fetch('/get-user?update=1');
+            userData = await user.json();
+            if (userData.error) {
+                if (userData.error == 'Request failed with status code 429') {
+                    notify('Too many requests...', 'error', 5000);
+                    document.getElementById('server-loader').remove();
+                    const noServers = document.createElement('div');
+                    noServers.textContent = 'Too many requests... Please try again later!';
+                    serversContainer.append(noServers);
                 } else {
-                    notify('Please add the bot to the server first', 'warning', 2000);
-                    setTimeout(function () {
-                        window.open("https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands&guild_id=" + guildID);
-                    }, 2000);
+                    notify(userData.error, 'error', 5000);
+                    document.getElementById('server-loader').remove();
+                    const noServers = document.createElement('div');
+                    noServers.textContent = userData.error;
+                    serversContainer.append(noServers);
                 }
+                return;
             }
-        }
-        if (serverCount == 0) {
-            const noServers = document.createElement('div');
-            noServers.textContent = 'You do not have any server!'
-            serversContainer.append(noServers);
-        }
+            document.getElementById('server-loader').remove();
+            loadServers(userData, serversContainer);
+            userName.textContent = userData.global_name;
+            userPic.src = userData.avatar;
+        });
     }
     const twentyFourHours = 12 * 60 * 60 * 1000;
     const currentTime = new Date().getTime();

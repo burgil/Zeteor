@@ -47,21 +47,6 @@ app.use(Fingerprint({
     ]
 }))
 //
-function checkBotServers(serverID) {
-    const botServers = [
-        "1112920281367973900",
-        "1234408445525098527",
-        "764695230146281483"
-    ];
-    let isBotInServer = false;
-    for (const botServerID of botServers) {
-        if (serverID == botServerID) {
-            isBotInServer = true;
-            break;
-        }
-    }
-    return isBotInServer;
-}
 
 app.get('/personas', (req, res) => {
     res.sendFile(path.join(__dirname + '/private/personas.html'));
@@ -148,12 +133,16 @@ app.post('/edit-server/commands', (req, res) => {
                     headers: {
                         "authorization": `Bearer ${userData.data.access_token}`
                     }
-                }).then(guilds => {
+                }).then(async guilds => {
                     let hasPermissions = false;
+                    const guildIds = guilds.data.map(guild => guild.id);
+                    const query = `SELECT * FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
+                    const serversDB = await sql(query, guildIds);
                     for (const guildID in guilds.data) {
                         if (guildID != serverID) continue;
+                        const serverData = serversDB.rows.find(server => server.discord_id === guildID);
                         const guild = guilds.data[guildID];
-                        if (guild.permissions == 2147483647 && checkBotServers(guildID)) hasPermissions = true;
+                        if (guild.permissions == 2147483647 && serverData) hasPermissions = true;
                     }
                     if (!hasPermissions) {
                         responder(JSON.stringify({
@@ -198,6 +187,7 @@ app.post('/edit-server/commands', (req, res) => {
     });
 });
 
+let usersCache = {};
 app.get('/get-user', (req, res) => {
     if (!req.cookies.auth_token) {
         res.send(JSON.stringify({
@@ -213,77 +203,82 @@ app.get('/get-user', (req, res) => {
         }));
         return;
     }
+    if (usersCache[req.cookies.auth_token] && !req.query.update) {
+        console.log("cached...");
+        res.send(usersCache[req.cookies.auth_token]);
+        return;
+    }
+    console.log("updating...");
     addQueue(req, res, function (req, res, responder) {
         res.write('');
         try {
-            const userData = example_db[req.cookies.auth_token];
-            if (userData) {
-                axios.get("https://discord.com/api/users/@me", {
-                    headers: {
-                        "authorization": `Bearer ${userData.data.access_token}`
-                    }
-                }).then(user => {
-                    setTimeout(function () {
-                        axios.get("https://discord.com/api/users/@me/guilds", {
-                            headers: {
-                                "authorization": `Bearer ${userData.data.access_token}`
-                            }
-                        }).then(guilds => {
-                            const adminGuilds = {};
-                            for (const guild of guilds.data) {
-                                if (guild.permissions == 2147483647) {
-                                    let serverAvatarUrl;
-                                    if (guild.icon) {
-                                        if (guild.icon.startsWith('a_')) {
-                                            serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.gif`;
-                                        } else {
-                                            serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
-                                        }
-                                    }
-                                    if (!example_db['guildSettings_' + guild.id]) example_db['guildSettings_' + guild.id] = {};
-                                    if (!example_db['guildCommands_' + guild.id]) example_db['guildCommands_' + guild.id] = {};
-                                    db_save();
-                                    adminGuilds[guild.id] = {
-                                        name: guild.name,
-                                        icon: serverAvatarUrl,
-                                        isBotExist: checkBotServers(guild.id),
-                                        settings: example_db['guildSettings_' + guild.id],
-                                        commands: example_db['guildCommands_' + guild.id],
+            axios.get("https://discord.com/api/users/@me", {
+                headers: {
+                    "authorization": `Bearer ${userData.data.access_token}`
+                }
+            }).then(user => {
+                setTimeout(function () {
+                    axios.get("https://discord.com/api/users/@me/guilds", {
+                        headers: {
+                            "authorization": `Bearer ${userData.data.access_token}`
+                        }
+                    }).then(async guilds => {
+                        const adminGuilds = {};
+                        const guildIds = guilds.data.map(guild => guild.id);
+                        const query = `SELECT * FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
+                        const serversDB = await sql(query, guildIds);
+                        for (const guild of guilds.data) {
+                            if (guild.permissions == 2147483647) {
+                                let serverAvatarUrl;
+                                if (guild.icon) {
+                                    if (guild.icon.startsWith('a_')) {
+                                        serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.gif`;
+                                    } else {
+                                        serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
                                     }
                                 }
+                                if (!example_db['guildSettings_' + guild.id]) example_db['guildSettings_' + guild.id] = {};
+                                if (!example_db['guildCommands_' + guild.id]) example_db['guildCommands_' + guild.id] = {};
+                                db_save();
+                                const serverData = serversDB.rows.find(server => server.discord_id === guild.id);
+                                adminGuilds[guild.id] = {
+                                    name: guild.name,
+                                    icon: serverAvatarUrl,
+                                    isBotExist: serverData ? true : false,
+                                    settings: example_db['guildSettings_' + guild.id],
+                                    commands: example_db['guildCommands_' + guild.id],
+                                }
                             }
-                            example_db[req.cookies.auth_token].username = user.data.username;
-                            example_db[req.cookies.auth_token].id = user.data.id;
-                            example_db[req.cookies.auth_token].global_name = user.data.global_name;
-                            db_save();
-                            let avatarUrl;
-                            if (user.data.avatar.startsWith('a_')) {
-                                avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
-                            } else {
-                                avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
-                            }
-                            responder(JSON.stringify({
-                                username: user.data.username,
-                                global_name: user.data.global_name,
-                                avatar: avatarUrl,
-                                guilds: adminGuilds
-                            }));
-                        }).catch(err => {
-                            responder(JSON.stringify({
-                                error: err.message
-                            }));
+                        }
+                        example_db[req.cookies.auth_token].username = user.data.username;
+                        example_db[req.cookies.auth_token].id = user.data.id;
+                        example_db[req.cookies.auth_token].global_name = user.data.global_name;
+                        db_save();
+                        let avatarUrl;
+                        if (user.data.avatar.startsWith('a_')) {
+                            avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
+                        } else {
+                            avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
+                        }
+                        const output = JSON.stringify({
+                            username: user.data.username,
+                            global_name: user.data.global_name,
+                            avatar: avatarUrl,
+                            guilds: adminGuilds
                         });
-                    }, 500);
-                }).catch(err => {
-                    responder(JSON.stringify({
-                        error: err.message
-                    }));
-                });
-            } else {
+                        usersCache[req.cookies.auth_token] = output;
+                        responder(output);
+                    }).catch(err => {
+                        responder(JSON.stringify({
+                            error: err.message
+                        }));
+                    });
+                }, 500);
+            }).catch(err => {
                 responder(JSON.stringify({
-                    error: 'Missing code parameter'
+                    error: err.message
                 }));
-            }
+            });
         } catch (severError) {
             responder(JSON.stringify({
                 error: 'Server Error'

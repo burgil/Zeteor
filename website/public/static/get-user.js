@@ -1,5 +1,12 @@
 async function getUser(retries = 0) {
     try {
+        // const twentyFourHours = 12 * 60 * 60 * 1000;
+        // const currentTime = new Date().getTime();
+        // const lastVisit = localStorage.getItem('lastVisit');
+        // if (!lastVisit || (currentTime - parseInt(lastVisit)) >= twentyFourHours) {
+        //     notify(`Welcome back, ${userData.username}!`, 'success', 3500);
+        //     localStorage.setItem('lastVisit', currentTime.toString());
+        // }
         const user = await fetch('/get-user');
         const userData = await user.json();
         if (userData.error) {

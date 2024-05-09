@@ -290,7 +290,6 @@ main {
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid rgba(169, 150, 253, 0.5);
-  width: 140px;
   aspect-ratio: 1/1;
   margin-bottom: 8px;
   box-shadow: rgba(221, 221, 221, 0.3) 0px 6px 18px -3px,
@@ -306,8 +305,10 @@ main {
   font-size: clamp(0.9rem, 3vw, 1rem);
   font-weight: 500;
   text-align: center;
-  max-width: 140px;
   height: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ALBUMS */
@@ -646,10 +647,6 @@ main {
     grid-template-rows: 7fr 2fr;
   }
 
-  .server img {
-    width: 120px;
-  }
-
   .album-frame {
     width: 160px;
   }
@@ -682,10 +679,6 @@ main {
 
   .server {
     grid-template-rows: 5fr 2fr;
-  }
-
-  .server img {
-    width: 90px;
   }
 
   .album {
@@ -728,10 +721,6 @@ main {
 
   .server {
     grid-template-rows: 4fr 2fr;
-  }
-
-  .server img {
-    width: 80px;
   }
 
   .album {
@@ -807,10 +796,6 @@ main {
     width: 420px;
   }
 
-  .server img {
-    width: 110px;
-  }
-
   .album {
     grid-template-rows: 3fr 2fr;
   }
@@ -848,10 +833,6 @@ main {
 
   .swiper-slide img {
     height: 180px;
-  }
-
-  .server img {
-    width: 80px;
   }
 
   .album {
@@ -894,4 +875,8 @@ main {
 
 .link-parent:hover .normal-link {
   color: #000;
+}
+
+#server-loader {
+  filter: hue-rotate(180deg);
 }

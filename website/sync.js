@@ -131,7 +131,7 @@ const client = new Client({
 });
 
 async function sql(sql, values) {
-    console.log("RUNNING SQL:", sql, values ? values : '');
+    // console.log("RUNNING SQL:", sql, values ? values : '');
     return await client.query(sql, values);
 }
 
