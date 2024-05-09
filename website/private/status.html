@@ -1,0 +1,99 @@
+
+<section class="system-status">
+    <h2>All Systems Operational</h2>
+    <button class="green-v-button">
+        <i class="fas fa-check-circle"></i>
+    </button>
+    <p><a href="#" class="incident-history-link">Incident History <i class="fas fa-arrow-right"></i></a></p>
+</section>
+
+<section class="incident-history">
+    <h2>Incident History</h2>
+    <div class="incident-blocks">
+        <div class="incident-block green">
+            <h3>2023-02-15</h3>
+            <p>System Upgrade</p>
+            <div class="toolbox">
+                <p>Uptime: 99.99%</p>
+                <p>Operational: <i class="fas fa-check-circle"></i></p>
+            </div>
+        </div>
+        <div class="incident-block red">
+            <h3>2023-02-10</h3>
+            <p>Database Outage</p>
+            <div class="toolbox">
+                <p>Uptime: 95.00%</p>
+                <p>Operational: <i class="fas fa-times-circle"></i></p>
+            </div>
+        </div>
+        <div class="incident-block yellow">
+            <h3>2023-02-05</h3>
+            <p>Maintenance Window</p>
+            <div class="toolbox">
+                <p>Uptime: 98.00%</p>
+                <p>Operational: <i class="fas fa-check-circle"></i></p>
+            </div>
+        </div>
+        <!-- Add more incident blocks here -->
+    </div>
+</section>
+
+<section class="daily-incident-report">
+    <h2>Daily Incident Report</h2>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Incidents</th>
+        </tr>
+        <tr>
+            <td>2023-02-15</td>
+            <td>System Upgrade</td>
+        </tr>
+        <tr>
+            <td>2023-02-14</td>
+            <td>No incidents</td>
+        </tr>
+        <tr>
+            <td>2023-02-13</td>
+            <td>No incidents</td>
+        </tr>
+        <tr>
+            <td>2023-02-12</td>
+            <td>Database Outage</td>
+        </tr>
+        <!-- Add more table rows here -->
+    </table>
+</section>
+
+<section class="system-status">
+    <h2>System Status</h2>
+    <div class="status-lines">
+        <div class="line green" data-uptime="99.99%">
+            <span>2023-02-15</span>
+            <div class="tooltip">
+                <p>Uptime: 99.99%</p>
+                <p>Operational: <i class="fas fa-check-circle"></i></p>
+            </div>
+        </div>
+        <div class="line red" data-uptime="95.00%">
+            <span>2023-02-10</span>
+            <div class="tooltip">
+                <p>Uptime: 95.00%</p>
+                <p>Operational: <i class="fas fa-times-circle"></i></p>
+            </div>
+        </div>
+        <div class="line orange" data-uptime="98.00%">
+            <span>2023-02-05</span>
+            <div class="tooltip">
+                <p>Uptime: 98.00%</p>
+                <p>Operational: <i class="fas fa-check-circle"></i></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="system-status">
+    <h2>System Status</h2>
+    <div class="status-lines" id="status-lines">
+    </div>
+</section>

@@ -60,6 +60,22 @@ app.get('/ai', (req, res) => {
 app.get('/invite', (req, res) => {
     res.redirect('https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands');
 });
+app.get('/status', (req, res) => {
+    res.write('');
+    http.get('http://localhost:4444', { timeout: 100 }, (response) => {
+        const { statusCode } = response;
+        if (statusCode === 200) {
+            // console.log(`${URL} is available`);
+            res.end('online');
+        } else {
+            // console.log(`${URL} is not available. Status code: ${statusCode}`);
+            res.end('offline');
+        }
+    }).on('error', (err) => {
+        // console.error(`Error checking ${URL}: ${err.message}`);
+        res.end('offline');
+    });
+});
 app.get('/logout', (req, res) => {
     if (example_db[req.cookies.auth_token]) {
         example_db[req.cookies.auth_token] = undefined;
