@@ -11,6 +11,7 @@ async function getUser(retries = 0) {
         window.history.replaceState({}, document.title, parsedUrl.toString());
         if (guildIdURL) {
             updater = '?update=1';
+            localStorage.setItem('lastUpdate', currentTime.toString());
         }  else {
             const fiveMinutes = 5 * 60 * 1000;
             const currentTime = new Date().getTime();
