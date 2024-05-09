@@ -1,4 +1,4 @@
-function loadLoggedInInterface(userData) {
+function loadLoggedInInterface(userData, guildIdURL) {
     const userPic = document.getElementById('user-pic');
     const userName = document.getElementById('user-name');
     userName.textContent = userData.global_name;
@@ -8,7 +8,7 @@ function loadLoggedInInterface(userData) {
     const serversContainer = document.querySelector('.servers-container');
     if (serversContainer) {
         document.getElementById('server-loader').remove();
-        loadServers(userData, serversContainer);
+        loadServers(userData, serversContainer, guildIdURL);
         document.getElementById('refresh-servers').addEventListener('click', async function () {
             serversContainer.innerHTML = `<div class="server" id="server-loader">
                 <div class="server-img"><img src="./images/loading.gif">
@@ -36,7 +36,7 @@ function loadLoggedInInterface(userData) {
                 return;
             }
             document.getElementById('server-loader').remove();
-            loadServers(userData, serversContainer);
+            loadServers(userData, serversContainer, guildIdURL);
             userName.textContent = userData.global_name;
             userPic.src = userData.avatar;
         });

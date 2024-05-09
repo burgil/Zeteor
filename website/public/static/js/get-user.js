@@ -3,6 +3,12 @@ async function getUser(retries = 0) {
         let updater = '';
         const parsedUrl = new URL(window.location.href);
         const guildIdURL = parsedUrl.searchParams.get('guild_id');
+        const permissionsURL = parsedUrl.searchParams.get('permissions');
+        const codeURL = parsedUrl.searchParams.get('code');
+        if (guildIdURL) parsedUrl.searchParams.delete('guild_id');
+        if (permissionsURL) parsedUrl.searchParams.delete('permissions');
+        if (codeURL) parsedUrl.searchParams.delete('code');
+        window.history.replaceState({}, document.title, parsedUrl.toString());
         if (guildIdURL) {
             updater = '?update=1';
         }  else {
@@ -48,7 +54,7 @@ async function getUser(retries = 0) {
                 loadLoggedOutInterface();
             }
         } else {
-            loadLoggedInInterface(userData);
+            loadLoggedInInterface(userData, guildIdURL);
         }
     } catch (e) {
         console.log(e);

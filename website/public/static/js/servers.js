@@ -1,10 +1,4 @@
-function loadServers(userData, serversContainer) {
-    const parsedUrl = new URL(window.location.href);
-    const guildIdURL = parsedUrl.searchParams.get('guild_id');
-    parsedUrl.searchParams.delete('guild_id');
-    parsedUrl.searchParams.delete('permissions');
-    parsedUrl.searchParams.delete('code');
-    window.history.replaceState({}, document.title, parsedUrl.toString());
+function loadServers(userData, serversContainer, guildIdURL) {
     let serverCount = 0;
     for (const guildID in userData.guilds) {
         const guild = userData.guilds[guildID];
@@ -58,7 +52,20 @@ function loadServers(userData, serversContainer) {
                 window.location.href = "https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&response_type=code&scope=bot+applications.commands&disable_guild_select=true&guild_id=" + guildID + "&redirect_uri=" + encodeURIComponent(location.href);
             }
         };
-        if (guildID == guildIdURL) newServer.click();
+        if (guildID == guildIdURL) {
+            // newServer.click(); // It won't let them execute anything anyways if they don't have permissions on the server... (the server actually check for your permission level in each server you are on using the guilds scope to know what servers you are on)
+            // show a popup with the server settings
+            modalBuilder(document.getElementById('modal-content'), serverModal(newServerIMG.src, guild));
+            requestAnimationFrame(function () {
+                setupLangs();
+            });
+            requestAnimationFrame(function () {
+                openModal('modal-popup');
+            });
+            requestAnimationFrame(function () {
+                initSelector(".multipleSelect", "Translation Commands...");
+            });
+        }
     }
     if (serverCount == 0) {
         document.getElementById('server-loader').remove();
