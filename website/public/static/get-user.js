@@ -1,13 +1,14 @@
 async function getUser(retries = 0) {
     try {
-        // const twentyFourHours = 12 * 60 * 60 * 1000;
-        // const currentTime = new Date().getTime();
-        // const lastVisit = localStorage.getItem('lastVisit');
-        // if (!lastVisit || (currentTime - parseInt(lastVisit)) >= twentyFourHours) {
-        //     notify(`Welcome back, ${userData.username}!`, 'success', 3500);
-        //     localStorage.setItem('lastVisit', currentTime.toString());
-        // }
-        const user = await fetch('/get-user');
+        const fiveMinutes = 5 * 60 * 1000;
+        const currentTime = new Date().getTime();
+        const lastUpdate = localStorage.getItem('lastUpdate');
+        let updater = '';
+        if (!lastUpdate || (currentTime - parseInt(lastUpdate)) >= fiveMinutes) {
+            localStorage.setItem('lastUpdate', currentTime.toString());
+            updater = '?update=1';
+        }
+        const user = await fetch('/get-user' + updater);
         const userData = await user.json();
         if (userData.error) {
             if (userData.error == 'Request failed with status code 429') {

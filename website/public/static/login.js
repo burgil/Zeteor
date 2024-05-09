@@ -41,10 +41,10 @@ function loadLoggedInInterface(userData) {
             userPic.src = userData.avatar;
         });
     }
-    const twentyFourHours = 12 * 60 * 60 * 1000;
+    const hoursLimit = 12 * 60 * 60 * 1000;
     const currentTime = new Date().getTime();
     const lastVisit = localStorage.getItem('lastVisit');
-    if (!lastVisit || (currentTime - parseInt(lastVisit)) >= twentyFourHours) {
+    if (!lastVisit || (currentTime - parseInt(lastVisit)) >= hoursLimit) {
         notify(`Welcome back, ${userData.username}!`, 'success', 3500);
         localStorage.setItem('lastVisit', currentTime.toString());
     }

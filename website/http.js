@@ -204,11 +204,9 @@ app.get('/get-user', (req, res) => {
         return;
     }
     if (usersCache[req.cookies.auth_token] && !req.query.update) {
-        console.log("cached...");
         res.send(usersCache[req.cookies.auth_token]);
         return;
     }
-    console.log("updating...");
     addQueue(req, res, function (req, res, responder) {
         res.write('');
         try {
