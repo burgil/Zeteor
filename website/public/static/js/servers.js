@@ -1,4 +1,10 @@
 function loadServers(userData, serversContainer) {
+    const parsedUrl = new URL(window.location.href);
+    const guildIdURL = parsedUrl.searchParams.get('guild_id');
+    parsedUrl.searchParams.delete('guild_id');
+    parsedUrl.searchParams.delete('permissions');
+    parsedUrl.searchParams.delete('code');
+    window.history.replaceState({}, document.title, parsedUrl.toString());
     let serverCount = 0;
     for (const guildID in userData.guilds) {
         const guild = userData.guilds[guildID];
@@ -48,12 +54,11 @@ function loadServers(userData, serversContainer) {
                     initSelector(".multipleSelect", "Translation Commands...");
                 });
             } else {
-                notify('Please add the bot to the server first', 'warning', 2000);
-                setTimeout(function () {
-                    window.open("https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands&guild_id=" + guildID);
-                }, 2000);
+                // notify('Please add the bot to the server first', 'warning', 2000);
+                window.location.href = "https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&response_type=code&scope=bot+applications.commands&disable_guild_select=true&guild_id=" + guildID + "&redirect_uri=" + encodeURIComponent(location.href);
             }
-        }
+        };
+        if (guildID == guildIdURL) newServer.click();
     }
     if (serverCount == 0) {
         document.getElementById('server-loader').remove();

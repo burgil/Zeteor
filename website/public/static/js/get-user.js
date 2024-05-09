@@ -1,12 +1,18 @@
 async function getUser(retries = 0) {
     try {
-        const fiveMinutes = 5 * 60 * 1000;
-        const currentTime = new Date().getTime();
-        const lastUpdate = localStorage.getItem('lastUpdate');
         let updater = '';
-        if (!lastUpdate || (currentTime - parseInt(lastUpdate)) >= fiveMinutes) {
-            localStorage.setItem('lastUpdate', currentTime.toString());
+        const parsedUrl = new URL(window.location.href);
+        const guildIdURL = parsedUrl.searchParams.get('guild_id');
+        if (guildIdURL) {
             updater = '?update=1';
+        }  else {
+            const fiveMinutes = 5 * 60 * 1000;
+            const currentTime = new Date().getTime();
+            const lastUpdate = localStorage.getItem('lastUpdate');
+            if (!lastUpdate || (currentTime - parseInt(lastUpdate)) >= fiveMinutes) {
+                localStorage.setItem('lastUpdate', currentTime.toString());
+                updater = '?update=1';
+            }
         }
         const user = await fetch('/get-user' + updater);
         const userData = await user.json();
