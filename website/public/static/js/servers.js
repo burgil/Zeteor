@@ -49,7 +49,7 @@ function loadServers(userData, serversContainer, guildIdURL) {
                 });
             } else {
                 // notify('Please add the bot to the server first', 'warning', 2000);
-                window.location.href = "https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&response_type=code&scope=bot+applications.commands&disable_guild_select=true&guild_id=" + guildID + "&redirect_uri=" + encodeURIComponent(location.href);
+                window.location.href = "https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&response_type=code&scope=bot+applications.commands&disable_guild_select=true&guild_id=" + guildID + "&redirect_uri=" + encodeURIComponent(location.origin + location.pathname);
             }
         };
         if (guildID == guildIdURL) {
