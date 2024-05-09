@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { example_db, db_save } = require('./db.js');
 const { addQueue } = require('./queue.js');
+const { setupRoutes } = require('./routes.js');
 const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
 const client_id = fs.readFileSync('../clientID', 'utf8').trim();
@@ -47,16 +48,7 @@ app.use(Fingerprint({
     ]
 }))
 //
-
-app.get('/personas', (req, res) => {
-    res.sendFile(path.join(__dirname + '/private/personas.html'));
-});
-app.get('/settings', (req, res) => {
-    res.sendFile(path.join(__dirname + '/private/settings.html'));
-});
-app.get('/ai', (req, res) => {
-    res.sendFile(path.join(__dirname + '/private/ai.html'));
-});
+setupRoutes(app);
 app.get('/invite', (req, res) => {
     res.redirect('https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands');
 });

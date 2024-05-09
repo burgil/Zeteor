@@ -61,7 +61,7 @@ main {
   z-index: 10;
 }
 
-.main-menu {
+.sidebar {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -127,6 +127,7 @@ main {
 
 .content {
   max-height: 90vh;
+  height: 90vh;
   display: grid;
   grid-template-columns: 75% 25%;
 }
