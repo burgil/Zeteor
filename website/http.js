@@ -57,6 +57,9 @@ app.get('/settings', (req, res) => {
 app.get('/ai', (req, res) => {
     res.sendFile(path.join(__dirname + '/private/ai.html'));
 });
+app.get('/invite', (req, res) => {
+    res.redirect('https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands');
+});
 app.get('/logout', (req, res) => {
     if (example_db[req.cookies.auth_token]) {
         example_db[req.cookies.auth_token] = undefined;
