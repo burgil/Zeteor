@@ -13,6 +13,7 @@ async function getUser(retries = 0) {
         if (error_descriptionURL) parsedUrl.searchParams.delete('error_description');
         if (errorURL) parsedUrl.searchParams.delete('error');
         window.history.replaceState({}, document.title, parsedUrl.toString());
+        const currentTime = Date.now();
         if (guildIdURL) {
             updater = '?update=1';
             localStorage.setItem('lastUpdate', currentTime.toString());

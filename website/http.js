@@ -53,18 +53,19 @@ app.get('/invite', (req, res) => {
     res.redirect('https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands');
 });
 app.get('/status', (req, res) => {
-    res.write('');
-    http.get('http://localhost:4444', { timeout: 100 }, (response) => {
+    http.get('http://localhost:4444', { timeout: 10 }, (response) => {
         const { statusCode } = response;
         if (statusCode === 200) {
             // console.log(`${URL} is available`);
             res.end('online');
         } else {
             // console.log(`${URL} is not available. Status code: ${statusCode}`);
+            res.writeHead(503, {'Content-Type': 'text/plain'});
             res.end('offline');
         }
     }).on('error', (err) => {
         // console.error(`Error checking ${URL}: ${err.message}`);
+        res.writeHead(503, {'Content-Type': 'text/plain'});
         res.end('offline');
     });
 });
