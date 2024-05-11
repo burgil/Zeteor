@@ -21,6 +21,7 @@ function modalBuilder(parentEl, mData) {
         if (el.html) newEl.innerHTML = el.html;
         if (el.tabIndex) newEl.setAttribute('tab-index', el.tabIndex);
         if (el.elements) modalBuilder(newEl, el.elements);
+        if (el.js) el.js(newEl);
         parentEl.append(newEl);
     }
 }

@@ -120,6 +120,20 @@ const serverCommands = {
 };
 
 app.post('/edit-server/commands', (req, res) => {
+    if (!req.cookies.auth_token) {
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+        return;
+    }
+    const userData = example_db[req.cookies.auth_token];
+    if (!userData) {
+        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+        return;
+    }
     addQueue(req, res, function (req, res, responder) {
         res.write('');
         try {
@@ -138,7 +152,6 @@ app.post('/edit-server/commands', (req, res) => {
                     error: "Command doesn't exist!"
                 }));
             } else {
-                console.log(targetCommand, "Command exist!")
                 const serverID = req.body.serverID;
                 const action = req.body.action;
                 axios.get("https://discord.com/api/users/@me/guilds", {
@@ -148,12 +161,13 @@ app.post('/edit-server/commands', (req, res) => {
                 }).then(async guilds => {
                     let hasPermissions = false;
                     const guildIds = guilds.data.map(guild => guild.id);
-                    const query = `SELECT * FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
+                    const query = `SELECT discord_id FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
                     const serversDB = await sql(query, guildIds);
-                    for (const guildID in guilds.data) {
+                    for (const guildIndex in guilds.data) {
+                        const guild = guilds.data[guildIndex];
+                        const guildID = guild.id;
                         if (guildID != serverID) continue;
                         const serverData = serversDB.rows.find(server => server.discord_id === guildID);
-                        const guild = guilds.data[guildID];
                         if (guild.permissions == 2147483647 && serverData) hasPermissions = true;
                     }
                     if (!hasPermissions) {
@@ -164,27 +178,27 @@ app.post('/edit-server/commands', (req, res) => {
                         switch (action) {
                             case 'enable-command':
                                 responder(JSON.stringify({
-                                    error: "Enabled Command!"
+                                    msg: "Enabled Command!"
                                 }));
                                 break;
                             case 'disable-command':
                                 responder(JSON.stringify({
-                                    error: "Disabled Command!"
+                                    msg: "Disabled Command!"
                                 }));
                                 break;
                             case 'add-command':
                                 responder(JSON.stringify({
-                                    error: "Added Command!"
+                                    msg: "Added Command!"
                                 }));
                                 break;
                             case 'remove-command':
                                 responder(JSON.stringify({
-                                    error: "Removed Command!"
+                                    msg: "Removed Command!"
                                 }));
                                 break;
                             case 'change-command-permissions':
                                 responder(JSON.stringify({
-                                    error: "Changed Command Permissions!"
+                                    msg: "Changed Command Permissions!"
                                 }));
                                 break;
                         }
@@ -193,7 +207,7 @@ app.post('/edit-server/commands', (req, res) => {
             }
         } catch (serverError) {
             responder(JSON.stringify({
-                error: error.message
+                error: serverError.message
             }));
         }
     });

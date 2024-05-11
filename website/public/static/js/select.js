@@ -1,5 +1,6 @@
-function initSelector(selectClass, placeholder) {
+function initSelector(selectClass, placeholder, tags = false) {
     $(selectClass).select2({
-        placeholder
+        placeholder,
+        tags
     });
 }

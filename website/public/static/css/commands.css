@@ -1,12 +1,14 @@
 .popup-server-commands {
     display: flex;
     flex-wrap: wrap;
+    border-right: 1px solid #ffffff14;
+    justify-content: flex-end;
 }
 .popup-command {
-    width: 33.33%;
+    width: calc(33.33% - 5px);
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 0;
     align-content: flex-start;
 }
@@ -14,17 +16,23 @@
 .popup-command-info {
     display: block;
     width: calc(100% - 70px);
-    border-bottom: 1px solid #ffffff14;
+    height: 89px;
     padding: 10px 5px 10px 0;
 }
 
 .popup-command h3 {
-    height: 33px;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #ffffff14;
+    border-left: 1px solid #ffffff14;
+    border-top: 1px solid #ffffff14;
+    padding: 5px;
 }
 
 .switch {
     align-items: center;
-    border-bottom: 1px solid #ffffff14;
+    height: fit-content;
+    margin-top: 5px;
 }
 
 .popup-command h3 b {

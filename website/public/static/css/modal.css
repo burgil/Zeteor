@@ -4,7 +4,7 @@
     inset: 0;
     z-index: 10000;
     background-color: rgba(0, 0, 0, .75);
-    padding: 40px;
+    padding: 30px;
     overflow: auto;
 }
 
@@ -13,12 +13,14 @@
 }
 
 .jw-modal-body {
-    padding: 4%;
+    padding: 1%;
     background: linear-gradient(193deg, #04040f, #0f113d);
     color: #f1f1f1;
     border-radius: 20px;
-    max-height: 90vh;
-    min-height: 90vh;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    max-height: 100%;
+    min-height: 100%;
     overflow-y: auto;
     position: relative;
 }
@@ -45,6 +47,7 @@ body.jw-modal-open {
     transition: filter .16s ease;
     filter: drop-shadow(0px 0px 5px #831cd130);
 }
+
 .popup-close:hover {
     filter: drop-shadow(0px 0px 4px #831cd180);
 }
