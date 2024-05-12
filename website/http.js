@@ -12,9 +12,18 @@ const { addQueue } = require('./queue.js');
 const { setupRoutes } = require('./routes.js');
 const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
-const client_id = fs.readFileSync('../clientID', 'utf8').trim();
-const client_secret = fs.readFileSync('../secret', 'utf8').trim();
-const togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
+let client_id;
+try {
+    client_id = fs.readFileSync('../clientID', 'utf8').trim();
+} catch (fileErr) { }
+let client_secret;
+try {
+    client_secret = fs.readFileSync('../secret', 'utf8').trim();
+} catch (fileErr) { }
+let togetherAPIKey;
+try {
+    togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
+} catch (fileErr) { }
 const { v4: uuidv4 } = require('uuid');
 const app = express();
 function getUsername() {
@@ -70,12 +79,12 @@ app.get('/status', (req, res) => {
             res.end('online');
         } else {
             // console.log(`${URL} is not available. Status code: ${statusCode}`);
-            res.writeHead(503, {'Content-Type': 'text/plain'});
+            res.writeHead(503, { 'Content-Type': 'text/plain' });
             res.end('offline');
         }
     }).on('error', (err) => {
         // console.error(`Error checking ${URL}: ${err.message}`);
-        res.writeHead(503, {'Content-Type': 'text/plain'});
+        res.writeHead(503, { 'Content-Type': 'text/plain' });
         res.end('offline');
     });
 });
