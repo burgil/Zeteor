@@ -1,11 +1,12 @@
 .popup-server-commands {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     border-right: 1px solid #ffffff14;
     justify-content: flex-end;
+    max-width: 990px;
+    margin: auto;
 }
 .popup-command {
-    width: calc(33.33% - 5px);
     display: flex;
     flex-wrap: wrap;
     justify-content: center;

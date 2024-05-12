@@ -25,6 +25,153 @@ const serverModal = (serverImage, guild, guildID) => {
                 },
                 {
                     type: 'div',
+                    class: 'popup-server-personas',
+                    html: `
+                    <div class="song-container">
+                        <div class="song">
+                            <div class="song-img" id="persona-0">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/ea61baa7-9c4b-4f43-805e-81de5fc8aa2b" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Mentor</h2>
+                                <p>This persona is like a wise teacher or mentor, always ready to offer advice, guidance, and knowledge on a wide range of topics, from academics to personal development.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-1">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/6f72f702-c049-46fe-af76-a3b188b9a909" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Storyteller</h2>
+                                <p>Imagine an AI that loves to tell captivating stories, whether they're fictional tales, historical anecdotes, or personal narratives. This persona keeps listeners entertained and engaged with its vivid storytelling abilities.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-2">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/ad2e664a-3ab9-4f30-933a-623e26999030" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Virtual Friend</h2>
+                                <p>Need someone to chat with about your day, your interests, or just to share some laughs? The Virtual Friend persona is there for you, offering companionship, empathy, and a listening ear whenever you need it.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-3">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/666e065b-eb53-4320-a580-30e266370955" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Historical Figure</h2>
+                                <p>Ever wished you could chat with a famous historical figure like Albert Einstein, Marie Curie, or Leonardo da Vinci? This persona brings historical figures to life, allowing you to engage in thought-provoking conversations with some of the greatest minds in history.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-4">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/619ed17f-5df2-4d32-a419-78f120a1aa5c" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Relationship Advisor</h2>
+                                <p>Struggling with matters of the heart? The Relationship Advisor persona offers thoughtful advice and support on topics related to love, dating, friendships, and more.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-5">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/0ed3f51d-b769-4256-a4dd-8f35b12a1690" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Gaming Buddy</h2>
+                                <p>Whether you're looking for tips on your favorite video game, someone to team up with for multiplayer matches, or just want to chat about gaming news and trends, the Gaming Buddy persona is the perfect companion for gamers.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-6">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/33779e1a-55f9-402a-b004-002395d0fbf1" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Wellness Coach</h2>
+                                <p>Need help staying motivated to exercise, eat healthy, or practice self-care? The Wellness Coach persona provides encouragement, tips, and personalized advice to help you achieve your wellness goals.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-7">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/96bc0648-51f9-46ab-a426-766c6bc93d80" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Science Geek</h2>
+                                <p>Curious about the latest scientific discoveries, space exploration, or technological advancements? The Science Geek persona is a treasure trove of scientific knowledge and enthusiasm, ready to geek out with you over all things science-related.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                        <div class="song">
+                            <div class="song-img" id="persona-8">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/885b67a7-1816-4235-9dd3-5d879a202728" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="song-title">
+                                <h2>The Creative Collaborator</h2>
+                                <p>Whether you're an artist, writer, musician, or just someone with a passion for creativity, the Creative Collaborator persona is your creative partner in crime, offering inspiration, feedback, and collaboration opportunities to help you bring your creative projects to life.</p>
+                            </div>
+                            <span>FREE</span>
+                        </div>
+                    </div>
+                    `
+                },
+                {
+                    type: 'div',
+                    class: 'popup-server-inputs',
+                    html: `
+                    <div class="form-group">
+                        <label>
+                            <textarea placeholder="Write Your Server AI System Message Prompt..."></textarea>
+                            <span>AI System Message Prompt</span>
+                        </label>
+                        <div class="popup-server-selected-persona">
+                            <p>Selected Persona</p>
+                            <div class="song-img" id="persona-1">
+                                <img src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/6f72f702-c049-46fe-af76-a3b188b9a909" alt="">
+                                <div class="overlay">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="popup-selected-persona">Persona Name</div>
+                        </div>
+                    </div>
+                    `
+                },
+                {
+                    type: 'div',
                     class: 'popup-server-commands',
                     html: `
                     <div class="popup-command">
@@ -249,6 +396,7 @@ const serverModal = (serverImage, guild, guildID) => {
                         for (const input of el.querySelectorAll('.popup-command input[type="checkbox"]')) {
                             const inputID = input.id;
                             input.addEventListener('change', function () {
+                                console.log("send", input.checked)
                                 fetch('/edit-server/commands', {
                                     method: 'POST',
                                     headers: {

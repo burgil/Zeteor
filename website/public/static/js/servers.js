@@ -38,18 +38,10 @@ function loadServers(userData, serversContainer, guildIdURL) {
             if (guild.isBotExist) {
                 // show a popup with the server settings
                 modalBuilder(document.getElementById('modal-content'), serverModal(newServerIMG.src, guild, guildID));
-                requestAnimationFrame(function () {
-                    setupLangs();
-                });
-                requestAnimationFrame(function () {
-                    openModal('modal-popup');
-                });
-                requestAnimationFrame(function () {
-                    initSelector(".multipleSelect", "Translation Commands...");
-                });
-                requestAnimationFrame(function () {
-                    initSelector(".multipleSelectCMD", "Add Custom Commands...", true);
-                });
+                setupLangs();
+                openModal('modal-popup');
+                initSelector(".multipleSelect", "Translation Commands...");
+                initSelector(".multipleSelectCMD", "Add Custom Commands...", true);
             } else {
                 // notify('Please add the bot to the server first', 'warning', 2000);
                 window.location.href = "https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&response_type=code&scope=bot+applications.commands&disable_guild_select=true&guild_id=" + guildID + "&redirect_uri=" + encodeURIComponent(location.origin + location.pathname);
@@ -59,18 +51,10 @@ function loadServers(userData, serversContainer, guildIdURL) {
             // newServer.click(); // It won't let them execute anything anyways if they don't have permissions on the server... (the server actually check for your permission level in each server you are on using the guilds scope to know what servers you are on)
             // show a popup with the server settings
             modalBuilder(document.getElementById('modal-content'), serverModal(newServerIMG.src, guild, guildID));
-            requestAnimationFrame(function () {
-                setupLangs();
-            });
-            requestAnimationFrame(function () {
-                openModal('modal-popup');
-            });
-            requestAnimationFrame(function () {
-                initSelector(".multipleSelect", "Translation Commands...");
-            });
-            requestAnimationFrame(function () {
-                initSelector(".multipleSelectCMD", "Add Custom Commands...", true);
-            });
+            setupLangs();
+            openModal('modal-popup');
+            initSelector(".multipleSelect", "Translation Commands...");
+            initSelector(".multipleSelectCMD", "Add Custom Commands...", true);
         }
     }
     if (serverCount == 0) {

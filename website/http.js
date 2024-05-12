@@ -17,7 +17,17 @@ const client_secret = fs.readFileSync('../secret', 'utf8').trim();
 const togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
 const { v4: uuidv4 } = require('uuid');
 const app = express();
-const isSecure = process.platform !== 'win32';
+function getUsername() {
+    return (
+        process.env.SUDO_USER ||
+        process.env.C9_USER ||
+        process.env.LOGNAME ||
+        process.env.USER ||
+        process.env.LNAME ||
+        process.env.USERNAME
+    );
+}
+const isSecure = getUsername().toLowerCase() === 'ubuntu'; // this had issue with linux developers running the project locally: process.platform !== 'win32';
 const Fingerprint = require('express-fingerprint');
 const requestIp = require('request-ip');
 app.use(cookieParser());
@@ -81,7 +91,6 @@ app.get('/logout', (req, res) => {
         }));
     }
 });
-
 const serverCommands = {
     '1': [
         'aijoin',

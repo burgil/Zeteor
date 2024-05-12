@@ -5,13 +5,19 @@
     box-shadow: rgba(221, 221, 221, 0.3) 0px 6px 18px -3px, rgba(221, 221, 221, 0.2) 0px -3px
 }
 
+.popup-server-inputs textarea::placeholder {
+    color: #cbcbcb;
+    font-size: 13px;
+}
+
 .popup-server-name-container {
     display: flex;
     flex-direction: column;
-    align-content: center;
     align-items: center;
     max-width: fit-content;
     gap: 10px;
+    margin: auto;
+    margin-bottom: 20px;
 }
 
 .multipleSelect {
@@ -112,7 +118,8 @@
 
 .popup-command-block .select2-container,
 .popup-command-block input.select2-search__field {
-    min-width: 290px;
+    width: 100%!important;
+    max-width: 290px;
 }
 
 .jw-modal {
@@ -121,28 +128,34 @@
 
 .popup-server-name::after {
     content: '';
-    width: 100%;
+    width: 200%;
     height: 100%;
     animation: shine 4s linear infinite;
     position: absolute;
-    background: linear-gradient(to right, transparent 0%, #ffffff61 20%, transparent 50%);
+    background: linear-gradient(45deg, transparent 0%, #ffffff41 20%, transparent 50%);
+    top: 0;
 }
+
 .popup-server-name {
     position: relative;
     overflow: hidden;
+    border: 1px solid #ffffff8f;
+    padding: 5px 20px;
+    border-radius: 8px;
+    margin-top: 10px;
 }
 
 @keyframes shine {
     0% {
-        transform: translateX(-200%)
+        transform: translateX(-200%);
     }
 
     to {
-        transform: translateX(200%)
+        transform: translateX(200%);
     }
 }
 
-.popup-server-icon, select {
+.popup-server-icon {
     position: relative;
     z-index: 1;
     border: 2px solid transparent;
@@ -167,4 +180,62 @@
     50% {
         background-color: rgb(255 0 0 / 56%);
     }
+}
+
+.popup-server-inputs {
+    max-width: 990px;
+    margin: auto;
+}
+
+.popup-server-inputs textarea {
+    font-size: 16px;
+    background-color: #333333;
+    color: #ebebeb;
+}
+
+.popup-server-container .song-container {
+    max-width: 400px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.popup-server-container .song {
+    grid-template-columns: 16% auto 13%!important;
+    gap: 10px;
+    background: #333333;
+    padding: 5px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    transition: background .16s ease;
+    cursor: pointer;
+}
+
+.popup-server-container .song:hover {
+    background: #3c3c3c;
+}
+
+.popup-server-selected-persona p {
+    font-weight: bold;
+    border-bottom: 1px solid #bfbfbfb8;
+    padding-bottom: 5px;
+    max-width: 200px;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+.popup-server-selected-persona {
+    width: 50%;
+    text-align: center;
+}
+
+.popup-selected-persona {
+    font-weight: bolder;
+    font-size: 18px;
+    text-align: center;
+}
+
+.popup-server-selected-persona .song-img {
+    margin: auto;
 }

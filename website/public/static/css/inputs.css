@@ -1,6 +1,7 @@
 .popup-server-inputs .form-group {
-    display: block;
+    display: flex;
     margin-bottom: 32px;
+    gap: 10px;
 }
 
 .popup-server-inputs label {
@@ -9,6 +10,7 @@
     width: 100%;
     box-sizing: border-box;
     display: block;
+    max-width: 50%;
 }
 
 .popup-server-inputs input, .popup-server-inputs textarea {
