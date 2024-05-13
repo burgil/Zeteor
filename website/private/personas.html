@@ -1,1 +1,23 @@
-<h1>Hello World!</h1>
+<h1>Hello World! Do not buy yet lol</h1>
+
+<div id="paypal-button-container-P-5Y335465PV9368620MZBEGIQ"></div>
+<script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+<script>
+  paypal.Buttons({
+      style: {
+          shape: 'rect',
+          color: 'gold',
+          layout: 'vertical',
+          label: 'paypal'
+      },
+      createSubscription: function(data, actions) {
+        return actions.subscription.create({
+          /* Creates the subscription */
+          plan_id: 'P-5Y335465PV9368620MZBEGIQ'
+        });
+      },
+      onApprove: function(data, actions) {
+        alert(data.subscriptionID); // You can add optional success message for the subscriber here
+      }
+  }).render('#paypal-button-container-P-5Y335465PV9368620MZBEGIQ'); // Renders the PayPal button
+</script>
