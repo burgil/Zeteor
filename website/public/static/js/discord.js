@@ -6,13 +6,13 @@ var demoEle = { lastMsgGroup: null };
 
 /*
 function getUserLanguage() {
-            return navigator.language || navigator.userLanguage;
-        }
+			return navigator.language || navigator.userLanguage;
+		}
 
-        // Function to set the greeting based on language
-        function setGreeting() {
-            var language = getUserLanguage();
-            var greetingElement = document.getElementById('greeting');
+		// Function to set the greeting based on language
+		function setGreeting() {
+			var language = getUserLanguage();
+			var greetingElement = document.getElementById('greeting');
 */
 var users = {
 	burgil: {
@@ -44,17 +44,17 @@ var channelData = [{
 			pill: 'hsl(202, 35%, 68%)',
 			thumb: null,
 			fields: [{
-        name: '-> Language Translation',
-        value: '/aihelp - Help command\n/pt ola - Translate Portuguese to English\n/en hello - Translate English to Portuguese\n/a hello or ola - Auto Detect Language & Translate'
+				name: '-> Language Translation',
+				value: '/aihelp - Help command\n/pt ola - Translate Portuguese to English\n/en hello - Translate English to Portuguese\n/a hello or ola - Auto Detect Language & Translate'
 			}, {
-        name: '-> Voice Commands',
-        value: '/aijoin - Make the bot join/leave the voice channel.\n/aileave - Make the bot join/leave the voice channel.\n/burgil - Make the bot join/leave the voice channel.\n/ai ola or hello - Speak to the AI.\n/aipause - Pause the AI from speaking.'
+				name: '-> Voice Commands',
+				value: '/aijoin - Make the bot join/leave the voice channel.\n/aileave - Make the bot join/leave the voice channel.\n/burgil - Make the bot join/leave the voice channel.\n/ai ola or hello - Speak to the AI.\n/aipause - Pause the AI from speaking.'
 			}, {
-        name: '-> Voice Translation',
-        value: '/v ola - Speak Portuguese in English\n/vpt ola - Speak Portuguese in English\n/ven hello - Speak English in Portuguese\n/va hello or ola - Auto Detect Language, Translate & Speak'
+				name: '-> Voice Translation',
+				value: '/v ola - Speak Portuguese in English\n/vpt ola - Speak Portuguese in English\n/ven hello - Speak English in Portuguese\n/va hello or ola - Auto Detect Language, Translate & Speak'
 			}, {
-        name: '-> Advanced Commands',
-        value: '/ailisten - Enable listen mode - will listen to speech, translate, and speak in the other language.\n/aionly - Make the bot only listen to burgil!\n/ailong - Make the bot speak longer responses!\n/pingai - Test the bot responsiveness!\n/aidc - Force voice channel disconnect!\n/aidebug - Test the AI bot\'s responsiveness with a simple ping command'
+				name: '-> Advanced Commands',
+				value: '/ailisten - Enable listen mode - will listen to speech, translate, and speak in the other language.\n/aitts - Enable TTS mode - will listen to text, and speak in the detected language.\n/aionly - Make the bot only listen to burgil!\n/ailong - Make the bot speak longer responses!\n/pingai - Test the bot responsiveness!\n/aidc - Force voice channel disconnect!\n/aidebug - Test the AI bot\'s responsiveness with a simple ping command'
 			}]
 		}
 	}]
@@ -183,17 +183,17 @@ function scrollMessages() {
 
 function createEmbed(embed, embedData) {
 	var _embedData$title = embedData.title,
-	    titleText = _embedData$title === undefined ? '' : _embedData$title,
-	    _embedData$pill = embedData.pill,
-	    pillColor = _embedData$pill === undefined ? 'hsl(0, 0%, 50%)' : _embedData$pill,
-	    _embedData$footerIcon = embedData.footerIcon,
-	    footerIconURL = _embedData$footerIcon === undefined ? '' : _embedData$footerIcon,
-	    _embedData$footer = embedData.footer,
-	    footerText = _embedData$footer === undefined ? '' : _embedData$footer,
-	    _embedData$thumb = embedData.thumb,
-	    thumbURL = _embedData$thumb === undefined ? null : _embedData$thumb,
-	    _embedData$fields = embedData.fields,
-	    fieldList = _embedData$fields === undefined ? [] : _embedData$fields;
+		titleText = _embedData$title === undefined ? '' : _embedData$title,
+		_embedData$pill = embedData.pill,
+		pillColor = _embedData$pill === undefined ? 'hsl(0, 0%, 50%)' : _embedData$pill,
+		_embedData$footerIcon = embedData.footerIcon,
+		footerIconURL = _embedData$footerIcon === undefined ? '' : _embedData$footerIcon,
+		_embedData$footer = embedData.footer,
+		footerText = _embedData$footer === undefined ? '' : _embedData$footer,
+		_embedData$thumb = embedData.thumb,
+		thumbURL = _embedData$thumb === undefined ? null : _embedData$thumb,
+		_embedData$fields = embedData.fields,
+		fieldList = _embedData$fields === undefined ? [] : _embedData$fields;
 
 	var pill = createElement({ classes: 'embed-pill', parent: embed, style: { backgroundColor: pillColor } });
 	var rich = createElement({ classes: 'embed-rich', parent: embed });
@@ -222,8 +222,8 @@ function createEmbed(embed, embedData) {
 	if (fieldList.length) {
 		fieldList.forEach(function (_ref) {
 			var name = _ref.name,
-			    value = _ref.value,
-			    inline = _ref.inline;
+				value = _ref.value,
+				inline = _ref.inline;
 
 			var fieldClasses = ['embed-field'];
 			if (inline) {
@@ -240,13 +240,13 @@ function createEmbed(embed, embedData) {
 function createMessageGroup() {
 	var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	var _opts$avatar = opts.avatar,
-	    avatarUrl = _opts$avatar === undefined ? '' : _opts$avatar,
-	    _opts$username = opts.username,
-	    name = _opts$username === undefined ? '' : _opts$username,
-	    _opts$nameColor = opts.nameColor,
-	    nameColor = _opts$nameColor === undefined ? '' : _opts$nameColor,
-	    _opts$bot = opts.bot,
-	    bot = _opts$bot === undefined ? false : _opts$bot;
+		avatarUrl = _opts$avatar === undefined ? '' : _opts$avatar,
+		_opts$username = opts.username,
+		name = _opts$username === undefined ? '' : _opts$username,
+		_opts$nameColor = opts.nameColor,
+		nameColor = _opts$nameColor === undefined ? '' : _opts$nameColor,
+		_opts$bot = opts.bot,
+		bot = _opts$bot === undefined ? false : _opts$bot;
 
 	var group = createElement({ classes: 'message-group' });
 	var avatar = createElement({ classes: 'avatar', parent: group });
@@ -277,9 +277,9 @@ function createMessageGroup() {
 function createMessage() {
 	var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	var _opts$text = opts.text,
-	    text = _opts$text === undefined ? '' : _opts$text,
-	    _opts$embedData = opts.embedData,
-	    embedData = _opts$embedData === undefined ? null : _opts$embedData;
+		text = _opts$text === undefined ? '' : _opts$text,
+		_opts$embedData = opts.embedData,
+		embedData = _opts$embedData === undefined ? null : _opts$embedData;
 
 	var message = createElement({ classes: 'message' });
 	var body = createElement({ classes: 'body', parent: message });
@@ -305,9 +305,9 @@ function addMessage() {
 		return Promise.reject(false);
 	}
 	var _opts$username2 = opts.username,
-	    username = _opts$username2 === undefined ? '' : _opts$username2,
-	    _opts$lastMsgGroup = opts.lastMsgGroup,
-	    lastMsgGroup = _opts$lastMsgGroup === undefined ? null : _opts$lastMsgGroup;
+		username = _opts$username2 === undefined ? '' : _opts$username2,
+		_opts$lastMsgGroup = opts.lastMsgGroup,
+		lastMsgGroup = _opts$lastMsgGroup === undefined ? null : _opts$lastMsgGroup;
 
 	var prom = Promise.resolve();
 	if (lastMsgGroup === null) {
@@ -345,9 +345,9 @@ function setChannel(name) {
 function loadChannel() {
 	var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	var _opts$name = opts.name,
-	    name = _opts$name === undefined ? 'general' : _opts$name,
-	    _opts$messages = opts.messages,
-	    messages = _opts$messages === undefined ? [] : _opts$messages;
+		name = _opts$name === undefined ? 'general' : _opts$name,
+		_opts$messages = opts.messages,
+		messages = _opts$messages === undefined ? [] : _opts$messages;
 
 	if (name === currentChannel || currentlyLoading || !canAddMessages) {
 		return Promise.reject(false);
@@ -362,13 +362,13 @@ function loadChannel() {
 		var prom = Promise.resolve();
 		messages.forEach(function (n) {
 			var _n$type = n.type,
-			    type = _n$type === undefined ? 'message' : _n$type,
-			    _n$user = n.user,
-			    user = _n$user === undefined ? { username: 'User' } : _n$user,
-			    _n$text = n.text,
-			    text = _n$text === undefined ? '' : _n$text,
-			    _n$delay = n.delay,
-			    delayTime = _n$delay === undefined ? 0 : _n$delay;
+				type = _n$type === undefined ? 'message' : _n$type,
+				_n$user = n.user,
+				user = _n$user === undefined ? { username: 'User' } : _n$user,
+				_n$text = n.text,
+				text = _n$text === undefined ? '' : _n$text,
+				_n$delay = n.delay,
+				delayTime = _n$delay === undefined ? 0 : _n$delay;
 
 			if (type === 'input') {
 				prom = prom.then(function () {
@@ -427,8 +427,8 @@ window.addEventListener('load', function () {
 	var selectedChannel = void 0;
 	channelData.forEach(function (n) {
 		var name = n.name,
-		    _n$selected = n.selected,
-		    selected = _n$selected === undefined ? false : _n$selected;
+			_n$selected = n.selected,
+			selected = _n$selected === undefined ? false : _n$selected;
 
 		if (selected) {
 			selectedChannel = n;
@@ -488,19 +488,19 @@ function parseBrackets(text) {
 function createElement() {
 	var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	var _opts$tagName = opts.tagName,
-	    tagName = _opts$tagName === undefined ? 'div' : _opts$tagName,
-	    _opts$classes = opts.classes,
-	    classes = _opts$classes === undefined ? [] : _opts$classes,
-	    _opts$id = opts.id,
-	    id = _opts$id === undefined ? '' : _opts$id,
-	    _opts$text2 = opts.text,
-	    text = _opts$text2 === undefined ? '' : _opts$text2,
-	    _opts$attrs = opts.attrs,
-	    attrs = _opts$attrs === undefined ? [] : _opts$attrs,
-	    _opts$style = opts.style,
-	    style = _opts$style === undefined ? null : _opts$style,
-	    _opts$parent = opts.parent,
-	    parent = _opts$parent === undefined ? null : _opts$parent;
+		tagName = _opts$tagName === undefined ? 'div' : _opts$tagName,
+		_opts$classes = opts.classes,
+		classes = _opts$classes === undefined ? [] : _opts$classes,
+		_opts$id = opts.id,
+		id = _opts$id === undefined ? '' : _opts$id,
+		_opts$text2 = opts.text,
+		text = _opts$text2 === undefined ? '' : _opts$text2,
+		_opts$attrs = opts.attrs,
+		attrs = _opts$attrs === undefined ? [] : _opts$attrs,
+		_opts$style = opts.style,
+		style = _opts$style === undefined ? null : _opts$style,
+		_opts$parent = opts.parent,
+		parent = _opts$parent === undefined ? null : _opts$parent;
 
 	var ele = document.createElement(tagName);
 	if (typeof classes === 'string' && classes.length) {
@@ -519,17 +519,17 @@ function createElement() {
 		var hasBrackets = /\[.*?\]/g.test(text);
 
 		var _ref2 = hasBrackets ? parseBrackets(text) : {},
-		    _ref2$result = _ref2.result,
-		    result = _ref2$result === undefined ? text : _ref2$result,
-		    _ref2$changedBrackets = _ref2.changedBrackets,
-		    changedBrackets = _ref2$changedBrackets === undefined ? false : _ref2$changedBrackets;
+			_ref2$result = _ref2.result,
+			result = _ref2$result === undefined ? text : _ref2$result,
+			_ref2$changedBrackets = _ref2.changedBrackets,
+			changedBrackets = _ref2$changedBrackets === undefined ? false : _ref2$changedBrackets;
 
 		ele[changedBrackets ? 'innerHTML' : 'innerText'] = result;
 	}
 	if (Array.isArray(attrs)) {
 		if (attrs.length === 1) {
 			var _attrs = _slicedToArray(attrs, 1),
-			    attr = _attrs[0];
+				attr = _attrs[0];
 
 			ele.setAttribute(attr[0], attr[1]);
 		} else if (attrs.length) {

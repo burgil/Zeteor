@@ -119,6 +119,7 @@ const serverCommands = {
     '4': [
         'aipause',
         'ailisten',
+        'aitts',
         'aionly',
         'ailong',
         'pingai',

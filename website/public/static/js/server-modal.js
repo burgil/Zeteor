@@ -318,6 +318,18 @@ const serverModal = (serverImage, guild, guildID) => {
                                 <option value="ailisten" selected>ailisten</option>
                             </select>
                         </div>
+                        <div class="popup-command-block">        
+                            <label class="popup-command-info"><b>/aitts</b> - Enable TTS mode - will listen to text, and speak in the detected language.</label>
+                            <div class="switch">
+                                <input type="checkbox" id="aitts" checked />
+                                <label for="aitts">
+                                <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <select class="multipleSelectCMD" id="aitts_cmd" multiple="true">
+                                <option value="aitts" selected>aitts</option>
+                            </select>
+                        </div>
                         <div class="popup-command-block">    
                             <label class="popup-command-info"><b>/aionly</b> - Make the bot only listen to burgil!</label>
                             <div class="switch">
