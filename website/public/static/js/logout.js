@@ -1,4 +1,5 @@
 function loadLoggedOutInterface() {
+    if (!document.querySelector('.main-section')) return location.href = '/';
     // remove logged in elements:
     document.querySelector('main').style.gridTemplateColumns = '0% 100%';
     document.querySelector('.sidebar').style.width = '0';
