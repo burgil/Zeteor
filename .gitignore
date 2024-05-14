@@ -1,5 +1,6 @@
 secret
 clientID
+cachedToken.json
 paypalWebhookId
 paypalClientSecret
 paypalClientId

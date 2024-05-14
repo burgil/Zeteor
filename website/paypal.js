@@ -18,10 +18,29 @@ try {
 } catch (fileErr) { }
 
 let cachedToken;
-async function getToken() {
+try {
+    cachedToken = fs.readFileSync('../cachedToken.json', 'utf8').trim();
+    cachedToken = JSON.parse(cachedToken);
+} catch (fileErr) { }
+
+async function updateToken() {
     if (cachedToken) {
-        // if () {check for expiry else {
-        return cachedToken;
+        const expirationDate = new Date(((cachedToken.current_timestamp / 1000) + cachedToken.expires_in) * 1000);
+        const year = expirationDate.getFullYear();
+        const month = expirationDate.getMonth() + 1;
+        const day = expirationDate.getDate();
+        const hours = expirationDate.getHours();
+        const minutes = expirationDate.getMinutes();
+        const seconds = expirationDate.getSeconds();
+        console.log(`Expiration date and time: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
+        // check if expired
+        const currentDate = new Date();
+        if (expirationDate < currentDate) {
+            console.log("Token has expired, refreshing!");
+        } else {
+            // console.log("Token is still valid.");
+            return;
+        }
     }
     const url = 'https://api-m.sandbox.paypal.com/v1/oauth2/token';
     const auth = Buffer.from(`${paypalClientId}:${paypalClientSecret}`).toString('base64');
@@ -39,12 +58,16 @@ async function getToken() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         cachedToken = data;
-        return data;
+        cachedToken.current_timestamp = Date.now();
+        fs.writeFileSync('../cachedToken.json', JSON.stringify(cachedToken), 'utf8');
     } catch (error) {
         console.error('Error:', error.message);
     }
 }
-// getToken();
+updateToken();
+setInterval(function () {
+    updateToken();
+}, 31926 * 1000);
 /* Sample response
 {
 "scope": "https://uri.paypal.com/services/invoicing https://uri.paypal.com/services/disputes/read-buyer https://uri.paypal.com/services/payments/realtimepayment https://uri.paypal.com/services/disputes/update-seller https://uri.paypal.com/services/payments/payment/authcapture openid https://uri.paypal.com/services/disputes/read-seller https://uri.paypal.com/services/payments/refund https://api-m.paypal.com/v1/vault/credit-card https://api-m.paypal.com/v1/payments/.* https://uri.paypal.com/payments/payouts https://api-m.paypal.com/v1/vault/credit-card/.* https://uri.paypal.com/services/subscriptions https://uri.paypal.com/services/applications/webhooks",
@@ -57,13 +80,14 @@ async function getToken() {
 */
 // console.log('Access Token:', data.access_token, "data:", data);
 
-async function verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent) {
+async function verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent) {
     try {
+        await updateToken();
         const response = await fetch('https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // Replace YOUR_ACCESS_TOKEN with your actual access token
+                'Authorization': `Bearer ${cachedToken.access_token}` // Replace YOUR_ACCESS_TOKEN with your actual access token
             },
             body: JSON.stringify({
                 "transmission_id": transmissionId, // string <= 50 characters The ID of the HTTP transmission. Contained in the PAYPAL-TRANSMISSION-ID header of the notification message.
@@ -86,15 +110,13 @@ async function verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissi
 
 async function processPaypalWebhooks(req, res) { // fetch('http://localhost/paypal', {method: 'POST'})
     try {
-        const token = await getToken();
-        if (!token) return res.status(401).send('Paypal is not configured!');
         const authAlgo = req.headers["paypal-auth-algo"];
         const certUrl = req.headers["paypal-cert-url"];
         const transmissionId = req.headers["paypal-transmission-id"];
         const transmissionSig = req.headers["paypal-transmission-sig"];
         const transmissionTime = req.headers["paypal-transmission-time"];
         const webhookEvent = req.body;
-        const verificationStatus = await verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
+        const verificationStatus = await verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
         const insertPayment = await generateInsertStatement('payments', ['logs', {
             body: req.body,
             time: Date.now(),
