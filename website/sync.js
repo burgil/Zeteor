@@ -14,6 +14,11 @@ const tables = {
             data_type: 'json',
             sql_type: 'JSON',
         },
+        {
+            column_name: 'payment_id',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
     ],
     'personas': [
         {
@@ -93,14 +98,39 @@ const tables = {
     ],
     'payments': [
         {
-            column_name: 'type',
+            column_name: 'discord_id',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
+        {
+            column_name: 'id',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
+        {
+            column_name: 'event_type',
             data_type: 'character varying',
             sql_type: 'VARCHAR(50)',
         },
         {
-            column_name: 'data',
-            data_type: 'json',
-            sql_type: 'JSON',
+            column_name: 'summary',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(510)',
+        },
+        {
+            column_name: 'create_time',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'total',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'currency',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
         },
     ]
 };

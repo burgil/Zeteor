@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
+const { example_db, db_save } = require('./db.js');
 
 let paypalClientId;
 try {
@@ -33,9 +34,8 @@ async function updateToken() {
         const minutes = expirationDate.getMinutes();
         const seconds = expirationDate.getSeconds();
         console.log(`Expiration date and time: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
-        // check if expired
         const currentDate = new Date();
-        if (expirationDate < currentDate) {
+        if (expirationDate < currentDate) {  // check if expired
             console.log("Token has expired, refreshing!");
         } else {
             // console.log("Token is still valid.");
@@ -68,17 +68,6 @@ updateToken();
 setInterval(function () {
     updateToken();
 }, 31926 * 1000);
-/* Sample response
-{
-"scope": "https://uri.paypal.com/services/invoicing https://uri.paypal.com/services/disputes/read-buyer https://uri.paypal.com/services/payments/realtimepayment https://uri.paypal.com/services/disputes/update-seller https://uri.paypal.com/services/payments/payment/authcapture openid https://uri.paypal.com/services/disputes/read-seller https://uri.paypal.com/services/payments/refund https://api-m.paypal.com/v1/vault/credit-card https://api-m.paypal.com/v1/payments/.* https://uri.paypal.com/payments/payouts https://api-m.paypal.com/v1/vault/credit-card/.* https://uri.paypal.com/services/subscriptions https://uri.paypal.com/services/applications/webhooks",
-"access_token": "....-....", // When you make API calls, replace ACCESS-TOKEN with your access token in the authorization header: -H Authorization: Bearer ACCESS-TOKEN
-"token_type": "Bearer",
-"app_id": "APP-....",
-"expires_in": 31668, // When your access token expires, call /v1/oauth2/token again to request a new access token.
-"nonce": "2020-04-03T15:35:....."
-}
-*/
-// console.log('Access Token:', data.access_token, "data:", data);
 
 async function verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent) {
     try {
@@ -117,24 +106,299 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
         const transmissionTime = req.headers["paypal-transmission-time"];
         const webhookEvent = req.body;
         const verificationStatus = await verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
-        const insertPayment = await generateInsertStatement('payments', ['logs', {
-            body: req.body,
-            time: Date.now(),
-            timestamp: new Date().toLocaleString(),
-            headers: req.headers,
-            url: req.url,
-            method: req.method,
-            cookies: req.cookies,
-            fingerprint: req.fingerprint,
-            ip: req.clientIp,
-            verificationStatus
-        }])
-        await sql(insertPayment.sql, insertPayment.values);
+        if (verificationStatus.verification_status == 'SUCCESS') {
+            req.status(200).send('ok');
+            let paymentStatus = false;
+            switch (body.event_type) {
+                // Payments V2
+                case 'PAYMENT.AUTHORIZATION.CREATED': // A payment authorization is created, approved, executed, or a future payment authorization is created.
+                    break;
+                case 'PAYMENT.AUTHORIZATION.VOIDED': // A payment authorization is voided either due to authorization reaching it’s 30 day validity period or authorization was manually voided using the Void Authorized Payment API.
+                    break;
+                case 'PAYMENT.CAPTURE.DECLINED': // A payment capture is declined.
+                    paymentStatus = 'reject';
+                    break;
+                case 'PAYMENT.CAPTURE.COMPLETED': // A payment capture completes.
+                    break;
+                case 'PAYMENT.CAPTURE.PENDING': // The state of a payment capture changes to pending.
+                    break;
+                case 'PAYMENT.CAPTURE.REFUNDED': // A merchant refunds a payment capture.
+                    paymentStatus = 'reject';
+                    break;
+                case 'PAYMENT.CAPTURE.REVERSED': // PayPal reverses a payment capture.
+                    break;
+                // Payments V1
+                case 'PAYMENT.CAPTURE.DENIED': // A payment capture is denied.
+                    paymentStatus = 'reject';
+                    break;
+                // Batch payouts
+                case 'PAYMENT.PAYOUTSBATCH.DENIED': // A batch payout payment is denied.
+                    break;
+                case 'PAYMENT.PAYOUTSBATCH.PROCESSING': // The state of a batch payout payment changes to processing.
+                    break;
+                case 'PAYMENT.PAYOUTSBATCH.SUCCESS': // A batch payout payment completes successfully.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.BLOCKED': // A payouts item is blocked.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.CANCELED': // A payouts item is canceled.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.DENIED': // A payouts item is denied.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.FAILED': // 	A payouts item fails.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.HELD': // A payouts item is held.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.REFUNDED': // A payouts item is refunded.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.RETURNED': // A payouts item is returned.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.SUCCEEDED': // A payouts item succeeds.
+                    break;
+                case 'PAYMENT.PAYOUTS-ITEM.UNCLAIMED': // A payouts item is unclaimed.
+                    break;
+                // Billing plans and agreements
+                case 'BILLING.PLAN.CREATED': // A billing plan is created.
+                    break;
+                case 'BILLING.PLAN.UPDATED': // A billing plan is updated.
+                    break;
+                case 'BILLING.SUBSCRIPTION.CANCELLED': // A billing agreement is canceled.
+                    paymentStatus = 'cancel';
+                    break;
+                case 'BILLING.SUBSCRIPTION.CREATED': // A billing agreement is created.
+                    break;
+                case 'BILLING.SUBSCRIPTION.RE-ACTIVATED': // A billing agreement is re-activated.
+                    break;
+                case 'BILLING.SUBSCRIPTION.SUSPENDED': // A billing agreement is suspended.
+                    paymentStatus = 'reject';
+                    break;
+                case 'BILLING.SUBSCRIPTION.UPDATED': // A billing agreement is updated.
+                    break;
+                // Log in with PayPal
+                case 'IDENTITY.AUTHORIZATION-CONSENT.REVOKED': // A user's consent token is revoked.
+                    break;
+                // Checkout buyer approval
+                case 'PAYMENTS.PAYMENT.CREATED': // Checkout payment is created and approved by buyer.
+                    break;
+                case 'CHECKOUT.ORDER.APPROVED': // A buyer approved a checkout order
+                    break;
+                case 'CHECKOUT.CHECKOUT.BUYER-APPROVED': // Express checkout payment is created and approved by buyer.
+                    break;
+                // Disputes
+                case 'CUSTOMER.DISPUTE.CREATED': // A dispute is created.
+                    break;
+                case 'CUSTOMER.DISPUTE.RESOLVED': // A dispute is resolved.
+                    break;
+                case 'CUSTOMER.DISPUTE.UPDATED': // A dispute is updated.
+                    break;
+                case 'RISK.DISPUTE.CREATED': // A risk dispute is created.
+                    break;
+                // Invoicing
+                case 'INVOICING.INVOICE.CANCELLED': // A merchant or customer cancels an invoice.
+                    break;
+                case 'INVOICING.INVOICE.CREATED': // An invoice is created.
+                    break;
+                case 'INVOICING.INVOICE.PAID': // An invoice is paid, partially paid, or payment is made and is pending.
+                    break;
+                case 'INVOICING.INVOICE.REFUNDED': // An invoice is refunded or partially refunded.
+                    break;
+                case 'INVOICING.INVOICE.SCHEDULED': // An invoice is scheduled.
+                    break;
+                case 'INVOICING.INVOICE.UPDATED': // An invoice is updated.
+                    break;
+                // Marketplaces and Platforms
+                case 'CHECKOUT.ORDER.COMPLETED': // A checkout order is processed. Note: For use by marketplaces and platforms only.
+                    break;
+                case 'CHECKOUT.ORDER.PROCESSED': // A checkout order is processed.
+                    break;
+                case 'CUSTOMER.ACCOUNT-LIMITATION.ADDED': // A limitation is added for a partner's managed account.
+                    break;
+                case 'CUSTOMER.ACCOUNT-LIMITATION.ESCALATED': // A limitation is escalated for a partner's managed account.
+                    break;
+                case 'CUSTOMER.ACCOUNT-LIMITATION.LIFTED': // A limitation is lifted for a partner's managed account.
+                    break;
+                case 'CUSTOMER.ACCOUNT-LIMITATION.UPDATED': // A limitation is updated for a partner's managed account.
+                    break;
+                case 'CUSTOMER.MERCHANT-INTEGRATION.CAPABILITY-UPDATED': // PayPal must enable the merchant's account as PPCP for this webhook to work.
+                    break;
+                case 'CUSTOMER.MERCHANT-INTEGRATION.PRODUCT-SUBSCRIPTION-UPDATED': // The products available to the merchant have changed.
+                    break;
+                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-ALREADY-INTEGRATED': // Merchant onboards again to a partner.
+                    break;
+                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-ONBOARDING-INITIATED': // PayPal creates a merchant account from the partner's onboarding link.
+                    break;
+                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-CONSENT-GRANTED': // Merchant grants consents to a partner.
+                    break;
+                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-EMAIL-CONFIRMED': // Merchant confirms the email and consents are granted.
+                    break;
+                case 'MERCHANT.ONBOARDING.COMPLETED': // Merchant completes setup.
+                    break;
+                case 'MERCHANT.PARTNER-CONSENT.REVOKED': // The consents for a merchant account setup are revoked or an account is closed.
+                    break;
+                case 'PAYMENT.REFERENCED-PAYOUT-ITEM.COMPLETED': // Funds are disbursed to the seller and partner.
+                    break;
+                case 'PAYMENT.REFERENCED-PAYOUT-ITEM.FAILED': // Attempt to disburse funds fails.
+                    break;
+                // Merchant onboarding
+                case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-CREATED': // Managed account has been created.
+                    break;
+                case 'CUSTOMER.MANAGED-ACCOUNT.CREATION-FAILED': // Managed account creation failed.
+                    break;
+                case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-UPDATED': // Managed account has been updated.
+                    break;
+                case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-STATUS-CHANGED': // Capabilities and/or process status has been changed on a managed account.
+                    break;
+                case 'CUSTOMER.MANAGED-ACCOUNT.RISK-ASSESSED': // Managed account has been risk assessed or the risk assessment has been changed.
+                    break;
+                case 'CUSTOMER.MANAGED-ACCOUNT.NEGATIVE-BALANCE-NOTIFIED': // Negative balance debit has been notified on a managed account.
+                    break;
+                case 'CUSTOMER.MANAGED-ACCOUNT.NEGATIVE-BALANCE-DEBIT-INITIATED': // Negative balance debit has been initiated on a managed account.
+                    break;
+                // Orders V2
+                case 'CHECKOUT.PAYMENT-APPROVAL.REVERSED': // A problem occurred after the buyer approved the order but before you captured the payment. Refer to Handle uncaptured payments for what to do when this event occurs.
+                    break;
+                // Payment orders
+                case 'PAYMENT.ORDER.CANCELLED': // A payment order is canceled.
+                    paymentStatus = 'reject';
+                    break;
+                case 'PAYMENT.ORDER.CREATED': // A payment order is created.
+                    break;
+                // Sales
+                case 'PAYMENT.SALE.DENIED': // The state of a sale changes from pending to denied.
+                    paymentStatus = 'reject';
+                    break;
+                case 'PAYMENT.SALE.PENDING': // The state of a sale changes to pending.
+                    break;
+                // Subscriptions & Sales
+                case 'PAYMENT.SALE.REFUNDED': // A merchant refunds a sale.
+                    paymentStatus = 'reject';
+                    break;
+                case 'PAYMENT.SALE.COMPLETED': // A sale completes.
+                    paymentStatus = 'confirm';
+                    break;
+                case 'PAYMENT.SALE.REVERSED': // PayPal reverses a sale.
+                    break;
+                // Subscriptions
+                case 'CATALOG.PRODUCT.CREATED': // A product is created.
+                    break;
+                case 'CATALOG.PRODUCT.UPDATED': // A product is updated.
+                    break;
+                case 'BILLING.PLAN.ACTIVATED': // A billing plan is activated.
+                    break;
+                case 'BILLING.PLAN.PRICING-CHANGE.ACTIVATED': // A price change for the plan is activated.
+                    break;
+                case 'BILLING.PLAN.DEACTIVATED': // A billing plan is deactivated.
+                    break;
+                case 'BILLING.SUBSCRIPTION.ACTIVATED': // A subscription is activated.
+                    break;
+                case 'BILLING.SUBSCRIPTION.EXPIRED': // A subscription expires.
+                    break;
+                case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED': // 	Payment failed on subscription.
+                    break;
+                // Vault
+                case 'VAULT.CREDIT-CARD.CREATED': // A credit card is created.
+                    break;
+                case 'VAULT.CREDIT-CARD.DELETED': // A credit card is deleted.
+                    break;
+                case 'VAULT.CREDIT-CARD.UPDATED': // A credit card is updated.
+                    break;
+            }
+            // body: req.body,
+            // time: Date.now(),
+            // timestamp: new Date().toLocaleString(),
+            // headers: req.headers,
+            // url: req.url,
+            // method: req.method,
+            // cookies: req.cookies,
+            // fingerprint: req.fingerprint,
+            // ip: req.clientIp,
+            /*
+            paymentStatus:
+            reject - somehow got rejected
+            cancel - user manually cancelled
+            confirm - user purchased successfully
+            !false = do nothing - log?
+            */
+            if (req.body.resource?.id &&
+                req.body.event_type &&
+                req.body.summary &&
+                req.body.create_time &&
+                req.body.resource?.amount?.total &&
+                req.body.resource?.amount?.currency) {
+                    if (paymentStatus == 'reject') {
         
-        res.write('200');
-        res.end();
+                    } else if (paymentStatus == 'cancel') {
+        
+                    } else if (paymentStatus == 'confirm') { // PAYMENT.SALE.COMPLETED
+                        const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
+                            req.body.resource.billing_agreement_id
+                        ])
+                        console.warn('userDB:', userDB.rows)
+                        let claimedDiscordID = '';
+                        if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
+                        const insertPayment = await generateInsertStatement('payments', [
+                            claimedDiscordID, // discord_id
+                            req.body.resource.billing_agreement_id, // id
+                            req.body.event_type, // event_type
+                            req.body.summary, // summary
+                            req.body.create_time, // create_time
+                            req.body.resource.amount.total, // total
+                            req.body.resource.amount.currency, // currency
+                        ])
+                        await sql(insertPayment.sql, insertPayment.values);
+                    }
+            }
+        } else {
+            req.status(401).send('bad');
+        }
     } catch (e) {
         req.status(500).send('processPaypalWebhooks Error: ' + e.message);
+    }
+}
+
+async function claimOrder(req, res) {
+    if (!req.cookies.auth_token) {
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+        return;
+    }
+    const userData = example_db[req.cookies.auth_token];
+    if (!userData) {
+        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        res.send(JSON.stringify({
+            error: 'Not logged in'
+        }));
+        return;
+    }
+    const orderID = req.body.order_id;
+    if (!orderID || orderID.trim() == '') {
+        res.send(JSON.stringify({
+            error: 'Invalid order id'
+        }));
+        return;
+    }
+    // update user with the new order id
+    const updateUserPayment = await generateUpdateStatement('users', userData.id, {
+        payment_id: orderID,
+    });
+    const updatedUserPayment = await sql(updateUserPayment.sql, updateUserPayment.values)
+    console.warn('updatedUserPayment', updatedUserPayment.rows)
+    // find empty order with id
+    const paymentsDB = await sql(`SELECT * FROM payments WHERE discord_id = $1 AND id = $2;`, [
+        '',
+        orderID
+    ])
+    console.warn('paymentsDB:', paymentsDB.rows)
+    if (paymentsDB.rows.length > 0) {
+        // found empty order with that id, fill user as the owner
+        const updatePayment = await generateUpdateStatement('payments', orderID, {
+            discord_id: userData.id,
+        }, 'id');
+        const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
+        console.warn('updatedPayment', updatedPayment.rows)
+        res.send('ok')
+    } else {
+        res.send('bad')
     }
 }
 
@@ -166,6 +430,11 @@ const paypalRoutes = [
         route: '/clean-paypal-logs',
         func: cleanPaypalLogs
     },
+    {
+        method: 'POST',
+        route: '/claim-paypal',
+        func: claimOrder
+    }
 ]
 
 module.exports = paypalRoutes;
