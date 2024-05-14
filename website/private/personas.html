@@ -4,6 +4,7 @@
 <div id="paypal-button-container-P-6B898830LY4944547MZBTOXQ"></div>
 <script src="https://www.paypal.com/sdk/js?client-id=Aa6Vq9mTLyajIQGFs2meEDIEOmKEwXSPxyO6rPQFd9OgsZa_zZrr5fMxcDx0P1msDH80gL6YBK56435S&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 <script>
+  // hi please no hack me
   paypal.Buttons({
     style: {
       shape: 'rect',
@@ -12,12 +13,12 @@
       label: 'paypal'
     },
     createSubscription: function (data, actions) {
-      return actions.subscription.create({
-        /* Creates the subscription */
+      return actions.subscription.create({ /* Creates the subscription */
         plan_id: 'P-6B898830LY4944547MZBTOXQ'
       });
     },
     onApprove: function (data, actions) {
+      // bruh ??!
       // console.log("data", data)
       // console.log("actions", actions)
       // alert("THANK YOU FOR BUYING!!!\n" + data.subscriptionID); // eg. I-9W9PY3.... You can add optional success message for the subscriber here
@@ -25,101 +26,8 @@
       //   console.log("details", details)
       //   alert(details.payer.name.given_name)
       // })
-      const defaults = {
-        spread: 360,
-        ticks: 50,
-        gravity: 0,
-        decay: 0.94,
-        startVelocity: 30,
-        shapes: ["star"],
-        colors: ["FFE400", "FFBD00", "E89400", "FFCA6C", "FDFFB8"],
-      };
-
-      function shoot() {
-        confetti({
-          ...defaults,
-          particleCount: 40,
-          scalar: 1.2,
-          shapes: ["star"],
-        });
-
-        confetti({
-          ...defaults,
-          particleCount: 10,
-          scalar: 0.75,
-          shapes: ["circle"],
-        });
-      }
-
-      setTimeout(shoot, 0);
-      setTimeout(shoot, 100);
-      setTimeout(shoot, 200);
-      const defaults2 = {
-        spread: 360,
-        ticks: 100,
-        gravity: 0,
-        decay: 0.94,
-        startVelocity: 30,
-        shapes: ["heart"],
-        colors: ["FFC0CB", "FF69B4", "FF1493", "C71585"],
-      };
-
-      confetti({
-        ...defaults2,
-        particleCount: 50,
-        scalar: 2,
-      });
-
-      confetti({
-        ...defaults2,
-        particleCount: 25,
-        scalar: 3,
-      });
-
-      confetti({
-        ...defaults2,
-        particleCount: 10,
-        scalar: 4,
-      });
-      const count = 200,
-        defaults3 = {
-          origin: { y: 0.7 },
-        };
-
-      function fire(particleRatio, opts) {
-        confetti(
-          Object.assign({}, defaults3, opts, {
-            particleCount: Math.floor(count * particleRatio),
-          })
-        );
-      }
-
-      fire(0.25, {
-        spread: 26,
-        startVelocity: 55,
-      });
-
-      fire(0.2, {
-        spread: 60,
-      });
-
-      fire(0.35, {
-        spread: 100,
-        decay: 0.91,
-        scalar: 0.8,
-      });
-
-      fire(0.1, {
-        spread: 120,
-        startVelocity: 25,
-        decay: 0.92,
-        scalar: 1.2,
-      });
-
-      fire(0.1, {
-        spread: 120,
-        startVelocity: 45,
-      });
+      // just enjoy some confetti hahahaha
+      const defaults={spread:360,ticks:50,gravity:0,decay:.94,startVelocity:30,shapes:["star","circle","heart","square","triangle","diamond"],colors:["FFE400","FFBD00","E89400","FFCA6C","FDFFB8"]};function shoot(){confetti({...defaults,particleCount:40,scalar:1.2}),confetti({...defaults,particleCount:10,scalar:.75})}function show(){setTimeout(shoot,0),setTimeout(shoot,100),setTimeout(shoot,200)}const defaults2={spread:360,ticks:100,gravity:0,decay:.94,startVelocity:30,shapes:["heart"],colors:["FFC0CB","FF69B4","FF1493","C71585"]};confetti({...defaults2,particleCount:50,scalar:2}),confetti({...defaults2,particleCount:25,scalar:3}),confetti({...defaults2,particleCount:10,scalar:4});const count=200,defaults3={origin:{y:.7}};function fire(a,t){confetti(Object.assign({},defaults3,t,{particleCount:Math.floor(200*a)}))}fire(.25,{spread:26,startVelocity:55}),fire(.2,{spread:60}),fire(.35,{spread:100,decay:.91,scalar:.8}),fire(.1,{spread:120,startVelocity:25,decay:.92,scalar:1.2}),fire(.1,{spread:120,startVelocity:45}),setTimeout(show,500);
     }
   }).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ'); // Renders the PayPal button
 </script>
