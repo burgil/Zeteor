@@ -130,6 +130,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
             verificationStatus
         }])
         await sql(insertPayment.sql, insertPayment.values);
+        
         res.write('200');
         res.end();
     } catch (e) {

@@ -91,6 +91,8 @@ main {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  opacity: 0.8;
+  font-weight: bolder;
 }
 
 .nav-item {
@@ -881,4 +883,36 @@ main {
 
 #server-loader {
   filter: hue-rotate(180deg);
+}
+
+.premium-glow {
+  color: rgb(255 215 0) !important;
+  filter: drop-shadow(0px 0px 7px rgba(255, 215, 0, 0.3));
+}
+
+.premium-pic {
+  content: '';
+  background-image: url(/images/premium.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.78;
+  background-size: 100%;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  right: 9%;
+  top: 6%;
+  filter: drop-shadow(0px 0px 7px rgba(255, 215, 0, 0.3));
+  cursor: pointer;
+  transition: transform .16s ease;
+}
+
+.user-info-premium {
+  position: relative;
+  filter: drop-shadow(0px 0px 7px rgba(255, 215, 0, 0.3));
+}
+
+#user-pic {
+  pointer-events: none;
+  user-select: none;
 }

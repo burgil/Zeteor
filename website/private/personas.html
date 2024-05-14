@@ -4,7 +4,56 @@
 <div id="paypal-button-container-P-6B898830LY4944547MZBTOXQ"></div>
 <script src="https://www.paypal.com/sdk/js?client-id=Aa6Vq9mTLyajIQGFs2meEDIEOmKEwXSPxyO6rPQFd9OgsZa_zZrr5fMxcDx0P1msDH80gL6YBK56435S&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 <script>
-  // hi please no hack me
+  function createConfetti(params) {
+    confetti(Object.assign({}, params));
+  }
+  function fire_specific(a, t, origin) {
+    createConfetti(Object.assign({}, { origin: origin }, t, { particleCount: Math.floor(200 * a) }));
+  }
+  function confetti_show(event) {
+    const defaults = {
+      spread: 360,
+      ticks: 50,
+      gravity: 0,
+      decay: .94,
+      startVelocity: 30,
+      shapes: ["star", "circle", "heart", "square", "triangle", "diamond"],
+      colors: ["FFE400", "FFBD00", "E89400", "FFCA6C", "FDFFB8"]
+    };
+    const defaults2 = {
+      spread: 360,
+      ticks: 100,
+      gravity: 0,
+      decay: .94,
+      startVelocity: 30,
+      shapes: ["heart"],
+      colors: ["FFC0CB", "FF69B4", "FF1493", "C71585"]
+    };
+    const count = 200;
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    const originX = mouseX / window.innerWidth;
+    const originY = mouseY / window.innerHeight;
+    const origin = { x: originX, y: originY };
+    createConfetti({ ...defaults2, particleCount: 50, scalar: 2, origin });
+    createConfetti({ ...defaults2, particleCount: 25, scalar: 3, origin });
+    createConfetti({ ...defaults2, particleCount: 10, scalar: 4, origin });
+    fire_specific(.25, { spread: 26, startVelocity: 55 }, origin);
+    fire_specific(.2, { spread: 60 }, origin);
+    fire_specific(.35, { spread: 100, decay: .91, scalar: .8 }, origin);
+    fire_specific(.1, { spread: 120, startVelocity: 25, decay: .92, scalar: 1.2 }, origin);
+    fire_specific(.1, { spread: 120, startVelocity: 45 }, origin);
+    function shoot_specific() {
+      createConfetti({ ...defaults, particleCount: 40, scalar: 1.2, origin });
+      createConfetti({ ...defaults, particleCount: 10, scalar: .75, origin });
+    }
+    function show_specific() {
+      setTimeout(shoot_specific, 0);
+      setTimeout(shoot_specific, 100);
+      setTimeout(shoot_specific, 200);
+    }
+    setTimeout(show_specific, 500);
+  }
   paypal.Buttons({
     style: {
       shape: 'rect',
@@ -13,21 +62,42 @@
       label: 'paypal'
     },
     createSubscription: function (data, actions) {
-      return actions.subscription.create({ /* Creates the subscription */
+      return actions.subscription.create({
         plan_id: 'P-6B898830LY4944547MZBTOXQ'
       });
     },
     onApprove: function (data, actions) {
-      // bruh ??!
+      // premium ui elements:
+      document.querySelector('.component-frame').style.pointerEvents = 'none';
+      document.querySelector('.component-frame').style.filter = 'opacity(0.5) brightness(0.5) blur(2px)';
+      document.getElementById('user-name').classList.add('premium-glow');
+      const newPremiumPic = document.createElement('div');
+      newPremiumPic.classList.add('premium-pic');
+      let confettiDebouncer;
+      newPremiumPic.addEventListener('click', function (event) {
+        if (!confettiDebouncer) {
+          confettiDebouncer = setTimeout(function () {
+            confettiDebouncer = undefined;
+          }, 1000);
+          confetti_show(event); // on mouse click
+        }
+        newPremiumPic.style.transform = newPremiumPic.style.transform == '' ? 'rotate(360deg)' : '';
+      });
+      document.getElementById('user-pic').parentElement.append(newPremiumPic);
+      document.querySelector('.user-info').classList.add('user-info-premium');
+      // minified confetti: (center sreen)
+      const defaults = { spread: 360, ticks: 50, gravity: 0, decay: .94, startVelocity: 30, shapes: ["star", "circle", "heart", "square", "triangle", "diamond"], colors: ["FFE400", "FFBD00", "E89400", "FFCA6C", "FDFFB8"] };
+      function shoot() { confetti({ ...defaults, particleCount: 40, scalar: 1.2 }), confetti({ ...defaults, particleCount: 10, scalar: .75 }) } 
+      function show() { setTimeout(shoot, 0), setTimeout(shoot, 100), setTimeout(shoot, 200) } const defaults2 = { spread: 360, ticks: 100, gravity: 0, decay: .94, startVelocity: 30, shapes: ["heart"], colors: ["FFC0CB", "FF69B4", "FF1493", "C71585"] }; confetti({ ...defaults2, particleCount: 50, scalar: 2 }), confetti({ ...defaults2, particleCount: 25, scalar: 3 }), confetti({ ...defaults2, particleCount: 10, scalar: 4 }); const count = 200, defaults3 = { origin: { y: .7 } }; 
+      function fire(a, t) { confetti(Object.assign({}, defaults3, t, { particleCount: Math.floor(200 * a) })) }
+      fire(.25, { spread: 26, startVelocity: 55 }), fire(.2, { spread: 60 }), fire(.35, { spread: 100, decay: .91, scalar: .8 }), fire(.1, { spread: 120, startVelocity: 25, decay: .92, scalar: 1.2 }), fire(.1, { spread: 120, startVelocity: 45 }), setTimeout(show, 500);
       // console.log("data", data)
       // console.log("actions", actions)
-      // alert("THANK YOU FOR BUYING!!!\n" + data.subscriptionID); // eg. I-9W9PY3.... You can add optional success message for the subscriber here
-      // return actions.order.capture().then(function (details) {
+      // data.subscriptionID
+      // return actions.order.capture().then( function (details) {
       //   console.log("details", details)
       //   alert(details.payer.name.given_name)
       // })
-      // just enjoy some confetti hahahaha
-      const defaults={spread:360,ticks:50,gravity:0,decay:.94,startVelocity:30,shapes:["star","circle","heart","square","triangle","diamond"],colors:["FFE400","FFBD00","E89400","FFCA6C","FDFFB8"]};function shoot(){confetti({...defaults,particleCount:40,scalar:1.2}),confetti({...defaults,particleCount:10,scalar:.75})}function show(){setTimeout(shoot,0),setTimeout(shoot,100),setTimeout(shoot,200)}const defaults2={spread:360,ticks:100,gravity:0,decay:.94,startVelocity:30,shapes:["heart"],colors:["FFC0CB","FF69B4","FF1493","C71585"]};confetti({...defaults2,particleCount:50,scalar:2}),confetti({...defaults2,particleCount:25,scalar:3}),confetti({...defaults2,particleCount:10,scalar:4});const count=200,defaults3={origin:{y:.7}};function fire(a,t){confetti(Object.assign({},defaults3,t,{particleCount:Math.floor(200*a)}))}fire(.25,{spread:26,startVelocity:55}),fire(.2,{spread:60}),fire(.35,{spread:100,decay:.91,scalar:.8}),fire(.1,{spread:120,startVelocity:25,decay:.92,scalar:1.2}),fire(.1,{spread:120,startVelocity:45}),setTimeout(show,500);
     }
   }).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ'); // Renders the PayPal button
 </script>
