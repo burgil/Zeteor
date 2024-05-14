@@ -88,6 +88,13 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
     try {
         const token = await getToken();
         if (!token) return res.status(401).send('Paypal is not configured!');
+        const authAlgo = req.headers["paypal-auth-algo"];
+        const certUrl = req.headers["paypal-cert-url"];
+        const transmissionId = req.headers["paypal-transmission-id"];
+        const transmissionSig = req.headers["paypal-transmission-sig"];
+        const transmissionTime = req.headers["paypal-transmission-time"];
+        const webhookEvent = req.body;
+        const verificationStatus = await verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
         const insertPayment = await generateInsertStatement('payments', ['logs', {
             body: req.body,
             time: Date.now(),
@@ -97,17 +104,11 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
             method: req.method,
             cookies: req.cookies,
             fingerprint: req.fingerprint,
-            ip: req.clientIp
+            ip: req.clientIp,
+            verificationStatus
         }])
         await sql(insertPayment.sql, insertPayment.values);
-        const authAlgo = req.headers["paypal-auth-algo"];
-        const certUrl = req.headers["paypal-cert-url"];
-        const transmissionId = req.headers["paypal-transmission-id"];
-        const transmissionSig = req.headers["paypal-transmission-sig"];
-        const transmissionTime = req.headers["paypal-transmission-time"];
-        const webhookEvent = req.body;
-        const verificationStatus = await verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
-        res.write(typeof verificationStatus == 'string' ? verificationStatus : JSON.stringify(verificationStatus));
+        res.write('200');
         res.end();
     } catch (e) {
         req.status(500).send('processPaypalWebhooks Error: ' + e.message);
