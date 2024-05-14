@@ -80,7 +80,7 @@ async function verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissi
         return verificationStatus;
     } catch (error) {
         console.error('Error:', error.message);
-        return false;
+        return error.message;
     }
 }
 
