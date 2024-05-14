@@ -907,6 +907,43 @@ main {
   transition: transform .16s ease;
 }
 
+@media (min-width: 1900px) {
+  .premium-pic {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (min-width: 2184px) {
+  .premium-pic {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+@media (max-width: 1500px) {
+  .premium-pic {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+
+@media (max-width: 530px) {
+  .premium-pic {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+
+@media (max-width: 350px) {
+  .premium-pic {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .user-info-premium {
   position: relative;
   filter: drop-shadow(0px 0px 7px rgba(255, 215, 0, 0.3));
