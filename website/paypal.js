@@ -107,8 +107,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
         const transmissionTime = req.headers["paypal-transmission-time"];
         const webhookEvent = req.body;
         const verificationStatus = await verifyPaypal(token, authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
-        console.log('Verification Status:', verificationStatus);
-        res.write('200');
+        res.write(typeof verificationStatus == 'string' ? verificationStatus : JSON.stringify(verificationStatus));
         res.end();
     } catch (e) {
         req.status(500).send('processPaypalWebhooks Error: ' + e.message);

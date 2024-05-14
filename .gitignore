@@ -1,4 +1,8 @@
 secret
+clientID
+paypalWebhookId
+paypalClientSecret
+paypalClientId
 ssl/*.pem
 ssl/*.ca
 ssl/*.cert
