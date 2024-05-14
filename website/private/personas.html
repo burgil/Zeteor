@@ -1,6 +1,6 @@
 <h1>Hello World! Do not buy yet lol</h1>
 
-<div id="paypal-button-container-P-5Y335465PV9368620MZBEGIQ"></div>
+<!-- <div id="paypal-button-container-P-5Y335465PV9368620MZBEGIQ"></div>
 <script src="https://www.paypal.com/sdk/js?client-id=AQziaZ_iUI1ZkHq8-CbqDxy1C9MSkcKygVpIUCf53tKMpPlgysTliRG_UiRlWQH08SGqCaa4hSwRc_O-&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 <script>
   paypal.Buttons({
@@ -20,4 +20,26 @@
         alert(data.subscriptionID); // You can add optional success message for the subscriber here
       }
   }).render('#paypal-button-container-P-5Y335465PV9368620MZBEGIQ'); // Renders the PayPal button
+</script> -->
+
+<div id="paypal-button-container-P-6B898830LY4944547MZBTOXQ"></div>
+<script src="https://www.paypal.com/sdk/js?client-id=AXAOwFiT0KqDxyHZW4qwrbfKY1Xu_fbgWVJ7UYtD2crWRMTikGIdMTVxe6JPL6pjtUlwO4q8Z50RS4qj&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+<script>
+  paypal.Buttons({
+      style: {
+          shape: 'rect',
+          color: 'gold',
+          layout: 'vertical',
+          label: 'paypal'
+      },
+      createSubscription: function(data, actions) {
+        return actions.subscription.create({
+          /* Creates the subscription */
+          plan_id: 'P-6B898830LY4944547MZBTOXQ'
+        });
+      },
+      onApprove: function(data, actions) {
+        alert(data.subscriptionID); // You can add optional success message for the subscriber here
+      }
+  }).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ'); // Renders the PayPal button
 </script>

@@ -10,6 +10,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const { example_db, db_save } = require('./db.js');
 const { addQueue } = require('./queue.js');
 const { setupRoutes } = require('./routes.js');
+const paypalRoutes = require('./paypal.js');
 const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
 let client_id;
@@ -68,6 +69,13 @@ app.use(Fingerprint({
 }))
 //
 setupRoutes(app);
+for (const paypalRoute of paypalRoutes) {
+    if (paypalRoute.method == 'GET') {
+        app.get(paypalRoute.route, paypalRoute.func);
+    } else if (paypalRoute.method == 'POST') {
+        app.post(paypalRoute.route, paypalRoute.func);
+    }
+}
 app.get('/invite', (req, res) => {
     res.redirect('https://discord.com/oauth2/authorize?client_id=1186414586996478044&permissions=8&scope=bot%20applications.commands');
 });

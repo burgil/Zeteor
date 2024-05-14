@@ -91,6 +91,18 @@ const tables = {
             sql_type: 'VARCHAR(50)',
         },
     ],
+    'payments': [
+        {
+            column_name: 'type',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
+            column_name: 'data',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+    ]
 };
 
 /*
