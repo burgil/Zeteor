@@ -57,6 +57,10 @@ paypal.Buttons({
         confetti_show();
     },
     createSubscription: function (data, actions) {
+        if (!invoiceID) {
+            notify('Please wait for the interface to load...', 'warning', 3000);
+            return;
+        }
         // console.log("data", data)
         // console.log("actions", actions)
         // if (updatedSubscription && (status === "ACTIVE" || status === "SUSPENDED")) {
