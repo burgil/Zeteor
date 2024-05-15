@@ -312,6 +312,8 @@ app.get('/get-user', async (req, res) => {
                 output.premium = isPremium;
                 usersCache[req.cookies.auth_token].premium = isPremium;
                 usersCache[req.cookies.auth_token].premium_last_check = Date.now();
+            } else {
+                output.premium = usersCache[req.cookies.auth_token].premium;
             }
             res.send(JSON.stringify(output));
             return;
