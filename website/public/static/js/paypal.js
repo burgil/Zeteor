@@ -40,6 +40,7 @@ function purchaseValidator() {
 }
 const checkPremium = localStorage.getItem('subscriptionID');
 if (checkPremium) purchaseValidator();
+let paypalButton;
 paypal.Buttons({
     style: {
         shape: 'rect',
@@ -48,19 +49,31 @@ paypal.Buttons({
         label: 'paypal'
     },
     onError: function (err) {
-        // FIXME: show the user an error message
+        if (err.message == 'Window is closed, can not determine type' || err.message == 'Detected popup close') return;
         notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
         console.error(err);
     },
-    onClick: function (data) {
-        // FIXME: do something cool when the button is clicked
-        confetti_show();
+    onCancel: function(data) {
+        console.log("cancel", data)
+    },
+    onInit: function(data, actions) {
+        paypalButton = actions;
+        // paypalButton.disable();
+    },
+    onClick: function (data, thePromise) {
+        if (!invoiceID) {
+            paypalButton.disable();
+            thePromise.reject();
+            notify('Please wait for the interface to load...', 'warning', 3000);
+            paypalButton.enable();
+            return false;
+        } else {
+            confetti_show();
+            paypalButton.enable();
+            thePromise.resolve();
+        }
     },
     createSubscription: function (data, actions) {
-        if (!invoiceID) {
-            notify('Please wait for the interface to load...', 'warning', 3000);
-            return;
-        }
         // console.log("data", data)
         // console.log("actions", actions)
         // if (updatedSubscription && (status === "ACTIVE" || status === "SUSPENDED")) {
@@ -69,6 +82,7 @@ paypal.Buttons({
         //         plan_id: 'P-6B898830LY4944547MZBTOXQ'
         //     });
         // }
+        console.log(actions.subscription.create)
         return actions.subscription.create({
             custom_id: invoiceID,
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
@@ -106,4 +120,4 @@ paypal.Buttons({
             notify('Error: ' + e.message + ' please contact support!', 'error', 30000)
         }
     }
-}).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ'); // Renders the PayPal button
+}).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ');
