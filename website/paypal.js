@@ -108,226 +108,222 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
         const verificationStatus = await verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
         if (verificationStatus.verification_status == 'SUCCESS') {
             res.status(200).send('ok');
-            let paymentStatus = false;
-            switch (body.event_type) {
-                // Payments V2
-                case 'PAYMENT.AUTHORIZATION.CREATED': // A payment authorization is created, approved, executed, or a future payment authorization is created.
-                    break;
-                case 'PAYMENT.AUTHORIZATION.VOIDED': // A payment authorization is voided either due to authorization reaching it’s 30 day validity period or authorization was manually voided using the Void Authorized Payment API.
-                    break;
-                case 'PAYMENT.CAPTURE.DECLINED': // A payment capture is declined.
-                    paymentStatus = 'reject';
-                    break;
-                case 'PAYMENT.CAPTURE.COMPLETED': // A payment capture completes.
-                    break;
-                case 'PAYMENT.CAPTURE.PENDING': // The state of a payment capture changes to pending.
-                    break;
-                case 'PAYMENT.CAPTURE.REFUNDED': // A merchant refunds a payment capture.
-                    paymentStatus = 'reject';
-                    break;
-                case 'PAYMENT.CAPTURE.REVERSED': // PayPal reverses a payment capture.
-                    break;
-                // Payments V1
-                case 'PAYMENT.CAPTURE.DENIED': // A payment capture is denied.
-                    paymentStatus = 'reject';
-                    break;
-                // Batch payouts
-                case 'PAYMENT.PAYOUTSBATCH.DENIED': // A batch payout payment is denied.
-                    break;
-                case 'PAYMENT.PAYOUTSBATCH.PROCESSING': // The state of a batch payout payment changes to processing.
-                    break;
-                case 'PAYMENT.PAYOUTSBATCH.SUCCESS': // A batch payout payment completes successfully.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.BLOCKED': // A payouts item is blocked.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.CANCELED': // A payouts item is canceled.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.DENIED': // A payouts item is denied.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.FAILED': // 	A payouts item fails.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.HELD': // A payouts item is held.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.REFUNDED': // A payouts item is refunded.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.RETURNED': // A payouts item is returned.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.SUCCEEDED': // A payouts item succeeds.
-                    break;
-                case 'PAYMENT.PAYOUTS-ITEM.UNCLAIMED': // A payouts item is unclaimed.
-                    break;
-                // Billing plans and agreements
-                case 'BILLING.PLAN.CREATED': // A billing plan is created.
-                    break;
-                case 'BILLING.PLAN.UPDATED': // A billing plan is updated.
-                    break;
-                case 'BILLING.SUBSCRIPTION.CANCELLED': // A billing agreement is canceled.
-                    paymentStatus = 'cancel';
-                    break;
-                case 'BILLING.SUBSCRIPTION.CREATED': // A billing agreement is created.
-                    break;
-                case 'BILLING.SUBSCRIPTION.RE-ACTIVATED': // A billing agreement is re-activated.
-                    break;
-                case 'BILLING.SUBSCRIPTION.SUSPENDED': // A billing agreement is suspended.
-                    paymentStatus = 'reject';
-                    break;
-                case 'BILLING.SUBSCRIPTION.UPDATED': // A billing agreement is updated.
-                    break;
-                // Log in with PayPal
-                case 'IDENTITY.AUTHORIZATION-CONSENT.REVOKED': // A user's consent token is revoked.
-                    break;
-                // Checkout buyer approval
-                case 'PAYMENTS.PAYMENT.CREATED': // Checkout payment is created and approved by buyer.
-                    break;
-                case 'CHECKOUT.ORDER.APPROVED': // A buyer approved a checkout order
-                    break;
-                case 'CHECKOUT.CHECKOUT.BUYER-APPROVED': // Express checkout payment is created and approved by buyer.
-                    break;
-                // Disputes
-                case 'CUSTOMER.DISPUTE.CREATED': // A dispute is created.
-                    break;
-                case 'CUSTOMER.DISPUTE.RESOLVED': // A dispute is resolved.
-                    break;
-                case 'CUSTOMER.DISPUTE.UPDATED': // A dispute is updated.
-                    break;
-                case 'RISK.DISPUTE.CREATED': // A risk dispute is created.
-                    break;
-                // Invoicing
-                case 'INVOICING.INVOICE.CANCELLED': // A merchant or customer cancels an invoice.
-                    break;
-                case 'INVOICING.INVOICE.CREATED': // An invoice is created.
-                    break;
-                case 'INVOICING.INVOICE.PAID': // An invoice is paid, partially paid, or payment is made and is pending.
-                    break;
-                case 'INVOICING.INVOICE.REFUNDED': // An invoice is refunded or partially refunded.
-                    break;
-                case 'INVOICING.INVOICE.SCHEDULED': // An invoice is scheduled.
-                    break;
-                case 'INVOICING.INVOICE.UPDATED': // An invoice is updated.
-                    break;
-                // Marketplaces and Platforms
-                case 'CHECKOUT.ORDER.COMPLETED': // A checkout order is processed. Note: For use by marketplaces and platforms only.
-                    break;
-                case 'CHECKOUT.ORDER.PROCESSED': // A checkout order is processed.
-                    break;
-                case 'CUSTOMER.ACCOUNT-LIMITATION.ADDED': // A limitation is added for a partner's managed account.
-                    break;
-                case 'CUSTOMER.ACCOUNT-LIMITATION.ESCALATED': // A limitation is escalated for a partner's managed account.
-                    break;
-                case 'CUSTOMER.ACCOUNT-LIMITATION.LIFTED': // A limitation is lifted for a partner's managed account.
-                    break;
-                case 'CUSTOMER.ACCOUNT-LIMITATION.UPDATED': // A limitation is updated for a partner's managed account.
-                    break;
-                case 'CUSTOMER.MERCHANT-INTEGRATION.CAPABILITY-UPDATED': // PayPal must enable the merchant's account as PPCP for this webhook to work.
-                    break;
-                case 'CUSTOMER.MERCHANT-INTEGRATION.PRODUCT-SUBSCRIPTION-UPDATED': // The products available to the merchant have changed.
-                    break;
-                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-ALREADY-INTEGRATED': // Merchant onboards again to a partner.
-                    break;
-                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-ONBOARDING-INITIATED': // PayPal creates a merchant account from the partner's onboarding link.
-                    break;
-                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-CONSENT-GRANTED': // Merchant grants consents to a partner.
-                    break;
-                case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-EMAIL-CONFIRMED': // Merchant confirms the email and consents are granted.
-                    break;
-                case 'MERCHANT.ONBOARDING.COMPLETED': // Merchant completes setup.
-                    break;
-                case 'MERCHANT.PARTNER-CONSENT.REVOKED': // The consents for a merchant account setup are revoked or an account is closed.
-                    break;
-                case 'PAYMENT.REFERENCED-PAYOUT-ITEM.COMPLETED': // Funds are disbursed to the seller and partner.
-                    break;
-                case 'PAYMENT.REFERENCED-PAYOUT-ITEM.FAILED': // Attempt to disburse funds fails.
-                    break;
-                // Merchant onboarding
-                case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-CREATED': // Managed account has been created.
-                    break;
-                case 'CUSTOMER.MANAGED-ACCOUNT.CREATION-FAILED': // Managed account creation failed.
-                    break;
-                case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-UPDATED': // Managed account has been updated.
-                    break;
-                case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-STATUS-CHANGED': // Capabilities and/or process status has been changed on a managed account.
-                    break;
-                case 'CUSTOMER.MANAGED-ACCOUNT.RISK-ASSESSED': // Managed account has been risk assessed or the risk assessment has been changed.
-                    break;
-                case 'CUSTOMER.MANAGED-ACCOUNT.NEGATIVE-BALANCE-NOTIFIED': // Negative balance debit has been notified on a managed account.
-                    break;
-                case 'CUSTOMER.MANAGED-ACCOUNT.NEGATIVE-BALANCE-DEBIT-INITIATED': // Negative balance debit has been initiated on a managed account.
-                    break;
-                // Orders V2
-                case 'CHECKOUT.PAYMENT-APPROVAL.REVERSED': // A problem occurred after the buyer approved the order but before you captured the payment. Refer to Handle uncaptured payments for what to do when this event occurs.
-                    break;
-                // Payment orders
-                case 'PAYMENT.ORDER.CANCELLED': // A payment order is canceled.
-                    paymentStatus = 'reject';
-                    break;
-                case 'PAYMENT.ORDER.CREATED': // A payment order is created.
-                    break;
-                // Sales
-                case 'PAYMENT.SALE.DENIED': // The state of a sale changes from pending to denied.
-                    paymentStatus = 'reject';
-                    break;
-                case 'PAYMENT.SALE.PENDING': // The state of a sale changes to pending.
-                    break;
-                // Subscriptions & Sales
-                case 'PAYMENT.SALE.REFUNDED': // A merchant refunds a sale.
-                    paymentStatus = 'reject';
-                    break;
-                case 'PAYMENT.SALE.COMPLETED': // A sale completes.
-                    paymentStatus = 'confirm';
-                    break;
-                case 'PAYMENT.SALE.REVERSED': // PayPal reverses a sale.
-                    break;
-                // Subscriptions
-                case 'CATALOG.PRODUCT.CREATED': // A product is created.
-                    break;
-                case 'CATALOG.PRODUCT.UPDATED': // A product is updated.
-                    break;
-                case 'BILLING.PLAN.ACTIVATED': // A billing plan is activated.
-                    break;
-                case 'BILLING.PLAN.PRICING-CHANGE.ACTIVATED': // A price change for the plan is activated.
-                    break;
-                case 'BILLING.PLAN.DEACTIVATED': // A billing plan is deactivated.
-                    break;
-                case 'BILLING.SUBSCRIPTION.ACTIVATED': // A subscription is activated.
-                    break;
-                case 'BILLING.SUBSCRIPTION.EXPIRED': // A subscription expires.
-                    break;
-                case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED': // 	Payment failed on subscription.
-                    break;
-                // Vault
-                case 'VAULT.CREDIT-CARD.CREATED': // A credit card is created.
-                    break;
-                case 'VAULT.CREDIT-CARD.DELETED': // A credit card is deleted.
-                    break;
-                case 'VAULT.CREDIT-CARD.UPDATED': // A credit card is updated.
-                    break;
-            }
-            // body: req.body,
-            // time: Date.now(),
-            // timestamp: new Date().toLocaleString(),
-            // headers: req.headers,
-            // url: req.url,
-            // method: req.method,
-            // cookies: req.cookies,
-            // fingerprint: req.fingerprint,
-            // ip: req.clientIp,
-            /*
-            paymentStatus:
-            reject - somehow got rejected
-            cancel - user manually cancelled
-            confirm - user purchased successfully
-            !false = do nothing - log?
-            */
-            if (req.body.resource?.id &&
-                req.body.event_type &&
-                req.body.summary &&
-                req.body.create_time &&
-                req.body.resource?.amount?.total &&
-                req.body.resource?.amount?.currency) {
+            try {
+                let paymentStatus = false;
+                switch (body.event_type) {
+                    // Payments V2
+                    case 'PAYMENT.AUTHORIZATION.CREATED': // A payment authorization is created, approved, executed, or a future payment authorization is created.
+                        break;
+                    case 'PAYMENT.AUTHORIZATION.VOIDED': // A payment authorization is voided either due to authorization reaching it’s 30 day validity period or authorization was manually voided using the Void Authorized Payment API.
+                        break;
+                    case 'PAYMENT.CAPTURE.DECLINED': // A payment capture is declined.
+                        paymentStatus = 'reject';
+                        break;
+                    case 'PAYMENT.CAPTURE.COMPLETED': // A payment capture completes.
+                        break;
+                    case 'PAYMENT.CAPTURE.PENDING': // The state of a payment capture changes to pending.
+                        break;
+                    case 'PAYMENT.CAPTURE.REFUNDED': // A merchant refunds a payment capture.
+                        paymentStatus = 'reject';
+                        break;
+                    case 'PAYMENT.CAPTURE.REVERSED': // PayPal reverses a payment capture.
+                        break;
+                    // Payments V1
+                    case 'PAYMENT.CAPTURE.DENIED': // A payment capture is denied.
+                        paymentStatus = 'reject';
+                        break;
+                    // Batch payouts
+                    case 'PAYMENT.PAYOUTSBATCH.DENIED': // A batch payout payment is denied.
+                        break;
+                    case 'PAYMENT.PAYOUTSBATCH.PROCESSING': // The state of a batch payout payment changes to processing.
+                        break;
+                    case 'PAYMENT.PAYOUTSBATCH.SUCCESS': // A batch payout payment completes successfully.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.BLOCKED': // A payouts item is blocked.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.CANCELED': // A payouts item is canceled.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.DENIED': // A payouts item is denied.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.FAILED': // 	A payouts item fails.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.HELD': // A payouts item is held.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.REFUNDED': // A payouts item is refunded.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.RETURNED': // A payouts item is returned.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.SUCCEEDED': // A payouts item succeeds.
+                        break;
+                    case 'PAYMENT.PAYOUTS-ITEM.UNCLAIMED': // A payouts item is unclaimed.
+                        break;
+                    // Billing plans and agreements
+                    case 'BILLING.PLAN.CREATED': // A billing plan is created.
+                        break;
+                    case 'BILLING.PLAN.UPDATED': // A billing plan is updated.
+                        break;
+                    case 'BILLING.SUBSCRIPTION.CANCELLED': // A billing agreement is canceled.
+                        paymentStatus = 'cancel';
+                        break;
+                    case 'BILLING.SUBSCRIPTION.CREATED': // A billing agreement is created.
+                        break;
+                    case 'BILLING.SUBSCRIPTION.RE-ACTIVATED': // A billing agreement is re-activated.
+                        break;
+                    case 'BILLING.SUBSCRIPTION.SUSPENDED': // A billing agreement is suspended.
+                        paymentStatus = 'reject';
+                        break;
+                    case 'BILLING.SUBSCRIPTION.UPDATED': // A billing agreement is updated.
+                        break;
+                    // Log in with PayPal
+                    case 'IDENTITY.AUTHORIZATION-CONSENT.REVOKED': // A user's consent token is revoked.
+                        break;
+                    // Checkout buyer approval
+                    case 'PAYMENTS.PAYMENT.CREATED': // Checkout payment is created and approved by buyer.
+                        break;
+                    case 'CHECKOUT.ORDER.APPROVED': // A buyer approved a checkout order
+                        break;
+                    case 'CHECKOUT.CHECKOUT.BUYER-APPROVED': // Express checkout payment is created and approved by buyer.
+                        break;
+                    // Disputes
+                    case 'CUSTOMER.DISPUTE.CREATED': // A dispute is created.
+                        break;
+                    case 'CUSTOMER.DISPUTE.RESOLVED': // A dispute is resolved.
+                        break;
+                    case 'CUSTOMER.DISPUTE.UPDATED': // A dispute is updated.
+                        break;
+                    case 'RISK.DISPUTE.CREATED': // A risk dispute is created.
+                        break;
+                    // Invoicing
+                    case 'INVOICING.INVOICE.CANCELLED': // A merchant or customer cancels an invoice.
+                        break;
+                    case 'INVOICING.INVOICE.CREATED': // An invoice is created.
+                        break;
+                    case 'INVOICING.INVOICE.PAID': // An invoice is paid, partially paid, or payment is made and is pending.
+                        break;
+                    case 'INVOICING.INVOICE.REFUNDED': // An invoice is refunded or partially refunded.
+                        break;
+                    case 'INVOICING.INVOICE.SCHEDULED': // An invoice is scheduled.
+                        break;
+                    case 'INVOICING.INVOICE.UPDATED': // An invoice is updated.
+                        break;
+                    // Marketplaces and Platforms
+                    case 'CHECKOUT.ORDER.COMPLETED': // A checkout order is processed. Note: For use by marketplaces and platforms only.
+                        break;
+                    case 'CHECKOUT.ORDER.PROCESSED': // A checkout order is processed.
+                        break;
+                    case 'CUSTOMER.ACCOUNT-LIMITATION.ADDED': // A limitation is added for a partner's managed account.
+                        break;
+                    case 'CUSTOMER.ACCOUNT-LIMITATION.ESCALATED': // A limitation is escalated for a partner's managed account.
+                        break;
+                    case 'CUSTOMER.ACCOUNT-LIMITATION.LIFTED': // A limitation is lifted for a partner's managed account.
+                        break;
+                    case 'CUSTOMER.ACCOUNT-LIMITATION.UPDATED': // A limitation is updated for a partner's managed account.
+                        break;
+                    case 'CUSTOMER.MERCHANT-INTEGRATION.CAPABILITY-UPDATED': // PayPal must enable the merchant's account as PPCP for this webhook to work.
+                        break;
+                    case 'CUSTOMER.MERCHANT-INTEGRATION.PRODUCT-SUBSCRIPTION-UPDATED': // The products available to the merchant have changed.
+                        break;
+                    case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-ALREADY-INTEGRATED': // Merchant onboards again to a partner.
+                        break;
+                    case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-ONBOARDING-INITIATED': // PayPal creates a merchant account from the partner's onboarding link.
+                        break;
+                    case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-CONSENT-GRANTED': // Merchant grants consents to a partner.
+                        break;
+                    case 'CUSTOMER.MERCHANT-INTEGRATION.SELLER-EMAIL-CONFIRMED': // Merchant confirms the email and consents are granted.
+                        break;
+                    case 'MERCHANT.ONBOARDING.COMPLETED': // Merchant completes setup.
+                        break;
+                    case 'MERCHANT.PARTNER-CONSENT.REVOKED': // The consents for a merchant account setup are revoked or an account is closed.
+                        break;
+                    case 'PAYMENT.REFERENCED-PAYOUT-ITEM.COMPLETED': // Funds are disbursed to the seller and partner.
+                        break;
+                    case 'PAYMENT.REFERENCED-PAYOUT-ITEM.FAILED': // Attempt to disburse funds fails.
+                        break;
+                    // Merchant onboarding
+                    case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-CREATED': // Managed account has been created.
+                        break;
+                    case 'CUSTOMER.MANAGED-ACCOUNT.CREATION-FAILED': // Managed account creation failed.
+                        break;
+                    case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-UPDATED': // Managed account has been updated.
+                        break;
+                    case 'CUSTOMER.MANAGED-ACCOUNT.ACCOUNT-STATUS-CHANGED': // Capabilities and/or process status has been changed on a managed account.
+                        break;
+                    case 'CUSTOMER.MANAGED-ACCOUNT.RISK-ASSESSED': // Managed account has been risk assessed or the risk assessment has been changed.
+                        break;
+                    case 'CUSTOMER.MANAGED-ACCOUNT.NEGATIVE-BALANCE-NOTIFIED': // Negative balance debit has been notified on a managed account.
+                        break;
+                    case 'CUSTOMER.MANAGED-ACCOUNT.NEGATIVE-BALANCE-DEBIT-INITIATED': // Negative balance debit has been initiated on a managed account.
+                        break;
+                    // Orders V2
+                    case 'CHECKOUT.PAYMENT-APPROVAL.REVERSED': // A problem occurred after the buyer approved the order but before you captured the payment. Refer to Handle uncaptured payments for what to do when this event occurs.
+                        break;
+                    // Payment orders
+                    case 'PAYMENT.ORDER.CANCELLED': // A payment order is canceled.
+                        paymentStatus = 'reject';
+                        break;
+                    case 'PAYMENT.ORDER.CREATED': // A payment order is created.
+                        break;
+                    // Sales
+                    case 'PAYMENT.SALE.DENIED': // The state of a sale changes from pending to denied.
+                        paymentStatus = 'reject';
+                        break;
+                    case 'PAYMENT.SALE.PENDING': // The state of a sale changes to pending.
+                        break;
+                    // Subscriptions & Sales
+                    case 'PAYMENT.SALE.REFUNDED': // A merchant refunds a sale.
+                        paymentStatus = 'reject';
+                        break;
+                    case 'PAYMENT.SALE.COMPLETED': // A sale completes.
+                        paymentStatus = 'confirm';
+                        break;
+                    case 'PAYMENT.SALE.REVERSED': // PayPal reverses a sale.
+                        break;
+                    // Subscriptions
+                    case 'CATALOG.PRODUCT.CREATED': // A product is created.
+                        break;
+                    case 'CATALOG.PRODUCT.UPDATED': // A product is updated.
+                        break;
+                    case 'BILLING.PLAN.ACTIVATED': // A billing plan is activated.
+                        break;
+                    case 'BILLING.PLAN.PRICING-CHANGE.ACTIVATED': // A price change for the plan is activated.
+                        break;
+                    case 'BILLING.PLAN.DEACTIVATED': // A billing plan is deactivated.
+                        break;
+                    case 'BILLING.SUBSCRIPTION.ACTIVATED': // A subscription is activated.
+                        break;
+                    case 'BILLING.SUBSCRIPTION.EXPIRED': // A subscription expires.
+                        break;
+                    case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED': // 	Payment failed on subscription.
+                        break;
+                    // Vault
+                    case 'VAULT.CREDIT-CARD.CREATED': // A credit card is created.
+                        break;
+                    case 'VAULT.CREDIT-CARD.DELETED': // A credit card is deleted.
+                        break;
+                    case 'VAULT.CREDIT-CARD.UPDATED': // A credit card is updated.
+                        break;
+                }
+                // body: req.body,
+                // time: Date.now(),
+                // timestamp: new Date().toLocaleString(),
+                // headers: req.headers,
+                // url: req.url,
+                // method: req.method,
+                // cookies: req.cookies,
+                // fingerprint: req.fingerprint,
+                // ip: req.clientIp,
+                /*
+                paymentStatus:
+                reject - somehow got rejected
+                cancel - user manually cancelled
+                confirm - user purchased successfully
+                !false = do nothing - log?
+                */
+                if (req.body.resource?.id && req.body.event_type && req.body.summary && req.body.create_time && req.body.resource?.amount?.total && req.body.resource?.amount?.currency) {
                     if (paymentStatus == 'reject') {
-        
+
                     } else if (paymentStatus == 'cancel') {
-        
+
                     } else if (paymentStatus == 'confirm') { // PAYMENT.SALE.COMPLETED
                         const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
                             req.body.resource.billing_agreement_id
@@ -346,6 +342,9 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                         ])
                         await sql(insertPayment.sql, insertPayment.values);
                     }
+                }
+            } catch (e2) {
+                console.error('processPaypalWebhooks Sub Error: ' + e2.message);
             }
         } else {
             res.status(401).send('bad');
