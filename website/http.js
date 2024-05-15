@@ -392,8 +392,9 @@ app.get('/get-user', async (req, res) => {
                             } else {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
                             }
+                            const randomHash = await sha256(user.data.id);
                             const output = { // sent to the client
-                                random: await sha256(user.data.id),
+                                random: randomHash,
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
@@ -401,6 +402,7 @@ app.get('/get-user', async (req, res) => {
                                 guilds: adminGuilds,
                             };
                             usersCache[req.cookies.auth_token] = { // saves in the server
+                                random: randomHash,
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,

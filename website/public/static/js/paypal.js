@@ -66,16 +66,14 @@ paypal.Buttons({
         });
     },
     createSubscription(data, actions) {
-        console.log("data", data)
-        console.log("actions", actions)
+        // console.log("data", data)
+        // console.log("actions", actions)
         // if (updatedSubscription && (status === "ACTIVE" || status === "SUSPENDED")) {
         //     // if subscription exists, revise it by chaning the plan id
-        //     console.log("revise")
         //     return actions.subscription.revise(subscriptionId, {
         //         plan_id: 'P-6B898830LY4944547MZBTOXQ'
         //     });
         // }
-        console.log("normal")
         return actions.subscription.create({
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
         });
