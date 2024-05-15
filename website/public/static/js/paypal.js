@@ -43,20 +43,26 @@ if (checkPremium) purchaseValidator();
 let paypalButton;
 paypal.Buttons({
     style: {
-        shape: 'rect',
-        color: 'gold',
-        layout: 'vertical',
-        label: 'paypal'
+        // shape: 'rect',
+        // color: 'gold',
+        // layout: 'vertical',
+        // label: 'paypal'
+        layout: 'horizontal',
+        size: 'small',
+        color:  'blue',
+        label:  'pay',
+        height: 55,
+        tagline: 'false'
     },
     onError: function (err) {
         if (err.message == 'Window is closed, can not determine type' || err.message == 'Detected popup close') return;
         notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
         console.error(err);
     },
-    onCancel: function(data) {
+    onCancel: function (data) {
         console.log("cancel", data)
     },
-    onInit: function(data, actions) {
+    onInit: function (data, actions) {
         paypalButton = actions;
         // paypalButton.disable();
     },
@@ -85,13 +91,44 @@ paypal.Buttons({
         return actions.subscription.create({
             purchase_units: [{
                 custom_id: invoiceID,
+                id: invoiceID,
+                reference_id: invoiceID,
+                user_id: invoiceID,
+                invoice: invoiceID,
+                InvoiceID: invoiceID,
+                INVNUM: invoiceID,
                 invoice_id: invoiceID,
             }],
-            application_context:  { 
-                shipping_preference: "NO_SHIPPING"
+            application_context: {
+                brand_name: 'Zeteor: Premium Subscription',
+                shipping_preference: "NO_SHIPPING",
+                return_url: "https://zeteor.roboticeva.com/personas",
+                cancel_url: "https://zeteor.roboticeva.com/personas",
             },
-            custom_id: invoiceID,
+            subscriber: {
+                name: {
+                    given_name: invoiceID
+                },
+                custom_id: invoiceID,
+                id: invoiceID,
+                reference_id: invoiceID,
+                user_id: invoiceID,
+                invoice: invoiceID,
+                InvoiceID: invoiceID,
+                INVNUM: invoiceID,
+                invoice_id: invoiceID,
+            },
+            // custom_id: invoiceID,
+            id: invoiceID,
+            reference_id: invoiceID,
+            user_id: invoiceID,
+            invoice: invoiceID,
+            InvoiceID: invoiceID,
+            INVNUM: invoiceID,
             invoice_id: invoiceID,
+            auto_renewal: true,
+            quantity: 1,
+            'custom_id': 'my-custom-code-for-integration',
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
         });
     },
