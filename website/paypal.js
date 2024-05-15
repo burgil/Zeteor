@@ -489,7 +489,7 @@ async function checkOrder(req, res) {
             userData.id,
         ])
         if (userDB.rows.length > 0) {
-            const subscriptionID = userDB.payment_id;
+            const subscriptionID = userDB.rows[0].payment_id;
             if (!subscriptionID || subscriptionID.trim() == '') {
                 res.send(JSON.stringify({
                     error: 'Invalid order id'
