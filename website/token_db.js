@@ -11,17 +11,35 @@ function db_save() {
 }
 function remove_expired() {
     const currentTime = Date.now();
+    console.log("removing expired...");
+    let didChange = false;
     for (const token in token_db) {
+        console.log("checking token:", token);
         const tokenData = token_db[token];
-        const expireTime = tokenData.data.expires_in || (7 * 24 * 60 * 60);
-        const expiresMS = expireTime * 1000;
-        const tokenExpiry = (tokenData.timestamp || 0) + expiresMS;
-        if (currentTime > tokenExpiry) {
-            // console.log("Token has expired, remove it from the database", token)
-            delete token_db[token];
+        console.log("checking tokenData:", tokenData);
+        if (tokenData) {
+            console.log("checking if token expired...")
+            const expireTime = tokenData.data.expires_in || (7 * 24 * 60 * 60);
+            const expiresMS = expireTime * 1000;
+            const tokenExpiry = (tokenData.timestamp || 0) + expiresMS;
+            if (currentTime > tokenExpiry) {
+                console.log("Token has expired, remove it from the database", token)
+                delete token_db[token];
+                didChange = true;
+            } else {
+                console.log("token is still valid..")
+            }
+        } else {
+            console.log("token data doesn't exist")
         }
     }
-    fs.writeFileSync('./token_db.json', JSON.stringify(token_db), 'utf8');
+    console.log("finished checking token db..")
+    if (didChange) {
+        console.log("saved tokens db");
+        fs.writeFileSync('./token_db.json', JSON.stringify(token_db), 'utf8');
+    } else {
+        console.log("didn't save");
+    }
 }
 function db_load() {
     try {
