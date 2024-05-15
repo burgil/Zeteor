@@ -57,15 +57,6 @@ paypal.Buttons({
         confetti_show();
     },
     createSubscription: function (data, actions) {
-        return actions.subscription.create({
-            purchase_units: [{
-                custom_id: invoiceID,
-                invoice_id: invoiceID,
-            }],
-            plan_id: 'P-6B898830LY4944547MZBTOXQ'
-        });
-    },
-    createSubscription(data, actions) {
         // console.log("data", data)
         // console.log("actions", actions)
         // if (updatedSubscription && (status === "ACTIVE" || status === "SUSPENDED")) {
@@ -75,6 +66,7 @@ paypal.Buttons({
         //     });
         // }
         return actions.subscription.create({
+            custom_id: invoiceID,
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
         });
     },
