@@ -34,9 +34,14 @@ try {
         fs.writeFileSync('./randomUUID', randomUUID, 'utf8');
     } catch (fileErr2) { }
 }
-async function sha256(str) {
-    return hex(await crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(str + randomUUID)));
-}
+async function sha256(message) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message + randomUUID);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  }
 const { v4: uuidv4 } = require('uuid');
 const app = express();
 const { isSecure } = require('./system.js');
