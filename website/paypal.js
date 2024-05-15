@@ -416,24 +416,100 @@ async function claimOrder(req, res) {
         const updateUserPayment = await generateUpdateStatement('users', userData.id, {
             payment_id: subscriptionID,
         });
-        const updatedUserPayment = await sql(updateUserPayment.sql, updateUserPayment.values)
-        console.warn('updatedUserPayment', updatedUserPayment.rows)
-        // find empty order with id
-        const paymentsDB = await sql(`SELECT * FROM payments WHERE discord_id = $1 AND id = $2;`, [
-            '',
-            subscriptionID
-        ])
-        console.warn('paymentsDB:', paymentsDB.rows)
-        if (paymentsDB.rows.length > 0) {
-            // found empty order with that id, fill user as the owner
-            const updatePayment = await generateUpdateStatement('payments', orderID, {
-                discord_id: userData.id,
-            }, 'id');
-            const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
-            console.warn('updatedPayment', updatedPayment.rows)
-            res.send('ok')
+        await sql(updateUserPayment.sql, updateUserPayment.values)
+        res.send(JSON.stringify({
+            ok: true
+        }))
+        // // find empty order with id
+        // const paymentsDB = await sql(`SELECT discord_id, id FROM payments WHERE discord_id = $1 AND id = $2;`, [
+        //     '',
+        //     subscriptionID
+        // ])
+        // console.warn('paymentsDB:', paymentsDB.rows)
+        // if (paymentsDB.rows.length > 0) {
+        //     // found empty order with that id, fill user as the owner
+        //     const updatePayment = await generateUpdateStatement('payments', orderID, {
+        //         discord_id: userData.id,
+        //     }, 'id');
+        //     const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
+        //     console.warn('updatedPayment', updatedPayment.rows)
+        //     res.send('ok')
+        // } else {
+        //     res.send('bad')
+        // }
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+}
+
+async function checkOrder(req, res) {
+    try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.send(JSON.stringify({
+                    error: 'Invalid Request'
+                }));
+                return;
+            }
         } else {
-            res.send('bad')
+            if (currentOrigin.host != 'localhost') {
+                res.send(JSON.stringify({
+                    error: 'Invalid Request'
+                }));
+                return;
+            }
+        }
+        if (!req.cookies.auth_token) {
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const userData = token_db[req.cookies.auth_token];
+        if (!userData) {
+            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const userDB = await sql(`SELECT payment_id FROM users WHERE discord_id = $1;`, [
+            userData.id,
+        ])
+        if (userDB.rows.length > 0) {
+            const subscriptionID = userDB.payment_id;
+            if (!subscriptionID || subscriptionID.trim() == '') {
+                res.send(JSON.stringify({
+                    error: 'Invalid order id'
+                }));
+                return;
+            }
+            // find empty order with id
+            const paymentsDB = await sql(`SELECT discord_id, id FROM payments WHERE discord_id = $1 AND id = $2;`, [
+                userData.id,
+                subscriptionID
+            ])
+            // console.warn('paymentsDB:', paymentsDB.rows)
+            if (paymentsDB.rows.length > 0) {
+                // found empty order with that id, fill user as the owner
+                // const updatePayment = await generateUpdateStatement('payments', orderID, {
+                //     discord_id: userData.id,
+                // }, 'id');
+                // const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
+                // console.warn('updatedPayment', updatedPayment.rows)
+                res.send(JSON.stringify({
+                    ok: true
+                }))
+            } else {
+                res.send(JSON.stringify({
+                    recheck: true
+                }))
+            }
+        } else {
+            res.send(JSON.stringify({
+                error: 'Invalid payment id'
+            }));
         }
     } catch (e) {
         res.status(500).send(e.message);
@@ -483,6 +559,11 @@ const paypalRoutes = [
         method: 'POST',
         route: '/claim-paypal',
         func: claimOrder
+    },
+    {
+        method: 'POST',
+        route: '/check-paypal',
+        func: checkOrder
     },
 ]
 
