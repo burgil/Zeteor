@@ -304,8 +304,7 @@ app.get('/get-user', async (req, res) => {
                 usersCache[req.cookies.auth_token].premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
                 token_db[req.cookies.auth_token].premium_last_check = Date.now();
             }
-            res.send(usersCache[req.cookies.auth_token]);
-            console.log("Serving cache")
+            res.send(JSON.stringify(usersCache[req.cookies.auth_token]));
             return;
         }
         addQueue(req, res, function (req, res, responder) {
@@ -364,26 +363,25 @@ app.get('/get-user', async (req, res) => {
                             } else {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
                             }
-                            const output = JSON.stringify({
+                            const output = {
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
                                 avatar: avatarUrl,
                                 guilds: adminGuilds,
-                            });
-                            usersCache[req.cookies.auth_token] = output;
+                            };
                             const currentTime = Date.now();
                             const lastCheckTime = token_db[req.cookies.auth_token].premium_last_check || 0;
                             const timeDifference = currentTime - lastCheckTime;
                             const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
-                            console.log("Should return payment status?", shouldRunCode)
                             if (shouldRunCode) {
                                 const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
                                 const userDB = await sql(userDBQuery, [user.data.id]);
-                                usersCache[req.cookies.auth_token].premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
+                                output.premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
                                 token_db[req.cookies.auth_token].premium_last_check = Date.now();
                             }
-                            responder(usersCache[req.cookies.auth_token]);
+                            usersCache[req.cookies.auth_token] = output;
+                            responder(JSON.stringify(usersCache[req.cookies.auth_token]));
                         }).catch(err => {
                             responder(JSON.stringify({
                                 error: err.message
