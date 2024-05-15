@@ -322,22 +322,22 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                 confirm - user purchased successfully
                 !false = do nothing - log?
                 */
-                console.log("incoming webhook..", {
-                    paymentStatus,
-                    body: webhookEvent
-                })
+                // console.log("incoming webhook..", {
+                //     paymentStatus,
+                //     body: webhookEvent
+                // })
                 if (paymentStatus) {
                     if (webhookEvent.resource?.id && webhookEvent.event_type && webhookEvent.summary && webhookEvent.create_time && webhookEvent.resource?.amount?.total && webhookEvent.resource?.amount?.currency) {
-                        console.log("processing webhook...")
+                        // console.log("processing webhook...")
                         if (paymentStatus == 'reject') { // -----------------
-                            console.log("rejected")
+                            // console.log("rejected")
                             const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
                                 webhookEvent.resource.id
                             ]);
-                            console.warn('userDB:', userDB.rows)
+                            // console.warn('userDB:', userDB.rows)
                             let claimedDiscordID = '';
                             if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
-                            console.log("claimedDiscordID", claimedDiscordID)
+                            // console.log("claimedDiscordID", claimedDiscordID)
                             if (claimedDiscordID && claimedDiscordID != '') {
                                 const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
                                     payment_status: 'reject',
@@ -345,14 +345,14 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                                 await sql(updateUserPayment.sql, updateUserPayment.values)
                             }
                         } else if (paymentStatus == 'cancel') { // ----------------- BILLING.SUBSCRIPTION.CANCELLED
-                            console.log("cancelled")
+                            // console.log("cancelled")
                             const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
                                 webhookEvent.resource.id
                             ]);
-                            console.warn('userDB:', userDB.rows)
+                            // console.warn('userDB:', userDB.rows)
                             let claimedDiscordID = '';
                             if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
-                            console.log("claimedDiscordID", claimedDiscordID)
+                            // console.log("claimedDiscordID", claimedDiscordID)
                             if (claimedDiscordID && claimedDiscordID != '') {
                                 const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
                                     payment_status: 'cancel',
@@ -360,15 +360,15 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                                 await sql(updateUserPayment.sql, updateUserPayment.values)
                             }
                         } else if (paymentStatus == 'confirm') { // ----------------- PAYMENT.SALE.COMPLETED
-                            console.log("confirm webhook")
+                            // console.log("confirm webhook")
                             const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
                                 webhookEvent.resource.billing_agreement_id
                             ]);
-                            console.warn('userDB:', userDB.rows)
+                            // console.warn('userDB:', userDB.rows)
                             let claimedDiscordID = '';
                             if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
-                            console.log("claimedDiscordID", claimedDiscordID)
-                            console.log("webhookEvent.resource.billing_agreement_id", webhookEvent.resource.billing_agreement_id)
+                            // console.log("claimedDiscordID", claimedDiscordID)
+                            // console.log("webhookEvent.resource.billing_agreement_id", webhookEvent.resource.billing_agreement_id)
                             const insertPayment = await generateInsertStatement('payments', {
                                 discord_id: claimedDiscordID,
                                 id: webhookEvent.resource.billing_agreement_id,
@@ -392,7 +392,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                         console.warn("webhook failed")
                     }
                 } else {
-                    console.warn("ignoring webhook...")
+                    // console.warn("ignoring webhook...")
                 }
             } catch (e2) {
                 console.error('processPaypalWebhooks Sub Error: ' + e2.message);

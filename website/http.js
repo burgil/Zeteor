@@ -293,18 +293,27 @@ app.get('/get-user', async (req, res) => {
             return;
         }
         if (usersCache[req.cookies.auth_token] && !req.query.update) {
+            const output = { // sent to the client
+                id: usersCache[req.cookies.auth_token].id,
+                username: usersCache[req.cookies.auth_token].username,
+                global_name: usersCache[req.cookies.auth_token].global_name,
+                avatar: usersCache[req.cookies.auth_token].avatar,
+                guilds: usersCache[req.cookies.auth_token].guilds,
+            };
             const currentTime = Date.now();
             const lastCheckTime = usersCache[req.cookies.auth_token].premium_last_check || 0;
             const timeDifference = currentTime - lastCheckTime;
             const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
-            console.log("cache - Should return payment status?", shouldRunCode)
+            // console.log("cache - Should return payment status?", shouldRunCode)
             if (shouldRunCode) {
                 const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
                 const userDB = await sql(userDBQuery, [usersCache[req.cookies.auth_token].id]);
-                usersCache[req.cookies.auth_token].premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
+                const isPremium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
+                output.premium = isPremium;
+                usersCache[req.cookies.auth_token].premium = isPremium;
                 usersCache[req.cookies.auth_token].premium_last_check = Date.now();
             }
-            res.send(JSON.stringify(usersCache[req.cookies.auth_token]));
+            res.send(JSON.stringify(output));
             return;
         }
         addQueue(req, res, function (req, res, responder) {
@@ -363,25 +372,27 @@ app.get('/get-user', async (req, res) => {
                             } else {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
                             }
-                            const output = {
+                            const output = { // sent to the client
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
                                 avatar: avatarUrl,
                                 guilds: adminGuilds,
                             };
-                            const currentTime = Date.now();
-                            const lastCheckTime = usersCache[req.cookies.auth_token] ? usersCache[req.cookies.auth_token].premium_last_check || 0 : 0;
-                            const timeDifference = currentTime - lastCheckTime;
-                            const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
-                            if (shouldRunCode) {
-                                const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
-                                const userDB = await sql(userDBQuery, [user.data.id]);
-                                output.premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
-                                usersCache[req.cookies.auth_token].premium_last_check = Date.now();
-                            }
-                            usersCache[req.cookies.auth_token] = output;
-                            responder(JSON.stringify(usersCache[req.cookies.auth_token]));
+                            usersCache[req.cookies.auth_token] = { // saves in the server
+                                id: user.data.id,
+                                username: user.data.username,
+                                global_name: user.data.global_name,
+                                avatar: avatarUrl,
+                                guilds: adminGuilds,
+                            };
+                            const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
+                            const userDB = await sql(userDBQuery, [user.data.id]);
+                            const isPremium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
+                            output.premium = isPremium;
+                            usersCache[req.cookies.auth_token].premium = isPremium;
+                            usersCache[req.cookies.auth_token].premium_last_check = Date.now();
+                            responder(JSON.stringify(output));
                         }).catch(err => {
                             responder(JSON.stringify({
                                 error: err.message
@@ -420,7 +431,7 @@ app.get('/discord-callback', (req, res) => {
                     data_1.append('code', code);
                     fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(async data => {
                         if (data.error) {
-                            console.log(data)
+                            // console.log(data)
                             responder('Invalid code');
                             return;
                         }
