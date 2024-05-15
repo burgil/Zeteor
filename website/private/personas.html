@@ -80,7 +80,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            order_id: data.subscriptionID
+            subscriptionID: data.subscriptionID
           })
         })
         const claimOrderResponse = await claimOrder.text();

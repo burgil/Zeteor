@@ -370,8 +370,8 @@ async function claimOrder(req, res) {
         }));
         return;
     }
-    const orderID = req.body.order_id;
-    if (!orderID || orderID.trim() == '') {
+    const subscriptionID = req.body.subscriptionID;
+    if (!subscriptionID || subscriptionID.trim() == '') {
         res.send(JSON.stringify({
             error: 'Invalid order id'
         }));
@@ -379,14 +379,14 @@ async function claimOrder(req, res) {
     }
     // update user with the new order id
     const updateUserPayment = await generateUpdateStatement('users', userData.id, {
-        payment_id: orderID,
+        payment_id: subscriptionID,
     });
     const updatedUserPayment = await sql(updateUserPayment.sql, updateUserPayment.values)
     console.warn('updatedUserPayment', updatedUserPayment.rows)
     // find empty order with id
     const paymentsDB = await sql(`SELECT * FROM payments WHERE discord_id = $1 AND id = $2;`, [
         '',
-        orderID
+        subscriptionID
     ])
     console.warn('paymentsDB:', paymentsDB.rows)
     if (paymentsDB.rows.length > 0) {
