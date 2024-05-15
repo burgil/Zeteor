@@ -113,7 +113,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
             res.status(200).send('ok');
             try {
                 let paymentStatus = false;
-                switch (body.event_type) {
+                switch (webhookEvent.event_type) {
                     // Payments V2
                     case 'PAYMENT.AUTHORIZATION.CREATED': // A payment authorization is created, approved, executed, or a future payment authorization is created.
                         break;
@@ -306,7 +306,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                     case 'VAULT.CREDIT-CARD.UPDATED': // A credit card is updated.
                         break;
                 }
-                // body: req.body,
+                // body: webhookEvent,
                 // time: Date.now(),
                 // timestamp: new Date().toLocaleString(),
                 // headers: req.headers,
@@ -324,9 +324,9 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                 */
                console.log("incoming webhook..", {
                 paymentStatus,
-                body: req.body
+                body: webhookEvent
                })
-                if (req.body.resource?.id && req.body.event_type && req.body.summary && req.body.create_time && req.body.resource?.amount?.total && req.body.resource?.amount?.currency) {
+                if (webhookEvent.resource?.id && webhookEvent.event_type && webhookEvent.summary && webhookEvent.create_time && webhookEvent.resource?.amount?.total && webhookEvent.resource?.amount?.currency) {
                     console.log("processing webhook...")
                     if (paymentStatus == 'reject') {
                         console.log("rejected")
@@ -335,21 +335,21 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                     } else if (paymentStatus == 'confirm') { // PAYMENT.SALE.COMPLETED
                         console.log("confirm webhook")
                         const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
-                            req.body.resource.billing_agreement_id
+                            webhookEvent.resource.billing_agreement_id
                         ])
                         console.warn('userDB:', userDB.rows)
                         let claimedDiscordID = '';
                         if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
                         console.log("claimedDiscordID", claimedDiscordID)
-                        console.log("req.body.resource.billing_agreement_id", req.body.resource.billing_agreement_id)
+                        console.log("webhookEvent.resource.billing_agreement_id", webhookEvent.resource.billing_agreement_id)
                         const insertPayment = await generateInsertStatement('payments', [
                             claimedDiscordID, // discord_id
-                            req.body.resource.billing_agreement_id, // id
-                            req.body.event_type, // event_type
-                            req.body.summary, // summary
-                            req.body.create_time, // create_time
-                            req.body.resource.amount.total, // total
-                            req.body.resource.amount.currency, // currency
+                            webhookEvent.resource.billing_agreement_id, // id
+                            webhookEvent.event_type, // event_type
+                            webhookEvent.summary, // summary
+                            webhookEvent.create_time, // create_time
+                            webhookEvent.resource.amount.total, // total
+                            webhookEvent.resource.amount.currency, // currency
                         ])
                         await sql(insertPayment.sql, insertPayment.values);
                     } else {
