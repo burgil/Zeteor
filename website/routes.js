@@ -184,7 +184,7 @@ for (const route of routes) {
     pages[route.address] = routeHTML;
 }
 
-function setupRoutes(app) {
+function setupFrontendRoutes(app) {
     for (const page in pages) {
         const pageHTML = pages[page];
         app.get(page, (req, res) => {
@@ -194,5 +194,5 @@ function setupRoutes(app) {
 }
 
 module.exports = {
-    setupRoutes
+    setupFrontendRoutes
 }

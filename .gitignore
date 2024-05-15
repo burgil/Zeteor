@@ -11,7 +11,7 @@ ssl/*.key
 ssl/*.crt
 togetherAPIKey
 togetherAPIKey2
-example_db.json
+token_db.json
 # Logs
 logs
 *.log

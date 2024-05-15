@@ -34,7 +34,7 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "example_db.json"
+      "token_db.json"
     ],
     "ext": "js,html"
   }

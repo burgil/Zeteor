@@ -1,7 +1,8 @@
 const fetch = require('node-fetch');
 const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
-const { example_db, db_save } = require('./db.js');
+const { token_db, db_save } = require('./token_db.js');
+const { isSecure } = require('./system.js');
 
 let paypalClientId;
 try {
@@ -33,7 +34,7 @@ async function updateToken() {
         const hours = expirationDate.getHours();
         const minutes = expirationDate.getMinutes();
         const seconds = expirationDate.getSeconds();
-        console.log(`Expiration date and time: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
+        console.log(`Paypal Token Expiration date and refresh time: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
         const currentDate = new Date();
         if (expirationDate < currentDate) {  // check if expired
             console.log("Token has expired, refreshing!");
@@ -59,7 +60,9 @@ async function updateToken() {
         const data = await response.json();
         cachedToken = data;
         cachedToken.current_timestamp = Date.now();
-        fs.writeFileSync('../cachedToken.json', JSON.stringify(cachedToken), 'utf8');
+        try {
+            fs.writeFileSync('../cachedToken.json', JSON.stringify(cachedToken), 'utf8');
+        } catch (err) {}
     } catch (error) {
         console.error('Error:', error.message);
     }
@@ -355,49 +358,65 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
 }
 
 async function claimOrder(req, res) {
-    if (!req.cookies.auth_token) {
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
-        return;
-    }
-    const userData = example_db[req.cookies.auth_token];
-    if (!userData) {
-        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
-        return;
-    }
-    const subscriptionID = req.body.subscriptionID;
-    if (!subscriptionID || subscriptionID.trim() == '') {
-        res.send(JSON.stringify({
-            error: 'Invalid order id'
-        }));
-        return;
-    }
-    // update user with the new order id
-    const updateUserPayment = await generateUpdateStatement('users', userData.id, {
-        payment_id: subscriptionID,
-    });
-    const updatedUserPayment = await sql(updateUserPayment.sql, updateUserPayment.values)
-    console.warn('updatedUserPayment', updatedUserPayment.rows)
-    // find empty order with id
-    const paymentsDB = await sql(`SELECT * FROM payments WHERE discord_id = $1 AND id = $2;`, [
-        '',
-        subscriptionID
-    ])
-    console.warn('paymentsDB:', paymentsDB.rows)
-    if (paymentsDB.rows.length > 0) {
-        // found empty order with that id, fill user as the owner
-        const updatePayment = await generateUpdateStatement('payments', orderID, {
-            discord_id: userData.id,
-        }, 'id');
-        const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
-        console.warn('updatedPayment', updatedPayment.rows)
-        res.send('ok')
-    } else {
-        res.send('bad')
+    try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.send('Invalid Request');
+                return;
+            }
+        } else {
+            if (currentOrigin.host != 'localhost') {
+                res.send('Invalid Request');
+                return;
+            }
+        }
+        if (!req.cookies.auth_token) {
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const userData = token_db[req.cookies.auth_token];
+        if (!userData) {
+            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const subscriptionID = req.body.subscriptionID;
+        if (!subscriptionID || subscriptionID.trim() == '') {
+            res.send(JSON.stringify({
+                error: 'Invalid order id'
+            }));
+            return;
+        }
+        // update user with the new order id
+        const updateUserPayment = await generateUpdateStatement('users', userData.id, {
+            payment_id: subscriptionID,
+        });
+        const updatedUserPayment = await sql(updateUserPayment.sql, updateUserPayment.values)
+        console.warn('updatedUserPayment', updatedUserPayment.rows)
+        // find empty order with id
+        const paymentsDB = await sql(`SELECT * FROM payments WHERE discord_id = $1 AND id = $2;`, [
+            '',
+            subscriptionID
+        ])
+        console.warn('paymentsDB:', paymentsDB.rows)
+        if (paymentsDB.rows.length > 0) {
+            // found empty order with that id, fill user as the owner
+            const updatePayment = await generateUpdateStatement('payments', orderID, {
+                discord_id: userData.id,
+            }, 'id');
+            const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
+            console.warn('updatedPayment', updatedPayment.rows)
+            res.send('ok')
+        } else {
+            res.send('bad')
+        }
+    } catch (e) {
+        res.status(500).send(e.message);
     }
 }
 

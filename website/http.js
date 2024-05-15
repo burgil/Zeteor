@@ -7,9 +7,9 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { example_db, db_save } = require('./db.js');
+const { token_db, db_save } = require('./token_db.js');
 const { addQueue } = require('./queue.js');
-const { setupRoutes } = require('./routes.js');
+const { setupFrontendRoutes } = require('./routes.js');
 const paypalRoutes = require('./paypal.js');
 const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
 const fs = require('fs');
@@ -27,17 +27,7 @@ try {
 } catch (fileErr) { }
 const { v4: uuidv4 } = require('uuid');
 const app = express();
-function getUsername() {
-    return (
-        process.env.SUDO_USER ||
-        process.env.C9_USER ||
-        process.env.LOGNAME ||
-        process.env.USER ||
-        process.env.LNAME ||
-        process.env.USERNAME
-    );
-}
-const isSecure = getUsername().toLowerCase() === 'ubuntu'; // this had issue with linux developers running the project locally: process.platform !== 'win32';
+const { isSecure } = require('./system.js');
 const Fingerprint = require('express-fingerprint');
 const requestIp = require('request-ip');
 app.use(cookieParser());
@@ -68,7 +58,7 @@ app.use(Fingerprint({
     ]
 }))
 //
-setupRoutes(app);
+setupFrontendRoutes(app);
 for (const paypalRoute of paypalRoutes) {
     if (paypalRoute.method == 'GET') {
         app.get(paypalRoute.route, paypalRoute.func);
@@ -97,15 +87,31 @@ app.get('/status', (req, res) => {
     });
 });
 app.get('/logout', (req, res) => {
-    if (example_db[req.cookies.auth_token]) {
-        example_db[req.cookies.auth_token] = undefined;
-        db_save();
-        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-        res.redirect('/');
-    } else {
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
+    try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.send('Invalid Request');
+                return;
+            }
+        } else {
+            if (currentOrigin.host != 'localhost') {
+                res.send('Invalid Request');
+                return;
+            }
+        }
+        if (token_db[req.cookies.auth_token]) {
+            token_db[req.cookies.auth_token] = undefined;
+            db_save();
+            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+            res.redirect('/');
+        } else {
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+        }
+    } catch (e) {
+        res.status(500).send(e.message);
     }
 });
 const serverCommands = {
@@ -147,243 +153,289 @@ const serverCommands = {
 };
 
 app.post('/edit-server/commands', (req, res) => {
-    if (!req.cookies.auth_token) {
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
-        return;
-    }
-    const userData = example_db[req.cookies.auth_token];
-    if (!userData) {
-        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
-        return;
-    }
-    addQueue(req, res, function (req, res, responder) {
-        res.write('');
-        try {
-            const targetCommand = req.body.targetCommand;
-            let commandExist = false;
-            for (const serverCommandID in serverCommands) {
-                for (const command of serverCommands[serverCommandID]) {
-                    if (targetCommand === command) {
-                        commandExist = true;
-                        break;
-                    }
-                }
+    try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.send('Invalid Request');
+                return;
             }
-            if (!commandExist) {
-                responder(JSON.stringify({
-                    error: "Command doesn't exist!"
-                }));
-            } else {
-                const serverID = req.body.serverID;
-                const action = req.body.action;
-                axios.get("https://discord.com/api/users/@me/guilds", {
-                    headers: {
-                        "authorization": `Bearer ${userData.data.access_token}`
-                    }
-                }).then(async guilds => {
-                    let hasPermissions = false;
-                    const guildIds = guilds.data.map(guild => guild.id);
-                    const query = `SELECT discord_id FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
-                    const serversDB = await sql(query, guildIds);
-                    for (const guildIndex in guilds.data) {
-                        const guild = guilds.data[guildIndex];
-                        const guildID = guild.id;
-                        if (guildID != serverID) continue;
-                        const serverData = serversDB.rows.find(server => server.discord_id === guildID);
-                        if (guild.permissions == 2147483647 && serverData) hasPermissions = true;
-                    }
-                    if (!hasPermissions) {
-                        responder(JSON.stringify({
-                            error: "No Permission!"
-                        }));
-                    } else {
-                        switch (action) {
-                            case 'enable-command':
-                                responder(JSON.stringify({
-                                    msg: "Enabled Command!"
-                                }));
-                                break;
-                            case 'disable-command':
-                                responder(JSON.stringify({
-                                    msg: "Disabled Command!"
-                                }));
-                                break;
-                            case 'add-command':
-                                responder(JSON.stringify({
-                                    msg: "Added Command!"
-                                }));
-                                break;
-                            case 'remove-command':
-                                responder(JSON.stringify({
-                                    msg: "Removed Command!"
-                                }));
-                                break;
-                            case 'change-command-permissions':
-                                responder(JSON.stringify({
-                                    msg: "Changed Command Permissions!"
-                                }));
-                                break;
+        } else {
+            if (currentOrigin.host != 'localhost') {
+                res.send('Invalid Request');
+                return;
+            }
+        }
+        if (!req.cookies.auth_token) {
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const userData = token_db[req.cookies.auth_token];
+        if (!userData) {
+            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        addQueue(req, res, function (req, res, responder) {
+            res.write('');
+            try {
+                const targetCommand = req.body.targetCommand;
+                let commandExist = false;
+                for (const serverCommandID in serverCommands) {
+                    for (const command of serverCommands[serverCommandID]) {
+                        if (targetCommand === command) {
+                            commandExist = true;
+                            break;
                         }
                     }
-                });
-            }
-        } catch (serverError) {
-            responder(JSON.stringify({
-                error: serverError.message
-            }));
-        }
-    });
-});
-
-let usersCache = {};
-app.get('/get-user', (req, res) => {
-    if (!req.cookies.auth_token) {
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
-        return;
-    }
-    const userData = example_db[req.cookies.auth_token];
-    if (!userData) {
-        res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-        res.send(JSON.stringify({
-            error: 'Not logged in'
-        }));
-        return;
-    }
-    if (usersCache[req.cookies.auth_token] && !req.query.update) {
-        res.send(usersCache[req.cookies.auth_token]);
-        return;
-    }
-    addQueue(req, res, function (req, res, responder) {
-        res.write('');
-        try {
-            axios.get("https://discord.com/api/users/@me", {
-                headers: {
-                    "authorization": `Bearer ${userData.data.access_token}`
                 }
-            }).then(user => {
-                setTimeout(function () {
+                if (!commandExist) {
+                    responder(JSON.stringify({
+                        error: "Command doesn't exist!"
+                    }));
+                } else {
+                    const serverID = req.body.serverID;
+                    const action = req.body.action;
                     axios.get("https://discord.com/api/users/@me/guilds", {
                         headers: {
                             "authorization": `Bearer ${userData.data.access_token}`
                         }
                     }).then(async guilds => {
-                        const adminGuilds = {};
+                        let hasPermissions = false;
                         const guildIds = guilds.data.map(guild => guild.id);
-                        const query = `SELECT * FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
+                        const query = `SELECT discord_id FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
                         const serversDB = await sql(query, guildIds);
-                        for (const guild of guilds.data) {
-                            if (guild.permissions == 2147483647) {
-                                let serverAvatarUrl;
-                                if (guild.icon) {
-                                    if (guild.icon.startsWith('a_')) {
-                                        serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.gif`;
-                                    } else {
-                                        serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
-                                    }
-                                }
-                                if (!example_db['guildSettings_' + guild.id]) example_db['guildSettings_' + guild.id] = {};
-                                if (!example_db['guildCommands_' + guild.id]) example_db['guildCommands_' + guild.id] = {};
-                                db_save();
-                                const serverData = serversDB.rows.find(server => server.discord_id === guild.id);
-                                adminGuilds[guild.id] = {
-                                    name: guild.name,
-                                    icon: serverAvatarUrl,
-                                    isBotExist: serverData ? true : false,
-                                    settings: example_db['guildSettings_' + guild.id],
-                                    commands: example_db['guildCommands_' + guild.id],
-                                }
+                        for (const guildIndex in guilds.data) {
+                            const guild = guilds.data[guildIndex];
+                            const guildID = guild.id;
+                            if (guildID != serverID) continue;
+                            const serverData = serversDB.rows.find(server => server.discord_id === guildID);
+                            if (guild.permissions == 2147483647 && serverData) hasPermissions = true;
+                        }
+                        if (!hasPermissions) {
+                            responder(JSON.stringify({
+                                error: "No Permission!"
+                            }));
+                        } else {
+                            switch (action) {
+                                case 'enable-command':
+                                    responder(JSON.stringify({
+                                        msg: "Enabled Command!"
+                                    }));
+                                    break;
+                                case 'disable-command':
+                                    responder(JSON.stringify({
+                                        msg: "Disabled Command!"
+                                    }));
+                                    break;
+                                case 'add-command':
+                                    responder(JSON.stringify({
+                                        msg: "Added Command!"
+                                    }));
+                                    break;
+                                case 'remove-command':
+                                    responder(JSON.stringify({
+                                        msg: "Removed Command!"
+                                    }));
+                                    break;
+                                case 'change-command-permissions':
+                                    responder(JSON.stringify({
+                                        msg: "Changed Command Permissions!"
+                                    }));
+                                    break;
                             }
                         }
-                        example_db[req.cookies.auth_token].username = user.data.username;
-                        example_db[req.cookies.auth_token].id = user.data.id;
-                        example_db[req.cookies.auth_token].global_name = user.data.global_name;
-                        db_save();
-                        let avatarUrl;
-                        if (user.data.avatar.startsWith('a_')) {
-                            avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
-                        } else {
-                            avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
-                        }
-                        const output = JSON.stringify({
-                            username: user.data.username,
-                            global_name: user.data.global_name,
-                            avatar: avatarUrl,
-                            guilds: adminGuilds
-                        });
-                        usersCache[req.cookies.auth_token] = output;
-                        responder(output);
-                    }).catch(err => {
-                        responder(JSON.stringify({
-                            error: err.message
-                        }));
                     });
-                }, 500);
-            }).catch(err => {
+                }
+            } catch (serverError) {
                 responder(JSON.stringify({
-                    error: err.message
+                    error: serverError.message
                 }));
-            });
-        } catch (severError) {
-            responder(JSON.stringify({
-                error: 'Server Error'
-            }));
+            }
+        });
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+});
+
+let usersCache = {};
+app.get('/get-user', (req, res) => {
+    try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.send('Invalid Request');
+                return;
+            }
+        } else {
+            if (currentOrigin.host != 'localhost') {
+                res.send('Invalid Request');
+                return;
+            }
         }
-    });
+        if (!req.cookies.auth_token) {
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const userData = token_db[req.cookies.auth_token];
+        if (!userData) {
+            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        if (usersCache[req.cookies.auth_token] && !req.query.update) {
+            res.send(usersCache[req.cookies.auth_token]);
+            return;
+        }
+        addQueue(req, res, function (req, res, responder) {
+            res.write('');
+            try {
+                axios.get("https://discord.com/api/users/@me", {
+                    headers: {
+                        "authorization": `Bearer ${userData.data.access_token}`
+                    }
+                }).then(user => {
+                    setTimeout(function () {
+                        axios.get("https://discord.com/api/users/@me/guilds", {
+                            headers: {
+                                "authorization": `Bearer ${userData.data.access_token}`
+                            }
+                        }).then(async guilds => {
+                            const adminGuilds = {};
+                            const guildIds = guilds.data.map(guild => guild.id);
+                            const query = `SELECT * FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
+                            const serversDB = await sql(query, guildIds);
+                            for (const guild of guilds.data) {
+                                if (guild.permissions == 2147483647) {
+                                    let serverAvatarUrl;
+                                    if (guild.icon) {
+                                        if (guild.icon.startsWith('a_')) {
+                                            serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.gif`;
+                                        } else {
+                                            serverAvatarUrl = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
+                                        }
+                                    }
+                                    const serverData = serversDB.rows.find(server => server.discord_id === guild.id);
+                                    adminGuilds[guild.id] = {
+                                        name: guild.name,
+                                        icon: serverAvatarUrl,
+                                        isBotExist: serverData ? true : false,
+                                        settings: {},
+                                        commands: {},
+                                    }
+                                }
+                            }
+                            token_db[req.cookies.auth_token].username = user.data.username;
+                            token_db[req.cookies.auth_token].id = user.data.id;
+                            token_db[req.cookies.auth_token].global_name = user.data.global_name;
+                            db_save();
+                            let avatarUrl;
+                            if (user.data.avatar.startsWith('a_')) {
+                                avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
+                            } else {
+                                avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
+                            }
+                            const output = JSON.stringify({
+                                username: user.data.username,
+                                global_name: user.data.global_name,
+                                avatar: avatarUrl,
+                                guilds: adminGuilds
+                            });
+                            usersCache[req.cookies.auth_token] = output;
+                            responder(output);
+                        }).catch(err => {
+                            responder(JSON.stringify({
+                                error: err.message
+                            }));
+                        });
+                    }, 500);
+                }).catch(err => {
+                    responder(JSON.stringify({
+                        error: err.message
+                    }));
+                });
+            } catch (severError) {
+                responder(JSON.stringify({
+                    error: 'Server Error'
+                }));
+            }
+        });
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
 });
 
 app.get('/discord-callback', (req, res) => {
-    addQueue(req, res, function (req, res, responder) {
-        // res.write('');
-        try {
-            const code = req.query.code;
-            if (code) {
-                const data_1 = new URLSearchParams();
-                data_1.append('client_id', client_id);
-                data_1.append('client_secret', client_secret);
-                data_1.append('grant_type', 'authorization_code');
-                data_1.append('redirect_uri', isSecure ? 'https://zeteor.roboticeva.com/discord-callback' : `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
-                data_1.append('scope', 'identify');
-                data_1.append('code', code);
-                fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => {
-                    if (data.error) {
-                        console.log(data)
-                        responder('Invalid code');
-                        return;
-                    }
-                    const uuid = uuidv4();
-                    example_db[uuid] = { // userData
-                        data,
-                        code
-                    };
-                    db_save();
-                    const currentTime = Date.now();
-                    const cookieValue = uuid;
-                    const expireTime = 90 * 24 * 60 * 60; // 90 Days
-                    const expiresMS = expireTime * 1000;
-                    const expires = new Date(currentTime + expiresMS);
-                    const authCookie = `auth_token=${cookieValue}; Path=/; Secure; HttpOnly; SameSite=Strict; Priority=High; Expires=${expires.toUTCString()}`;
-                    res.setHeader("Set-Cookie", authCookie);
-                    res.redirect('/');
-                    // res.end();
-                });
-            } else {
-                responder('Missing code parameter');
+    try {
+        addQueue(req, res, function (req, res, responder) {
+            // res.write('');
+            try {
+                const code = req.query.code;
+                if (code) {
+                    const data_1 = new URLSearchParams();
+                    data_1.append('client_id', client_id);
+                    data_1.append('client_secret', client_secret);
+                    data_1.append('grant_type', 'authorization_code');
+                    data_1.append('redirect_uri', isSecure ? 'https://zeteor.roboticeva.com/discord-callback' : `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
+                    data_1.append('scope', 'identify');
+                    data_1.append('code', code);
+                    fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => {
+                        if (data.error) {
+                            console.log(data)
+                            responder('Invalid code');
+                            return;
+                        }
+                        const uuid = uuidv4();
+                        token_db[uuid] = { // userData
+                            data,
+                            code,
+                            timestamp: Date.now()
+                        };
+                        db_save();
+                        const currentTime = Date.now();
+                        const cookieValue = uuid;
+                        const expireTime = data.expires_in || (7 * 24 * 60 * 60); // 7 Days - 604800
+                        const expiresMS = expireTime * 1000;
+                        const expires = new Date(currentTime + expiresMS);
+                        const authCookie = `auth_token=${cookieValue}; Path=/; Secure; HttpOnly; SameSite=Strict; Priority=High; Expires=${expires.toUTCString()}`;
+                        res.setHeader("Set-Cookie", authCookie);
+                        res.redirect('/');
+                        // res.end();
+                    });
+                } else {
+                    responder('Missing code parameter');
+                }
+            } catch (severError) {
+                responder('Server Error');
             }
-        } catch (severError) {
-            responder('Server Error');
-        }
-    });
+        });
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
 });
 
 app.post('/generate-image', (req, res) => {
     try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.json({ error: 'Invalid Request' });
+                return;
+            }
+        } else {
+            if (currentOrigin.host != 'localhost') {
+                res.json({ error: 'Invalid Request' });
+                return;
+            }
+        }
         const prompt = req.body.prompt;
         const numImages = req.body.numImages;
         const resolution = req.body.resolution;
@@ -415,7 +467,7 @@ app.post('/generate-image', (req, res) => {
         });
     } catch (serverError) {
         res.json({
-            error: error.message
+            error: serverError.message
         });
     }
 });
