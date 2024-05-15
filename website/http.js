@@ -371,7 +371,7 @@ app.get('/get-user', async (req, res) => {
                                 guilds: adminGuilds,
                             };
                             const currentTime = Date.now();
-                            const lastCheckTime = usersCache[req.cookies.auth_token].premium_last_check || 0;
+                            const lastCheckTime = usersCache[req.cookies.auth_token] ? usersCache[req.cookies.auth_token].premium_last_check || 0 : 0;
                             const timeDifference = currentTime - lastCheckTime;
                             const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
                             if (shouldRunCode) {
