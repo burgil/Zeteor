@@ -264,7 +264,7 @@ app.post('/edit-server/commands', (req, res) => {
     }
 });
 
-app.get('/get-user', (req, res) => {
+app.get('/get-user', async (req, res) => {
     try {
         const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
         if (isSecure) {
@@ -293,7 +293,18 @@ app.get('/get-user', (req, res) => {
             return;
         }
         if (usersCache[req.cookies.auth_token] && !req.query.update) {
+            const currentTime = Date.now();
+            const lastCheckTime = usersCache[req.cookies.auth_token].premium_last_check || 0;
+            const timeDifference = currentTime - lastCheckTime;
+            const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
+            if (shouldRunCode) {
+                const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
+                const userDB = await sql(userDBQuery, [usersCache[req.cookies.auth_token].id]);
+                usersCache[req.cookies.auth_token].premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
+                usersCache[req.cookies.auth_token].premium_last_check = Date.now();
+            }
             res.send(usersCache[req.cookies.auth_token]);
+            console.log("Serving cache")
             return;
         }
         addQueue(req, res, function (req, res, responder) {
@@ -353,12 +364,23 @@ app.get('/get-user', (req, res) => {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
                             }
                             const output = JSON.stringify({
+                                id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
                                 avatar: avatarUrl,
-                                guilds: adminGuilds
+                                guilds: adminGuilds,
                             });
                             usersCache[req.cookies.auth_token] = output;
+                            const currentTime = Date.now();
+                            const lastCheckTime = usersCache[req.cookies.auth_token].premium_last_check || 0;
+                            const timeDifference = currentTime - lastCheckTime;
+                            const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
+                            if (shouldRunCode) {
+                                const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
+                                const userDB = await sql(userDBQuery, [user.data.id]);
+                                usersCache[req.cookies.auth_token].premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
+                                usersCache[req.cookies.auth_token].premium_last_check = Date.now();
+                            }
                             responder(output);
                         }).catch(err => {
                             responder(JSON.stringify({
