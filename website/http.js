@@ -11,7 +11,7 @@ const { token_db, db_save } = require('./token_db.js');
 const { addQueue } = require('./queue.js');
 const { setupFrontendRoutes } = require('./routes.js');
 const paypalRoutes = require('./paypal.js');
-const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement } = require('./sync.js');
+const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteStatement, generateInsertOrUpdateStatement } = require('./sync.js');
 const fs = require('fs');
 let client_id;
 try {
@@ -30,6 +30,7 @@ const app = express();
 const { isSecure } = require('./system.js');
 const Fingerprint = require('express-fingerprint');
 const requestIp = require('request-ip');
+let usersCache = {};
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -102,6 +103,7 @@ app.get('/logout', (req, res) => {
         }
         if (token_db[req.cookies.auth_token]) {
             token_db[req.cookies.auth_token] = undefined;
+            if (usersCache[req.cookies.auth_token]) usersCache[req.cookies.auth_token] = undefined;
             db_save();
             res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
             res.redirect('/');
@@ -262,7 +264,6 @@ app.post('/edit-server/commands', (req, res) => {
     }
 });
 
-let usersCache = {};
 app.get('/get-user', (req, res) => {
     try {
         const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
@@ -311,7 +312,7 @@ app.get('/get-user', (req, res) => {
                         }).then(async guilds => {
                             const adminGuilds = {};
                             const guildIds = guilds.data.map(guild => guild.id);
-                            const query = `SELECT * FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
+                            const query = `SELECT discord_id FROM servers WHERE discord_id IN (${guildIds.map((_, index) => `$${index + 1}`).join(', ')});`;
                             const serversDB = await sql(query, guildIds);
                             for (const guild of guilds.data) {
                                 if (guild.permissions == 2147483647) {
@@ -333,10 +334,18 @@ app.get('/get-user', (req, res) => {
                                     }
                                 }
                             }
-                            token_db[req.cookies.auth_token].username = user.data.username;
-                            token_db[req.cookies.auth_token].id = user.data.id;
-                            token_db[req.cookies.auth_token].global_name = user.data.global_name;
-                            db_save();
+                            if (token_db[req.cookies.auth_token].username != user.data.username || token_db[req.cookies.auth_token].id != user.data.id || token_db[req.cookies.auth_token].global_name != user.data.global_name) {
+                                token_db[req.cookies.auth_token].username = user.data.username;
+                                token_db[req.cookies.auth_token].id = user.data.id;
+                                token_db[req.cookies.auth_token].global_name = user.data.global_name;
+                                db_save();
+                                const insertOrUpdateUser = await generateInsertOrUpdateStatement('users', user.data.id, {
+                                    last_login: token_db[req.cookies.auth_token].timestamp,
+                                    global_name: user.data.global_name,
+                                    username: user.data.username,
+                                });
+                                await sql(insertOrUpdateUser.sql, insertOrUpdateUser.values);
+                            }
                             let avatarUrl;
                             if (user.data.avatar.startsWith('a_')) {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.gif`;
@@ -387,17 +396,18 @@ app.get('/discord-callback', (req, res) => {
                     data_1.append('redirect_uri', isSecure ? 'https://zeteor.roboticeva.com/discord-callback' : `http://localhost${port == '80' ? '' : ':' + port}/discord-callback`);
                     data_1.append('scope', 'identify');
                     data_1.append('code', code);
-                    fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => {
+                    fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(async data => {
                         if (data.error) {
                             console.log(data)
                             responder('Invalid code');
                             return;
                         }
                         const uuid = uuidv4();
+                        const timestamp = Date.now();
                         token_db[uuid] = { // userData
                             data,
                             code,
-                            timestamp: Date.now()
+                            timestamp
                         };
                         db_save();
                         const currentTime = Date.now();
@@ -411,7 +421,16 @@ app.get('/discord-callback', (req, res) => {
                         // res.end();
                     });
                 } else {
-                    responder('Missing code parameter');
+                    const error = req.query.error;
+                    if (error) {
+                        if (error == 'access_denied') {
+                            res.redirect('/');
+                        } else {
+                            responder(error);
+                        }
+                    } else {
+                        responder('Missing code parameter');
+                    }
                 }
             } catch (severError) {
                 responder('Server Error');

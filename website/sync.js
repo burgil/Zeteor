@@ -5,7 +5,7 @@ const skipYesNo = true;
 const tables = {
     'users': [
         {
-            column_name: 'discord_id',
+            column_name: 'discord_id', // index must be first
             data_type: 'character varying',
             sql_type: 'VARCHAR(50)',
         },
@@ -19,10 +19,25 @@ const tables = {
             data_type: 'character varying',
             sql_type: 'VARCHAR(100)',
         },
+        {
+            column_name: 'last_login',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
+        {
+            column_name: 'global_name',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
+        {
+            column_name: 'username',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
     ],
     'personas': [
         {
-            column_name: 'slug',
+            column_name: 'slug', // index must be first
             data_type: 'character varying',
             sql_type: 'VARCHAR(50)',
         },
@@ -54,12 +69,12 @@ const tables = {
     ],
     'servers': [
         {
-            column_name: 'name',
+            column_name: 'discord_id', // index must be first
             data_type: 'character varying',
             sql_type: 'VARCHAR(50)',
         },
         {
-            column_name: 'discord_id',
+            column_name: 'name',
             data_type: 'character varying',
             sql_type: 'VARCHAR(50)',
         },
@@ -86,19 +101,19 @@ const tables = {
     ],
     'ai': [
         {
+            column_name: 'discord_id', // index must be first
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(50)',
+        },
+        {
             column_name: 'image',
             data_type: 'character varying',
             sql_type: 'VARCHAR(500)',
         },
-        {
-            column_name: 'discord_id',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(50)',
-        },
     ],
     'payments': [
         {
-            column_name: 'discord_id',
+            column_name: 'discord_id', // index must be first
             data_type: 'character varying',
             sql_type: 'VARCHAR(100)',
         },
@@ -177,11 +192,35 @@ async function sql(sql, values) {
     return await client.query(sql, values);
 }
 
-async function generateInsertStatement(tableName, values) {
+async function generateDeleteStatement(tableName, id, custom_selector = 'discord_id') {
+    const sql = `DELETE FROM ${tableName} WHERE ${custom_selector} = $1`;
+    return { sql, values: [id] };
+}
+
+async function generateInsertStatement(tableName, data) {
     const tableColumns = tables[tableName];
     const columns = tableColumns.map((column) => column.column_name);
     const placeholders = columns.map((_, index) => `$${index + 1}`);
     const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+    const values = [];
+    for (const column of columns) {
+        if (data[column]) {
+            values.push(data[column]);
+        } else {
+            const columnDef = tableColumns.find((col) => col.column_name === column);
+            if (columnDef) {
+                if (columnDef.data_type == 'integer') {
+                    values.push(0);
+                } else if (columnDef.data_type == 'character varying') {
+                    values.push('');
+                } else if (columnDef.data_type == 'json') {
+                    values.push({});
+                } else {
+                    values.push('');
+                }
+            }
+        }
+    }
     return { sql, values };
 }
 
@@ -201,9 +240,50 @@ async function generateUpdateStatement(tableName, discord_id, updates, custom_se
     return { sql, values };
 }
 
-async function generateDeleteStatement(tableName, id, custom_selector = 'discord_id') {
-    const sql = `DELETE FROM ${tableName} WHERE ${custom_selector} = $1`;
-    return { sql, values: [id] };
+async function generateInsertOrUpdateStatement(tableName, discordId, data) {
+    const tableColumns = tables[tableName];
+    const columns = tableColumns.map((column) => column.column_name);
+    const placeholders = columns.map((_, index) => `$${index + 1}`);
+    const values = [];
+    const selectSql = `SELECT * FROM ${tableName} WHERE discord_id = $1`;
+    const selectResult = await sql(selectSql, [discordId]);
+    if (selectResult.rows.length > 0) {
+        const updateSetClauses = [];
+        for (const [key, value] of Object.entries(data)) {
+            const columnDef = tableColumns.find((col) => col.column_name === key);
+            if (columnDef) {
+                updateSetClauses.push(`${key} = $${values.length + 1}`);
+                values.push(value);
+            }
+        }
+        const updateSql = `UPDATE ${tableName} SET ${updateSetClauses.join(', ')} WHERE discord_id = $${values.length + 1}`;
+        return { sql: updateSql, values: [...values, discordId] };
+    } else {
+        const insertSql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+        values.push(discordId);
+        let i = 0;
+        for (const column of columns) {
+            i += 1;
+            if (i == 1) continue;
+            if (data[column]) {
+                values.push(data[column]);
+            } else {
+                const columnDef = tableColumns.find((col) => col.column_name === column);
+                if (columnDef) {
+                    if (columnDef.data_type == 'integer') {
+                        values.push(0);
+                    } else if (columnDef.data_type == 'character varying') {
+                        values.push('');
+                    } else if (columnDef.data_type == 'json') {
+                        values.push({});
+                    } else {
+                        values.push('');
+                    }
+                }
+            }
+        }
+        return { sql: insertSql, values };
+    }
 }
 
 async function yesNo(callback) {
@@ -413,9 +493,12 @@ client.connect(async (err) => {
         /*
         // ------------------------------------------------------------------- users
         console.log('INSERT example');
-        const insertUser = await generateInsertStatement('users', ['1', {
-            test: 42
-        }]);
+        const insertUser = await generateInsertStatement('users', {
+            discord_id: '1',
+            settings: {
+                test: 42
+            },
+        });
         await sql(insertUser.sql, insertUser.values)
         //
         console.log('UPDATE example');
@@ -433,7 +516,13 @@ client.connect(async (err) => {
         await sql(deleteUser.sql, deleteUser.values)
         // ------------------------------------------------------------------- personas
         console.log('INSERT example');
-        const insertPersona = await generateInsertStatement('personas', ['1', 'title', 'description', 'price', 'image', 'ai_prompt'], 'slug')
+        const insertPersona = await generateInsertStatement('personas', {
+            title: 'New Title',
+            description: 'New Description',
+            price: 42,
+            image: 'New image',
+            ai_prompt: 'ai_prompt',
+        }, 'slug')
         await sql(insertPersona.sql, insertPersona.values)
         //
         console.log('UPDATE example');
@@ -452,11 +541,18 @@ client.connect(async (err) => {
         await sql(deletePersona.sql, deletePersona.values)
         // ------------------------------------------------------------------- servers
         console.log('INSERT example');
-        const insertServer = await generateInsertStatement('servers', ['name', '1', {
-            hello: 42 // commands
-        }, 'persona', {
-            hello: 42 // settings
-        }, 'image'])
+        const insertServer = await generateInsertStatement('servers', {
+            name: 'New name',
+            discord_id: '1',
+            commands: {
+                hello: 42
+            },
+            persona: 'New persona',
+            settings: {
+                hello: 42
+            },
+            image: 'New image',
+        })
         await sql(insertServer.sql, insertServer.values)
         //
         console.log('UPDATE example');
@@ -480,7 +576,9 @@ client.connect(async (err) => {
         await sql(deleteServer.sql, deleteServer.values)
         // ------------------------------------------------------------------- ai
         console.log('INSERT example');
-        const insertAI = await generateInsertStatement('ai', ['image', '1'])
+        const insertAI = await generateInsertStatement('ai', {
+            image: 'New image',
+        })
         await sql(insertAI.sql, insertAI.values)
         //
         console.log('UPDATE example');
@@ -508,4 +606,5 @@ module.exports = {
     generateInsertStatement,
     generateUpdateStatement,
     generateDeleteStatement,
+    generateInsertOrUpdateStatement,
 };

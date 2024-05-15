@@ -191,6 +191,7 @@
     font-size: 16px;
     background-color: #333333;
     color: #ebebeb;
+    height: 100%;
 }
 
 .popup-server-container .song-container {
