@@ -83,7 +83,15 @@ paypal.Buttons({
         //     });
         // }
         return actions.subscription.create({
+            purchase_units: [{
+                custom_id: invoiceID,
+                invoice_id: invoiceID,
+            }],
+            application_context:  { 
+                shipping_preference: "NO_SHIPPING"
+            },
             custom_id: invoiceID,
+            invoice_id: invoiceID,
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
         });
     },
