@@ -552,21 +552,21 @@ const paypalRoutes = [
         route: '/paypal',
         func: processPaypalWebhooks
     },
-    // {
-    //     method: 'GET',
-    //     route: '/paypal-logs',
-    //     func: getPaypalLogs
-    // },
-    // {
-    //     method: 'GET',
-    //     route: '/paypal-logs2',
-    //     func: getPaypalLogs2
-    // },
-    // {
-    //     method: 'GET',
-    //     route: '/clean-paypal-logs',
-    //     func: cleanPaypalLogs
-    // },
+    {
+        method: 'GET',
+        route: '/paypal-logs',
+        func: getPaypalLogs
+    },
+    {
+        method: 'GET',
+        route: '/paypal-logs2',
+        func: getPaypalLogs2
+    },
+    {
+        method: 'GET',
+        route: '/clean-paypal-logs',
+        func: cleanPaypalLogs
+    },
     {
         method: 'POST',
         route: '/claim-paypal',
