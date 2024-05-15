@@ -561,7 +561,7 @@ const paypalRoutes = [
         func: claimOrder
     },
     {
-        method: 'POST',
+        method: 'GET',
         route: '/check-paypal',
         func: checkOrder
     },
