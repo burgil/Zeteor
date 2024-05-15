@@ -329,11 +329,37 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                 if (paymentStatus) {
                     if (webhookEvent.resource?.id && webhookEvent.event_type && webhookEvent.summary && webhookEvent.create_time && webhookEvent.resource?.amount?.total && webhookEvent.resource?.amount?.currency) {
                         console.log("processing webhook...")
-                        if (paymentStatus == 'reject') {
+                        if (paymentStatus == 'reject') { // -----------------
                             console.log("rejected")
-                        } else if (paymentStatus == 'cancel') {
+                            const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
+                                webhookEvent.resource.id
+                            ]);
+                            console.warn('userDB:', userDB.rows)
+                            let claimedDiscordID = '';
+                            if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
+                            console.log("claimedDiscordID", claimedDiscordID)
+                            if (claimedDiscordID && claimedDiscordID != '') {
+                                const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
+                                    payment_status: 'reject',
+                                });
+                                await sql(updateUserPayment.sql, updateUserPayment.values)
+                            }
+                        } else if (paymentStatus == 'cancel') { // ----------------- BILLING.SUBSCRIPTION.CANCELLED
                             console.log("cancelled")
-                        } else if (paymentStatus == 'confirm') { // PAYMENT.SALE.COMPLETED
+                            const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
+                                webhookEvent.resource.id
+                            ]);
+                            console.warn('userDB:', userDB.rows)
+                            let claimedDiscordID = '';
+                            if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
+                            console.log("claimedDiscordID", claimedDiscordID)
+                            if (claimedDiscordID && claimedDiscordID != '') {
+                                const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
+                                    payment_status: 'cancel',
+                                });
+                                await sql(updateUserPayment.sql, updateUserPayment.values)
+                            }
+                        } else if (paymentStatus == 'confirm') { // ----------------- PAYMENT.SALE.COMPLETED
                             console.log("confirm webhook")
                             const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
                                 webhookEvent.resource.billing_agreement_id
@@ -353,13 +379,15 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                                 currency: webhookEvent.resource.amount.currency,
                             })
                             await sql(insertPayment.sql, insertPayment.values);
+                            if (claimedDiscordID && claimedDiscordID != '') {
+                                const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
+                                    payment_status: 'confirm',
+                                });
+                                await sql(updateUserPayment.sql, updateUserPayment.values)
+                            }
                         } else {
                             console.warn("unknown webhook type", paymentStatus)
                         }
-                        const updateUserPayment = await generateUpdateStatement('users', userData.id, {
-                            payment_status: paymentStatus,
-                        });
-                        await sql(updateUserPayment.sql, updateUserPayment.values)
                     } else {
                         console.warn("webhook failed")
                     }
@@ -420,23 +448,6 @@ async function claimOrder(req, res) {
         res.send(JSON.stringify({
             ok: true
         }))
-        // // find empty order with id
-        // const paymentsDB = await sql(`SELECT discord_id, id FROM payments WHERE discord_id = $1 AND id = $2;`, [
-        //     '',
-        //     subscriptionID
-        // ])
-        // console.warn('paymentsDB:', paymentsDB.rows)
-        // if (paymentsDB.rows.length > 0) {
-        //     // found empty order with that id, fill user as the owner
-        //     const updatePayment = await generateUpdateStatement('payments', orderID, {
-        //         discord_id: userData.id,
-        //     }, 'id');
-        //     const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
-        //     console.warn('updatedPayment', updatedPayment.rows)
-        //     res.send('ok')
-        // } else {
-        //     res.send('bad')
-        // }
     } catch (e) {
         res.status(500).send(e.message);
     }
@@ -486,9 +497,10 @@ async function checkOrder(req, res) {
                 return;
             }
             // find empty order with id
-            const paymentsDB = await sql(`SELECT discord_id, id FROM payments WHERE discord_id = $1 AND id = $2;`, [
+            const paymentsDB = await sql(`SELECT discord_id, id FROM payments WHERE discord_id = $1 AND id = $2 AND event_type = $3;`, [
                 userData.id,
-                subscriptionID
+                subscriptionID,
+                "PAYMENT.SALE.COMPLETED"
             ])
             // console.warn('paymentsDB:', paymentsDB.rows)
             if (paymentsDB.rows.length > 0) {

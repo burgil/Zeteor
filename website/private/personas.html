@@ -89,15 +89,15 @@
           method: 'GET',
         })
         const checkOrderResponse = await checkOrder.json();
-        if (claimOrderResponse.ok) {
+        if (checkOrderResponse.ok) {
           localStorage.removeItem('subscriptionID');
           clearInterval(premiumChecker);
           notify('Success!', 'success', 15000);
           activateFrontendPremium();
         } else {
-          if (!claimOrderResponse.recheck) {
-            if (claimOrderResponse.error) {
-              notify('Error: ' + claimOrderResponse.error, 'error', 30000);
+          if (!checkOrderResponse.recheck) {
+            if (checkOrderResponse.error) {
+              notify('Error: ' + checkOrderResponse.error, 'error', 30000);
               clearInterval(premiumChecker);
               localStorage.removeItem('subscriptionID');
             } else {
