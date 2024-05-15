@@ -18,13 +18,13 @@ var users = {
 	burgil: {
 		username: '👽🅱🆄🆁🅶🅸🅻🧙',
 		nameColor: 'hsl(345, 50%, 52%)',
-		avatar: 'https://cdn.discordapp.com/avatars/243439234294349834/a_3aafe5af825b083d50a464860df2e203.gif?size=128'
+		avatar: '/images/profile.webp'
 	},
 	zeteor: {
 		username: 'Zeteor 👽',
 		nameColor: 'hsl(212, 51%, 59%)',
 		bot: true,
-		avatar: '/images/profile.webp'
+		avatar: '/images/zeteor.jpg'
 	}
 };
 
