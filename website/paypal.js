@@ -34,12 +34,19 @@ async function updateToken() {
         const hours = expirationDate.getHours();
         const minutes = expirationDate.getMinutes();
         const seconds = expirationDate.getSeconds();
-        console.log(`Paypal Token Expiration date and refresh time: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
+        console.log(`Current Paypal Token Expiration date and refresh time: ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
         const currentDate = new Date();
+        const year2 = currentDate.getFullYear();
+        const month2 = currentDate.getMonth() + 1;
+        const day2 = currentDate.getDate();
+        const hours2 = currentDate.getHours();
+        const minutes2 = currentDate.getMinutes();
+        const seconds2 = currentDate.getSeconds();
+        console.log(`Current date and time: ${year2}-${month2}-${day2} ${hours2}:${minutes2}:${seconds2}`);
         if (expirationDate < currentDate) {  // check if expired
             console.log("Token has expired, refreshing!");
         } else {
-            // console.log("Token is still valid.");
+            console.log("Token is still valid.");
             return;
         }
     }
