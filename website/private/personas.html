@@ -109,6 +109,7 @@
         }
       } catch (e) {
         notify('Error: ' + e.message + ' please contact support!', 'error', 30000)
+        clearInterval(premiumChecker);
         localStorage.removeItem('subscriptionID');
       }
     }, 3000);
