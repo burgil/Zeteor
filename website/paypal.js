@@ -322,18 +322,26 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                 confirm - user purchased successfully
                 !false = do nothing - log?
                 */
+               console.log("incoming webhook..", {
+                paymentStatus,
+                body: req.body
+               })
                 if (req.body.resource?.id && req.body.event_type && req.body.summary && req.body.create_time && req.body.resource?.amount?.total && req.body.resource?.amount?.currency) {
+                    console.log("processing webhook...")
                     if (paymentStatus == 'reject') {
-
+                        console.log("rejected")
                     } else if (paymentStatus == 'cancel') {
-
+                        console.log("cancelled")
                     } else if (paymentStatus == 'confirm') { // PAYMENT.SALE.COMPLETED
+                        console.log("confirm webhook")
                         const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
                             req.body.resource.billing_agreement_id
                         ])
                         console.warn('userDB:', userDB.rows)
                         let claimedDiscordID = '';
                         if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
+                        console.log("claimedDiscordID", claimedDiscordID)
+                        console.log("req.body.resource.billing_agreement_id", req.body.resource.billing_agreement_id)
                         const insertPayment = await generateInsertStatement('payments', [
                             claimedDiscordID, // discord_id
                             req.body.resource.billing_agreement_id, // id
@@ -344,7 +352,11 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                             req.body.resource.amount.currency, // currency
                         ])
                         await sql(insertPayment.sql, insertPayment.values);
+                    } else {
+                        console.warn("unknown webhook type", paymentStatus)
                     }
+                } else {
+                    console.warn("webhook failed")
                 }
             } catch (e2) {
                 console.error('processPaypalWebhooks Sub Error: ' + e2.message);
