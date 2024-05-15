@@ -82,7 +82,6 @@ paypal.Buttons({
         //         plan_id: 'P-6B898830LY4944547MZBTOXQ'
         //     });
         // }
-        console.log(actions.subscription.create)
         return actions.subscription.create({
             custom_id: invoiceID,
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
