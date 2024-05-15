@@ -294,7 +294,7 @@ app.get('/get-user', async (req, res) => {
         }
         if (usersCache[req.cookies.auth_token] && !req.query.update) {
             const currentTime = Date.now();
-            const lastCheckTime = token_db[req.cookies.auth_token].premium_last_check || 0;
+            const lastCheckTime = usersCache[req.cookies.auth_token].premium_last_check || 0;
             const timeDifference = currentTime - lastCheckTime;
             const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
             console.log("cache - Should return payment status?", shouldRunCode)
@@ -302,7 +302,7 @@ app.get('/get-user', async (req, res) => {
                 const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
                 const userDB = await sql(userDBQuery, [usersCache[req.cookies.auth_token].id]);
                 usersCache[req.cookies.auth_token].premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
-                token_db[req.cookies.auth_token].premium_last_check = Date.now();
+                usersCache[req.cookies.auth_token].premium_last_check = Date.now();
             }
             res.send(JSON.stringify(usersCache[req.cookies.auth_token]));
             return;
@@ -371,14 +371,14 @@ app.get('/get-user', async (req, res) => {
                                 guilds: adminGuilds,
                             };
                             const currentTime = Date.now();
-                            const lastCheckTime = token_db[req.cookies.auth_token].premium_last_check || 0;
+                            const lastCheckTime = usersCache[req.cookies.auth_token].premium_last_check || 0;
                             const timeDifference = currentTime - lastCheckTime;
                             const shouldRunCode = timeDifference > (5 * 60 * 1000); // 5 minutes in milliseconds
                             if (shouldRunCode) {
                                 const userDBQuery = `SELECT payment_status FROM users WHERE discord_id = $1;`;
                                 const userDB = await sql(userDBQuery, [user.data.id]);
                                 output.premium = userDB.rows.length > 0 && userDB.rows[0].payment_status == 'confirm';
-                                token_db[req.cookies.auth_token].premium_last_check = Date.now();
+                                usersCache[req.cookies.auth_token].premium_last_check = Date.now();
                             }
                             usersCache[req.cookies.auth_token] = output;
                             responder(JSON.stringify(usersCache[req.cookies.auth_token]));
