@@ -356,6 +356,10 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                         } else {
                             console.warn("unknown webhook type", paymentStatus)
                         }
+                        const updateUserPayment = await generateUpdateStatement('users', userData.id, {
+                            payment_status: paymentStatus,
+                        });
+                        await sql(updateUserPayment.sql, updateUserPayment.values)
                     } else {
                         console.warn("webhook failed")
                     }

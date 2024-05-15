@@ -34,6 +34,11 @@ const tables = {
             data_type: 'character varying',
             sql_type: 'VARCHAR(100)',
         },
+        {
+            column_name: 'payment_status',
+            data_type: 'character varying',
+            sql_type: 'VARCHAR(100)',
+        },
     ],
     'personas': [
         {
