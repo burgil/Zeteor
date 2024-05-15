@@ -23,9 +23,8 @@ function confetti_show(event) {
         shapes: ["heart"],
         colors: ["FFC0CB", "FF69B4", "FF1493", "C71585"]
     };
-    const count = 200;
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
+    const mouseX = !event ? window.innerWidth / 2 : event.clientX || 0;
+    const mouseY = !event ? window.innerHeight / 2 : event.clientY || 0;
     const originX = mouseX / window.innerWidth;
     const originY = mouseY / window.innerHeight;
     const origin = { x: originX, y: originY };

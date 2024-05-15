@@ -1,3 +1,4 @@
+let invoiceID;
 async function getUser(retries = 0) {
     try {
         let updater = '';
@@ -28,6 +29,7 @@ async function getUser(retries = 0) {
         }
         const user = await fetch('/get-user' + updater);
         const userData = await user.json();
+        invoiceID = userData.random;
         if (userData.premium) premiumUI();
         if (userData.error) {
             if (userData.error == 'Request failed with status code 429') {

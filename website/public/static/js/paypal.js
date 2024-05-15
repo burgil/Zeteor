@@ -47,15 +47,43 @@ paypal.Buttons({
         layout: 'vertical',
         label: 'paypal'
     },
+    onError: function (err) {
+        // FIXME: show the user an error message
+        notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
+        console.error(err);
+    },
+    onClick: function (data) {
+        // FIXME: do something cool when the button is clicked
+        confetti_show();
+    },
     createSubscription: function (data, actions) {
+        return actions.subscription.create({
+            purchase_units: [{
+                custom_id: invoiceID,
+                invoice_id: invoiceID,
+            }],
+            plan_id: 'P-6B898830LY4944547MZBTOXQ'
+        });
+    },
+    createSubscription(data, actions) {
+        console.log("data", data)
+        console.log("actions", actions)
+        // if (updatedSubscription && (status === "ACTIVE" || status === "SUSPENDED")) {
+        //     // if subscription exists, revise it by chaning the plan id
+        //     console.log("revise")
+        //     return actions.subscription.revise(subscriptionId, {
+        //         plan_id: 'P-6B898830LY4944547MZBTOXQ'
+        //     });
+        // }
+        console.log("normal")
         return actions.subscription.create({
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
         });
     },
     onApprove: async function (data, actions) {
-        console.log("data", data)
+        // console.log("data", data)
         // console.log("actions", actions)
-        // return actions.order.capture().then( function (details) {
+        // return actions.order.capture().then(function (details) {
         //   console.log("details", details)
         //   alert(details.payer.name.given_name)
         // })

@@ -25,6 +25,18 @@ let togetherAPIKey;
 try {
     togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
 } catch (fileErr) { }
+let randomUUID;
+try {
+    randomUUID = fs.readFileSync('../randomUUID', 'utf8').trim();
+} catch (fileErr) {
+    randomUUID = crypto.randomUUID();
+    try {
+        fs.writeFileSync('./randomUUID', randomUUID, 'utf8');
+    } catch (fileErr2) { }
+}
+async function sha256(str) {
+    return hex(await crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(str + randomUUID)));
+}
 const { v4: uuidv4 } = require('uuid');
 const app = express();
 const { isSecure } = require('./system.js');
@@ -294,6 +306,7 @@ app.get('/get-user', async (req, res) => {
         }
         if (usersCache[req.cookies.auth_token] && !req.query.update) {
             const output = { // sent to the client
+                random: usersCache[req.cookies.auth_token].random,
                 id: usersCache[req.cookies.auth_token].id,
                 username: usersCache[req.cookies.auth_token].username,
                 global_name: usersCache[req.cookies.auth_token].global_name,
@@ -375,6 +388,7 @@ app.get('/get-user', async (req, res) => {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
                             }
                             const output = { // sent to the client
+                                random: await sha256(user.data.id),
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
