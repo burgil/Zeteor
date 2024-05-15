@@ -408,6 +408,12 @@ async function getPaypalLogs(req, res) { // http://localhost/paypal-logs
     res.end();
 }
 
+async function getPaypalLogs2(req, res) { // http://localhost/paypal-logs2
+    const paymentsDB = await sql(`SELECT * FROM users;`)
+    res.write(JSON.stringify(paymentsDB.rows));
+    res.end();
+}
+
 async function cleanPaypalLogs(req, res) { // http://localhost/clean-paypal-logs
     await sql(`DELETE FROM payments;`)
     res.write('ok');
@@ -427,6 +433,11 @@ const paypalRoutes = [
     },
     {
         method: 'GET',
+        route: '/paypal-logs2',
+        func: getPaypalLogs2
+    },
+    {
+        method: 'GET',
         route: '/clean-paypal-logs',
         func: cleanPaypalLogs
     },
@@ -434,7 +445,7 @@ const paypalRoutes = [
         method: 'POST',
         route: '/claim-paypal',
         func: claimOrder
-    }
+    },
 ]
 
 module.exports = paypalRoutes;
