@@ -107,7 +107,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
         const webhookEvent = req.body;
         const verificationStatus = await verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, transmissionTime, webhookEvent);
         if (verificationStatus.verification_status == 'SUCCESS') {
-            req.status(200).send('ok');
+            res.status(200).send('ok');
             let paymentStatus = false;
             switch (body.event_type) {
                 // Payments V2
@@ -348,10 +348,10 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                     }
             }
         } else {
-            req.status(401).send('bad');
+            res.status(401).send('bad');
         }
     } catch (e) {
-        req.status(500).send('processPaypalWebhooks Error: ' + e.message);
+        res.status(500).send('processPaypalWebhooks Error: ' + e.message);
     }
 }
 
