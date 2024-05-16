@@ -3,7 +3,7 @@ const fs = require('fs');
 let token_db = {};
 function db_save() {
     try {
-        fs.writeFileSync('./token_db.json', JSON.stringify(token_db), 'utf8');
+        fs.writeFileSync('./ignore/token_db.json', JSON.stringify(token_db), 'utf8');
         return true;
     } catch (dbError) {
         return false;
@@ -36,14 +36,14 @@ function remove_expired() {
     console.log("finished checking token db..")
     if (didChange) {
         console.log("saved tokens db");
-        fs.writeFileSync('./token_db.json', JSON.stringify(token_db), 'utf8');
+        fs.writeFileSync('./ignore/token_db.json', JSON.stringify(token_db), 'utf8');
     } else {
         console.log("didn't save");
     }
 }
 function db_load() {
     try {
-        const tokensDB = fs.readFileSync('./token_db.json', 'utf8');
+        const tokensDB = fs.readFileSync('./ignore/token_db.json', 'utf8');
         return JSON.parse(tokensDB);
     } catch (dbError) {
         return false;

@@ -15,23 +15,23 @@ const { sql, generateInsertStatement, generateUpdateStatement, generateDeleteSta
 const fs = require('fs');
 let client_id;
 try {
-    client_id = fs.readFileSync('../clientID', 'utf8').trim();
+    client_id = fs.readFileSync('/clientID', 'utf8').trim();
 } catch (fileErr) { }
 let client_secret;
 try {
-    client_secret = fs.readFileSync('../secret', 'utf8').trim();
+    client_secret = fs.readFileSync('/secret', 'utf8').trim();
 } catch (fileErr) { }
 let togetherAPIKey;
 try {
-    togetherAPIKey = fs.readFileSync('../togetherAPIKey', 'utf8').trim();
+    togetherAPIKey = fs.readFileSync('/togetherAPIKey', 'utf8').trim();
 } catch (fileErr) { }
 let randomUUID;
 try {
-    randomUUID = fs.readFileSync('../randomUUID', 'utf8').trim();
+    randomUUID = fs.readFileSync('/randomUUID', 'utf8').trim();
 } catch (fileErr) {
     randomUUID = crypto.randomUUID();
     try {
-        fs.writeFileSync('../randomUUID', randomUUID, 'utf8');
+        fs.writeFileSync('/randomUUID', randomUUID, 'utf8');
     } catch (fileErr2) { }
 }
 async function sha256(message) {

@@ -6,22 +6,22 @@ const { isSecure } = require('./system.js');
 
 let paypalClientId;
 try {
-    paypalClientId = fs.readFileSync('../paypalClientId', 'utf8').trim();
+    paypalClientId = fs.readFileSync('./ignore/paypalClientId', 'utf8').trim();
 } catch (fileErr) { }
 
 let paypalClientSecret;
 try {
-    paypalClientSecret = fs.readFileSync('../paypalClientSecret', 'utf8').trim();
+    paypalClientSecret = fs.readFileSync('./ignore/paypalClientSecret', 'utf8').trim();
 } catch (fileErr) { }
 
 let paypalWebhookId;
 try {
-    paypalWebhookId = fs.readFileSync('../paypalWebhookId', 'utf8').trim();
+    paypalWebhookId = fs.readFileSync('./ignore/paypalWebhookId', 'utf8').trim();
 } catch (fileErr) { }
 
 let cachedToken;
 try {
-    cachedToken = fs.readFileSync('../cachedToken.json', 'utf8').trim();
+    cachedToken = fs.readFileSync('./ignore/cachedToken.json', 'utf8').trim();
     cachedToken = JSON.parse(cachedToken);
 } catch (fileErr) { }
 

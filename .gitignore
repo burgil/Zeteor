@@ -1,6 +1,8 @@
 secret
 clientID
 randomUUID
+ignore/*
+ignore/*.*
 cachedToken.json
 paypalWebhookId
 paypalClientSecret
