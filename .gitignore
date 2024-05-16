@@ -3,6 +3,10 @@ clientID
 randomUUID
 ignore/*
 ignore/*.*
+nohup.out
+nohup
+logs.txt
+logs.updater.txt
 cachedToken.json
 paypalWebhookId
 paypalClientSecret

@@ -2,6 +2,25 @@ const { Client } = require('pg');
 
 const skipYesNo = true;
 
+/*
+    // port: 5432
+    // pass: postgres
+    // "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres
+    sudo -u postgres psql
+    sudo su
+    sudo -i -u postgres
+    \d
+    \connect zeteordb
+    ALTER USER postgres WITH PASSWORD 'new_password';
+    git checkout -- website_update.sh
+    git fetch
+    git pull
+    chmod +x website_update.sh
+    cd website
+    npm run updater
+    ./website_update.sh
+*/
+
 const tables = {
     'users': [
         {
@@ -155,24 +174,6 @@ const tables = {
     ]
 };
 
-/*
-    // port: 5432
-    // pass: postgres
-    // "C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres
-    sudo -u postgres psql
-    sudo su
-    sudo -i -u postgres
-    \d
-    \connect zeteordb
-    ALTER USER postgres WITH PASSWORD 'new_password';
-    git checkout -- website/website_update.sh
-    git fetch
-    git pull
-    chmod +x website/website_update.sh
-    cd website
-    npm run updater
-    ./website_update.sh
-*/
 const client = new Client({
     user: 'postgres', // string | undefined
     database: 'zeteordb', // string | undefined
