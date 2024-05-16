@@ -136,7 +136,7 @@ const tables = {
     ],
     'payments': [
         {
-            column_name: 'discord_id', // index must be first
+            column_name: 'payment_id', // index must be first
             data_type: 'character varying',
             sql_type: 'VARCHAR(100)',
         },

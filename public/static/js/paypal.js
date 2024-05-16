@@ -8,7 +8,7 @@ function purchaseValidator() {
             })
             const checkOrderResponse = await checkOrder.json();
             if (checkOrderResponse.ok) {
-                localStorage.removeItem('subscriptionID');
+                localStorage.removeItem('waitingForSubscription'); // subscriptionID
                 clearInterval(premiumChecker);
                 notify('Success!', 'success', 15000);
                 premiumUI();
@@ -23,11 +23,11 @@ function purchaseValidator() {
                     if (checkOrderResponse.error) {
                         notify('Error: ' + checkOrderResponse.error, 'error', 30000);
                         clearInterval(premiumChecker);
-                        localStorage.removeItem('subscriptionID');
+                        localStorage.removeItem('waitingForSubscription'); // subscriptionID
                     } else {
                         notify('Error: Order could not be claimed, please contact support!', 'error', 30000);
                         clearInterval(premiumChecker);
-                        localStorage.removeItem('subscriptionID');
+                        localStorage.removeItem('waitingForSubscription'); // subscriptionID
                     }
                 }
             }
@@ -38,7 +38,7 @@ function purchaseValidator() {
         }
     }, 3000);
 }
-const checkPremium = localStorage.getItem('subscriptionID');
+const checkPremium = localStorage.getItem('waitingForSubscription'); // subscriptionID
 if (checkPremium) purchaseValidator();
 let paypalButton;
 paypal.Buttons({
@@ -51,7 +51,7 @@ paypal.Buttons({
         size: 'small',
         color:  'blue',
         label:  'pay',
-        height: 55,
+        height: 42,
         tagline: 'false'
     },
     onError: function (err) {
@@ -139,26 +139,28 @@ paypal.Buttons({
         //   alert(details.payer.name.given_name)
         // })
         try {
-            const claimOrder = await fetch('/claim-paypal', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    subscriptionID: data.subscriptionID
-                })
-            })
-            const claimOrderResponse = await claimOrder.json();
-            if (claimOrderResponse.ok) {
-                localStorage.setItem('subscriptionID', data.subscriptionID);
-                purchaseValidator();
-            } else {
-                if (claimOrderResponse.error) {
-                    notify('Error: ' + claimOrderResponse.error, 'error', 30000);
-                } else {
-                    notify('Error: Order could not be claimed, please contact support!', 'error', 30000);
-                }
-            }
+            // const claimOrder = await fetch('/claim-paypal', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         subscriptionID: data.subscriptionID
+            //     })
+            // })
+            // const claimOrderResponse = await claimOrder.json();
+            // if (claimOrderResponse.ok) {
+            //     localStorage.setItem('subscriptionID', data.subscriptionID);
+            //     purchaseValidator();
+            // } else {
+            //     if (claimOrderResponse.error) {
+            //         notify('Error: ' + claimOrderResponse.error, 'error', 30000);
+            //     } else {
+            //         notify('Error: Order could not be claimed, please contact support!', 'error', 30000);
+            //     }
+            // }
+            localStorage.setItem('waitingForSubscription', 'true');
+            purchaseValidator();
         } catch (e) {
             notify('Error: ' + e.message + ' please contact support!', 'error', 30000)
         }

@@ -338,46 +338,20 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                         console.log("processing webhook...")
                         if (paymentStatus == 'reject') { // -----------------
                             console.log("rejected")
-                            const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
-                                webhookEvent.resource.id
-                            ]);
-                            console.warn('userDB:', userDB.rows)
-                            let claimedDiscordID = '';
-                            if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
-                            console.log("claimedDiscordID", claimedDiscordID)
-                            if (claimedDiscordID && claimedDiscordID != '') {
-                                const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
-                                    payment_status: 'reject',
-                                });
-                                await sql(updateUserPayment.sql, updateUserPayment.values)
-                            }
+                            const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
+                                payment_status: 'reject',
+                            }, 'payment_id');
+                            await sql(updateUserPayment.sql, updateUserPayment.values)
                         } else if (paymentStatus == 'cancel') { // ----------------- BILLING.SUBSCRIPTION.CANCELLED
                             console.log("cancelled")
-                            const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
-                                webhookEvent.resource.id
-                            ]);
-                            console.warn('userDB:', userDB.rows)
-                            let claimedDiscordID = '';
-                            if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
-                            console.log("claimedDiscordID", claimedDiscordID)
-                            if (claimedDiscordID && claimedDiscordID != '') {
-                                const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
-                                    payment_status: 'cancel',
-                                });
-                                await sql(updateUserPayment.sql, updateUserPayment.values)
-                            }
+                            const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
+                                payment_status: 'cancel',
+                            }, 'payment_id');
+                            await sql(updateUserPayment.sql, updateUserPayment.values)
                         } else if (paymentStatus == 'confirm') { // ----------------- PAYMENT.SALE.COMPLETED
                             console.log("confirm webhook")
-                            const userDB = await sql(`SELECT discord_id FROM users WHERE payment_id = $1;`, [
-                                webhookEvent.resource.billing_agreement_id
-                            ]);
-                            console.warn('userDB:', userDB.rows)
-                            let claimedDiscordID = '';
-                            if (userDB.rows.length > 0) claimedDiscordID = userDB.rows[0].discord_id;
-                            console.log("claimedDiscordID", claimedDiscordID)
-                            console.log("webhookEvent.resource.billing_agreement_id", webhookEvent.resource.billing_agreement_id)
                             const insertPayment = await generateInsertStatement('payments', {
-                                discord_id: claimedDiscordID,
+                                payment_id: webhookEvent.resource.custom || webhookEvent.resource.custom_id,
                                 id: webhookEvent.resource.billing_agreement_id,
                                 event_type: webhookEvent.event_type,
                                 summary: webhookEvent.summary,
@@ -386,12 +360,10 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                                 currency: webhookEvent.resource.amount.currency,
                             })
                             await sql(insertPayment.sql, insertPayment.values);
-                            if (claimedDiscordID && claimedDiscordID != '') {
-                                const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
-                                    payment_status: 'confirm',
-                                });
-                                await sql(updateUserPayment.sql, updateUserPayment.values)
-                            }
+                            const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
+                                payment_status: 'confirm',
+                            }, 'payment_id');
+                            await sql(updateUserPayment.sql, updateUserPayment.values)
                         } else {
                             console.warn("unknown webhook type", paymentStatus)
                         }
@@ -409,54 +381,6 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
         }
     } catch (e) {
         res.status(500).send('processPaypalWebhooks Error: ' + e.message);
-    }
-}
-
-async function claimOrder(req, res) {
-    try {
-        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
-        if (isSecure) {
-            if (currentOrigin.host != 'zeteor.roboticeva.com') {
-                res.send('Invalid Request');
-                return;
-            }
-        } else {
-            if (currentOrigin.host != 'localhost') {
-                res.send('Invalid Request');
-                return;
-            }
-        }
-        if (!req.cookies.auth_token) {
-            res.send(JSON.stringify({
-                error: 'Not logged in'
-            }));
-            return;
-        }
-        const userData = token_db[req.cookies.auth_token];
-        if (!userData) {
-            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-            res.send(JSON.stringify({
-                error: 'Not logged in'
-            }));
-            return;
-        }
-        const subscriptionID = req.body.subscriptionID;
-        if (!subscriptionID || subscriptionID.trim() == '') {
-            res.send(JSON.stringify({
-                error: 'Invalid order id'
-            }));
-            return;
-        }
-        // update user with the new order id
-        const updateUserPayment = await generateUpdateStatement('users', userData.id, {
-            payment_id: subscriptionID,
-        });
-        await sql(updateUserPayment.sql, updateUserPayment.values)
-        res.send(JSON.stringify({
-            ok: true
-        }))
-    } catch (e) {
-        res.status(500).send(e.message);
     }
 }
 
@@ -492,11 +416,8 @@ async function checkOrder(req, res) {
             }));
             return;
         }
-        const userDB = await sql(`SELECT payment_id FROM users WHERE discord_id = $1;`, [
-            userData.id,
-        ])
-        if (userDB.rows.length > 0) {
-            const subscriptionID = userDB.rows[0].payment_id;
+        if (!token_db[req.cookies.auth_token].random) {
+            const subscriptionID = token_db[req.cookies.auth_token].random;
             if (!subscriptionID || subscriptionID.trim() == '') {
                 res.send(JSON.stringify({
                     error: 'Invalid order id'
@@ -504,8 +425,7 @@ async function checkOrder(req, res) {
                 return;
             }
             // find empty order with id
-            const paymentsDB = await sql(`SELECT discord_id, id FROM payments WHERE discord_id = $1 AND id = $2 AND event_type = $3;`, [
-                userData.id,
+            const paymentsDB = await sql(`SELECT 1 FROM payments WHERE payment_id = $1 AND event_type = $2;`, [
                 subscriptionID,
                 "PAYMENT.SALE.COMPLETED"
             ])
@@ -535,23 +455,71 @@ async function checkOrder(req, res) {
     }
 }
 
-async function getPaypalLogs(req, res) { // http://localhost/paypal-logs
-    const paymentsDB = await sql(`SELECT * FROM payments;`)
-    res.write(JSON.stringify(paymentsDB.rows));
-    res.end();
-}
+// async function claimOrder(req, res) {
+//     try {
+//         const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+//         if (isSecure) {
+//             if (currentOrigin.host != 'zeteor.roboticeva.com') {
+//                 res.send('Invalid Request');
+//                 return;
+//             }
+//         } else {
+//             if (currentOrigin.host != 'localhost') {
+//                 res.send('Invalid Request');
+//                 return;
+//             }
+//         }
+//         if (!req.cookies.auth_token) {
+//             res.send(JSON.stringify({
+//                 error: 'Not logged in'
+//             }));
+//             return;
+//         }
+//         const userData = token_db[req.cookies.auth_token];
+//         if (!userData) {
+//             res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+//             res.send(JSON.stringify({
+//                 error: 'Not logged in'
+//             }));
+//             return;
+//         }
+//         const subscriptionID = req.body.subscriptionID;
+//         if (!subscriptionID || subscriptionID.trim() == '') {
+//             res.send(JSON.stringify({
+//                 error: 'Invalid order id'
+//             }));
+//             return;
+//         }
+//         // update user with the new order id
+//         const updateUserPayment = await generateUpdateStatement('users', userData.id, {
+//             payment_id: subscriptionID,
+//         });
+//         await sql(updateUserPayment.sql, updateUserPayment.values)
+//         res.send(JSON.stringify({
+//             ok: true
+//         }))
+//     } catch (e) {
+//         res.status(500).send(e.message);
+//     }
+// }
 
-async function getPaypalLogs2(req, res) { // http://localhost/paypal-logs2
-    const paymentsDB = await sql(`SELECT * FROM users;`)
-    res.write(JSON.stringify(paymentsDB.rows));
-    res.end();
-}
+// async function getPaypalLogs(req, res) { // http://localhost/paypal-logs
+//     const paymentsDB = await sql(`SELECT * FROM payments;`)
+//     res.write(JSON.stringify(paymentsDB.rows));
+//     res.end();
+// }
 
-async function cleanPaypalLogs(req, res) { // http://localhost/clean-paypal-logs
-    await sql(`DELETE FROM payments;`)
-    res.write('ok');
-    res.end();
-}
+// async function getPaypalLogs2(req, res) { // http://localhost/paypal-logs2
+//     const paymentsDB = await sql(`SELECT * FROM users;`)
+//     res.write(JSON.stringify(paymentsDB.rows));
+//     res.end();
+// }
+
+// async function cleanPaypalLogs(req, res) { // http://localhost/clean-paypal-logs
+//     await sql(`DELETE FROM payments;`)
+//     res.write('ok');
+//     res.end();
+// }
 
 const paypalRoutes = [
     {
@@ -559,26 +527,26 @@ const paypalRoutes = [
         route: '/paypal',
         func: processPaypalWebhooks
     },
-    {
-        method: 'GET',
-        route: '/paypal-logs',
-        func: getPaypalLogs
-    },
-    {
-        method: 'GET',
-        route: '/paypal-logs2',
-        func: getPaypalLogs2
-    },
-    {
-        method: 'GET',
-        route: '/clean-paypal-logs',
-        func: cleanPaypalLogs
-    },
-    {
-        method: 'POST',
-        route: '/claim-paypal',
-        func: claimOrder
-    },
+    // {
+    //     method: 'GET',
+    //     route: '/paypal-logs',
+    //     func: getPaypalLogs
+    // },
+    // {
+    //     method: 'GET',
+    //     route: '/paypal-logs2',
+    //     func: getPaypalLogs2
+    // },
+    // {
+    //     method: 'GET',
+    //     route: '/clean-paypal-logs',
+    //     func: cleanPaypalLogs
+    // },
+    // {
+    //     method: 'POST',
+    //     route: '/claim-paypal',
+    //     func: claimOrder
+    // },
     {
         method: 'GET',
         route: '/check-paypal',

@@ -19,8 +19,12 @@ npm install
 sleep 1
 echo "Cleaning Logs..."
 sleep 1
-rm logs.txt
-rm logs.updater.txt
+if [ ! -d "logs" ]; then
+    mkdir "logs"
+fi
+current_time=$(date "+%Y%m%d%H%M%S")
+mv logs.txt "logs/logs_$current_time.txt"
+mv logs.updater.txt "logs/logs_updater_$current_time.txt"
 sleep 1
 echo "Starting Website..."
 nohup npm start > logs.txt 2>&1 &
@@ -54,8 +58,12 @@ while true; do
             sleep 1
             echo "Cleaning Logs..."
             sleep 1
-            rm logs.txt
-            rm logs.updater.txt
+            if [ ! -d "logs" ]; then
+                mkdir "logs"
+            fi
+            current_time=$(date "+%Y%m%d%H%M%S")
+            mv logs.txt "logs/logs_$current_time.txt"
+            mv logs.updater.txt "logs/logs_updater_$current_time.txt"
             sleep 1
             echo "Starting Website..."
             nohup npm start > logs.txt 2>&1 &

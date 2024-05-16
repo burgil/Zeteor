@@ -311,7 +311,7 @@ app.get('/get-user', async (req, res) => {
         }
         if (usersCache[req.cookies.auth_token] && !req.query.update) {
             const output = { // sent to the client
-                random: usersCache[req.cookies.auth_token].random,
+                random: token_db[req.cookies.auth_token].random,
                 id: usersCache[req.cookies.auth_token].id,
                 username: usersCache[req.cookies.auth_token].username,
                 global_name: usersCache[req.cookies.auth_token].global_name,
@@ -377,12 +377,14 @@ app.get('/get-user', async (req, res) => {
                             if (token_db[req.cookies.auth_token].username != user.data.username || token_db[req.cookies.auth_token].id != user.data.id || token_db[req.cookies.auth_token].global_name != user.data.global_name) {
                                 token_db[req.cookies.auth_token].username = user.data.username;
                                 token_db[req.cookies.auth_token].id = user.data.id;
+                                token_db[req.cookies.auth_token].random = await sha256(user.data.id);
                                 token_db[req.cookies.auth_token].global_name = user.data.global_name;
                                 db_save();
                                 const insertOrUpdateUser = await generateInsertOrUpdateStatement('users', user.data.id, {
                                     last_login: token_db[req.cookies.auth_token].timestamp,
                                     global_name: user.data.global_name,
                                     username: user.data.username,
+                                    payment_id: token_db[req.cookies.auth_token].random
                                 });
                                 await sql(insertOrUpdateUser.sql, insertOrUpdateUser.values);
                             }
@@ -392,9 +394,8 @@ app.get('/get-user', async (req, res) => {
                             } else {
                                 avatarUrl = `https://cdn.discordapp.com/avatars/${user.data.id}/${user.data.avatar}.png`;
                             }
-                            const randomHash = await sha256(user.data.id);
                             const output = { // sent to the client
-                                random: randomHash,
+                                random: token_db[req.cookies.auth_token].random,
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
@@ -402,7 +403,6 @@ app.get('/get-user', async (req, res) => {
                                 guilds: adminGuilds,
                             };
                             usersCache[req.cookies.auth_token] = { // saves in the server
-                                random: randomHash,
                                 id: user.data.id,
                                 username: user.data.username,
                                 global_name: user.data.global_name,
