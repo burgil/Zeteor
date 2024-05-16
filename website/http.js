@@ -31,7 +31,7 @@ try {
 } catch (fileErr) {
     randomUUID = crypto.randomUUID();
     try {
-        fs.writeFileSync('./randomUUID', randomUUID, 'utf8');
+        fs.writeFileSync('../randomUUID', randomUUID, 'utf8');
     } catch (fileErr2) { }
 }
 async function sha256(message) {
