@@ -11,6 +11,7 @@ cachedToken.json
 paypalWebhookId
 paypalClientSecret
 paypalClientId
+package-lock.json
 ssl/*
 ssl/*.*
 ssl/*.pem
