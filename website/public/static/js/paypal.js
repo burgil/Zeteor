@@ -118,7 +118,7 @@ paypal.Buttons({
                 INVNUM: invoiceID,
                 invoice_id: invoiceID,
             },
-            // custom_id: invoiceID,
+            custom_id: invoiceID,
             id: invoiceID,
             reference_id: invoiceID,
             user_id: invoiceID,
@@ -128,7 +128,6 @@ paypal.Buttons({
             invoice_id: invoiceID,
             auto_renewal: true,
             quantity: 1,
-            'custom_id': 'my-custom-code-for-integration',
             plan_id: 'P-6B898830LY4944547MZBTOXQ'
         });
     },
