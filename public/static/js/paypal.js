@@ -64,7 +64,7 @@ paypal.Buttons({
         }
     },
     onCancel: function (data) {
-        console.log("cancel", data)
+        // console.log("cancel", data)
     },
     onInit: function (data, actions) {
         paypalButton = actions;

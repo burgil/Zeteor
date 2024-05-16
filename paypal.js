@@ -360,7 +360,7 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                                 currency: webhookEvent.resource.amount.currency,
                             })
                             await sql(insertPayment.sql, insertPayment.values);
-                            const updateUserPayment = await generateUpdateStatement('users', claimedDiscordID, {
+                            const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
                                 payment_status: 'confirm',
                             }, 'payment_id');
                             await sql(updateUserPayment.sql, updateUserPayment.values)
@@ -416,7 +416,7 @@ async function checkOrder(req, res) {
             }));
             return;
         }
-        if (!token_db[req.cookies.auth_token].random) {
+        if (token_db[req.cookies.auth_token].random) {
             const subscriptionID = token_db[req.cookies.auth_token].random;
             if (!subscriptionID || subscriptionID.trim() == '') {
                 res.send(JSON.stringify({
