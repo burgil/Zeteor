@@ -7,14 +7,12 @@ echo "Restarting Website..."
 sleep 1
 ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
 sleep 1
-cd ..
 echo "Fetching Updates..."
 sleep 1
 git fetch
 echo "Pulling Updates..."
 sleep 1
 git pull
-cd website
 echo "Installing Website..."
 sleep 1
 npm install
@@ -43,14 +41,12 @@ while true; do
             sleep 1
             ps aux | grep "ZeteorMainWebsite" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {}
             sleep 1
-            cd ..
             echo "Fetching Updates..."
             sleep 1
             git fetch
             echo "Pulling Updates..."
             sleep 1
             git pull
-            cd website
             echo "Installing Website..."
             sleep 1
             npm install

@@ -16,7 +16,6 @@ const skipYesNo = true;
     git fetch
     git pull
     chmod +x website_update.sh
-    cd website
     npm run updater
     ./website_update.sh
 */
