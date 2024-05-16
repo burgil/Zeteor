@@ -503,23 +503,29 @@ async function checkOrder(req, res) {
 //     }
 // }
 
-// async function getPaypalLogs(req, res) { // http://localhost/paypal-logs
-//     const paymentsDB = await sql(`SELECT * FROM payments;`)
-//     res.write(JSON.stringify(paymentsDB.rows));
-//     res.end();
-// }
+async function getPaypalLogs(req, res) { // http://localhost/paypal-logs
+    const paymentsDB = await sql(`SELECT * FROM payments;`)
+    res.write(JSON.stringify(paymentsDB.rows));
+    res.end();
+}
 
-// async function getPaypalLogs2(req, res) { // http://localhost/paypal-logs2
-//     const paymentsDB = await sql(`SELECT * FROM users;`)
-//     res.write(JSON.stringify(paymentsDB.rows));
-//     res.end();
-// }
+async function getPaypalLogs2(req, res) { // http://localhost/paypal-logs2
+    const paymentsDB = await sql(`SELECT * FROM users;`)
+    res.write(JSON.stringify(paymentsDB.rows));
+    res.end();
+}
 
-// async function cleanPaypalLogs(req, res) { // http://localhost/clean-paypal-logs
-//     await sql(`DELETE FROM payments;`)
-//     res.write('ok');
-//     res.end();
-// }
+async function cleanPaypalLogs(req, res) { // http://localhost/clean-paypal-logs
+    await sql(`DELETE FROM payments;`)
+    res.write('ok');
+    res.end();
+}
+
+async function cleanPaypalLogs2(req, res) { // http://localhost/clean-paypal-logs
+    await sql(`DELETE FROM payments;`)
+    res.write('ok');
+    res.end();
+}
 
 const paypalRoutes = [
     {
@@ -527,21 +533,26 @@ const paypalRoutes = [
         route: '/paypal',
         func: processPaypalWebhooks
     },
-    // {
-    //     method: 'GET',
-    //     route: '/paypal-logs',
-    //     func: getPaypalLogs
-    // },
-    // {
-    //     method: 'GET',
-    //     route: '/paypal-logs2',
-    //     func: getPaypalLogs2
-    // },
-    // {
-    //     method: 'GET',
-    //     route: '/clean-paypal-logs',
-    //     func: cleanPaypalLogs
-    // },
+    {
+        method: 'GET',
+        route: '/paypal-logs',
+        func: getPaypalLogs
+    },
+    {
+        method: 'GET',
+        route: '/paypal-logs2',
+        func: getPaypalLogs2
+    },
+    {
+        method: 'GET',
+        route: '/clean-paypal-logs',
+        func: cleanPaypalLogs
+    },
+    {
+        method: 'GET',
+        route: '/clean-paypal-logs2',
+        func: cleanPaypalLogs2
+    },
     // {
     //     method: 'POST',
     //     route: '/claim-paypal',
