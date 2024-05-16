@@ -11,6 +11,7 @@ function purchaseValidator() {
                 localStorage.removeItem('waitingForSubscription'); // subscriptionID
                 clearInterval(premiumChecker);
                 notify('Success!', 'success', 15000);
+                localStorage.deleteItem('lastUpdate');
                 premiumUI();
                 // minified confetti: (center sreen)
                 const defaults = { spread: 360, ticks: 50, gravity: 0, decay: .94, startVelocity: 30, shapes: ["star", "circle", "heart", "square", "triangle", "diamond"], colors: ["FFE400", "FFBD00", "E89400", "FFCA6C", "FDFFB8"] };
