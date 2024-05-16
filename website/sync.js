@@ -170,6 +170,7 @@ const tables = {
     git pull
     chmod +x website/website_update.sh
     cd website
+    npm run updater
     ./website_update.sh
 */
 const client = new Client({
