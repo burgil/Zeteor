@@ -63,7 +63,6 @@ while true; do
             fi
             current_time=$(date "+%Y%m%d%H%M%S")
             mv logs.txt "logs/logs_$current_time.txt"
-            mv logs.updater.txt "logs/logs_updater_$current_time.txt"
             sleep 1
             echo "Starting Website..."
             nohup npm start > logs.txt 2>&1 &
