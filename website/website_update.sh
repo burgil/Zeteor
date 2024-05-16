@@ -19,10 +19,8 @@ echo "Installing Website..."
 sleep 1
 npm install
 sleep 1
-rm nohup.out
-sleep 1
 echo "Starting Website..."
-nohup npm start &
+nohup npm start &> logs.txt
 echo "Website Restarted!"
 sleep 1
 
@@ -53,10 +51,8 @@ while true; do
             sleep 1
             npm install
             sleep 1
-            rm nohup.out
-            sleep 1
             echo "Starting Website..."
-            nohup npm start &
+            nohup npm start &> logs.txt
             echo "Website Restarted!"
         fi
     fi
