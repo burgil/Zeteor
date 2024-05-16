@@ -20,6 +20,7 @@ sleep 1
 echo "Cleaning Logs..."
 sleep 1
 rm logs.txt
+rm logs.updater.txt
 sleep 1
 echo "Starting Website..."
 nohup npm start > logs.txt 2>&1 &
@@ -54,6 +55,7 @@ while true; do
             echo "Cleaning Logs..."
             sleep 1
             rm logs.txt
+            rm logs.updater.txt
             sleep 1
             echo "Starting Website..."
             nohup npm start > logs.txt 2>&1 &
