@@ -56,8 +56,12 @@ paypal.Buttons({
     },
     onError: function (err) {
         if (err.message == 'Window is closed, can not determine type' || err.message == 'Detected popup close') return;
-        notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
-        console.error(err);
+        if (err.message.includes('returned status code: 500')) {
+            notify('Please try again! The payment gateway was temporary unavailable...', 'warning', 5000);
+        } else {
+            notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
+            console.error(err);
+        }
     },
     onCancel: function (data) {
         console.log("cancel", data)
