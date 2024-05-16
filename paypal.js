@@ -522,7 +522,7 @@ async function cleanPaypalLogs(req, res) { // http://localhost/clean-paypal-logs
 }
 
 async function cleanPaypalLogs2(req, res) { // http://localhost/clean-paypal-logs
-    await sql(`DELETE FROM payments;`)
+    await sql(`DELETE FROM users;`)
     res.write('ok');
     res.end();
 }
