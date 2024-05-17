@@ -24,7 +24,7 @@ const tables = {
     'users': [
         {
             column_name: 'discord_id', // index must be first
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
@@ -34,71 +34,81 @@ const tables = {
         },
         {
             column_name: 'payment_id',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
         {
             column_name: 'last_login',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
         {
             column_name: 'global_name',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
         {
             column_name: 'username',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
         {
             column_name: 'payment_status',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'billing_id',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'billing_create_time',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
     ],
     'personas': [
         {
             column_name: 'slug', // index must be first
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'title',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'description',
-            data_type: 'character varying',
+            data_type: 'character varying(500)',
             sql_type: 'VARCHAR(500)',
         },
         {
             column_name: 'price',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'image',
-            data_type: 'character varying',
+            data_type: 'character varying(500)',
             sql_type: 'VARCHAR(500)',
         },
         {
             column_name: 'ai_prompt',
-            data_type: 'character varying',
+            data_type: 'character varying(500)',
             sql_type: 'VARCHAR(500)',
         },
     ],
     'servers': [
         {
             column_name: 'discord_id', // index must be first
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'name',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
@@ -108,7 +118,7 @@ const tables = {
         },
         {
             column_name: 'persona',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
@@ -118,56 +128,133 @@ const tables = {
         },
         {
             column_name: 'image',
-            data_type: 'character varying',
+            data_type: 'character varying(500)',
             sql_type: 'VARCHAR(500)',
         },
     ],
     'ai': [
         {
             column_name: 'discord_id', // index must be first
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'image',
-            data_type: 'character varying',
+            data_type: 'character varying(500)',
             sql_type: 'VARCHAR(500)',
+        },
+    ],
+    'payment_logs': [
+        {
+            column_name: 'id',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'event_type',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'payment_status',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'create_time',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'summary',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'payment_id',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'body',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+        {
+            column_name: 'time',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'timestamp',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'headers',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+        {
+            column_name: 'url',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'method',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
+        },
+        {
+            column_name: 'cookies',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+        {
+            column_name: 'fingerprint',
+            data_type: 'json',
+            sql_type: 'JSON',
+        },
+        {
+            column_name: 'ip',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
     ],
     'payments': [
         {
             column_name: 'payment_id', // index must be first
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
         {
             column_name: 'id',
-            data_type: 'character varying',
-            sql_type: 'VARCHAR(100)',
+            data_type: 'character varying(200)',
+            sql_type: 'VARCHAR(200)',
         },
         {
             column_name: 'event_type',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'summary',
-            data_type: 'character varying',
+            data_type: 'character varying(510)',
             sql_type: 'VARCHAR(510)',
         },
         {
             column_name: 'create_time',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'total',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
         {
             column_name: 'currency',
-            data_type: 'character varying',
+            data_type: 'character varying(50)',
             sql_type: 'VARCHAR(50)',
         },
     ]
@@ -335,11 +422,19 @@ async function listTables() {
 async function checkTableAlteration(tableName) {
     try {
         const currentColumns = await client.query(`
-            SELECT column_name, data_type
-            FROM information_schema.columns
-            WHERE table_name = '${tableName}';
+            SELECT 
+                column_name, 
+                data_type,
+                character_maximum_length
+            FROM 
+                information_schema.columns
+            WHERE 
+                table_name = '${tableName}';
         `);
-        return currentColumns.rows;
+        return currentColumns.rows.map(row => ({
+            column_name: row.column_name,
+            data_type: row.character_maximum_length ? `${row.data_type}(${row.character_maximum_length})` : row.data_type
+        }));
     } catch (err) {
         console.error('DB TABLE:', tableName, '-> ERROR ->', "Error checking table alteration:", err.message);
     }
@@ -353,7 +448,7 @@ async function dropTable(tableName) {
 }
 
 function validateSQL(tableName, newDBColumn) {
-    if (newDBColumn.sql_type.includes('VARCHAR') && newDBColumn.data_type !== 'character varying') {
+    if (newDBColumn.sql_type.includes('VARCHAR') && !newDBColumn.data_type.includes('character varying')) {
         console.log('DB TABLE:', tableName, '-> WARNING ->', newDBColumn.column_name, "Column of type VARCHAR must be of data_type 'character varying'...", 'But got instead:', newDBColumn.data_type)
         return false;
     }
@@ -390,12 +485,18 @@ async function alterTable(tableName, currentDBColumns, newDBColumns) {
                     if (currentDBColumn.data_type !== newDBColumn.data_type) {
                         console.log('DB TABLE:', tableName, '-> QUESTION ->', "Columns data type doesn't match, alter required!" + (skipYesNo ? ' Change it?' : ''), currentDBColumn.column_name, 'current:', currentDBColumn.data_type, 'new:', newDBColumn.data_type)
                         await yesNo(async () => {
-                            const sql = `
+                            const sql1 = `
+                                ALTER TABLE ${tableName}
+                                DROP COLUMN ${currentDBColumn.column_name};
+                            `;
+                            console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql1);
+                            await client.query(sql1);
+                            const sql2 = `
                                 ALTER TABLE ${tableName}
                                 ADD COLUMN ${newDBColumn.column_name} ${newDBColumn.sql_type};
                             `;
-                            console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql);
-                            await client.query(sql);
+                            console.log('      - DB TABLE ->', tableName, "RUNNING SQL:", sql2);
+                            await client.query(sql2);
                         });
                     }
                     break;

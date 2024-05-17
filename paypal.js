@@ -107,6 +107,28 @@ async function verifyPaypal(authAlgo, certUrl, transmissionId, transmissionSig, 
     }
 }
 
+async function cancelPaypalSubscription(subscriptionID) {
+    try {
+        await updateToken();
+        const response = await fetch(`https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscriptionID}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${cachedToken.access_token}` // Replace YOUR_ACCESS_TOKEN with your actual access token
+            },
+            body: JSON.stringify({
+                "string": "Not satisfied with the service", // string [ 1 .. 128 ] characters The reason for the cancellation of a subscription.
+            })
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const cancelStatus = await response.json();
+        return cancelStatus;
+    } catch (error) {
+        console.error('Error:', error.message);
+        return error.message;
+    }
+}
+
 async function processPaypalWebhooks(req, res) { // fetch('http://localhost/paypal', {method: 'POST'})
     try {
         const authAlgo = req.headers["paypal-auth-algo"];
@@ -313,15 +335,21 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                     case 'VAULT.CREDIT-CARD.UPDATED': // A credit card is updated.
                         break;
                 }
-                // body: webhookEvent,
-                // time: Date.now(),
-                // timestamp: new Date().toLocaleString(),
-                // headers: req.headers,
-                // url: req.url,
-                // method: req.method,
-                // cookies: req.cookies,
-                // fingerprint: req.fingerprint,
-                // ip: req.clientIp,
+                const insertPaymentLog = await generateInsertStatement('payments', {
+                    id: '',
+                    payment_status: paymentStatus ? paymentStatus : 'false',
+                    event_type: webhookEvent.event_type,
+                    body: webhookEvent,
+                    time: Date.now(),
+                    timestamp: new Date().toLocaleString(),
+                    headers: req.headers,
+                    url: req.url,
+                    method: req.method,
+                    cookies: req.cookies,
+                    fingerprint: req.fingerprint,
+                    ip: req.clientIp,
+                })
+                await sql(insertPaymentLog.sql, insertPaymentLog.values);
                 /*
                 paymentStatus:
                 reject - somehow got rejected
@@ -334,36 +362,52 @@ async function processPaypalWebhooks(req, res) { // fetch('http://localhost/payp
                     body: webhookEvent
                 })
                 if (paymentStatus) {
-                    if (webhookEvent.resource?.id && webhookEvent.event_type && webhookEvent.summary && webhookEvent.create_time && webhookEvent.resource?.amount?.total && webhookEvent.resource?.amount?.currency) {
+                    if (webhookEvent.resource?.id && webhookEvent.event_type && webhookEvent.summary && webhookEvent.create_time) {
                         console.log("processing webhook...")
-                        if (paymentStatus == 'reject') { // -----------------
+                        if (!(webhookEvent.resource.custom || webhookEvent.resource.custom_id)) {
+                            console.log("ignored payment without custom id")
+                        } else if (paymentStatus == 'reject') { // -----------------
                             console.log("rejected")
                             const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
                                 payment_status: 'reject',
                             }, 'payment_id');
                             await sql(updateUserPayment.sql, updateUserPayment.values)
+                            await sql(`DELETE FROM payments WHERE payment_id = $1 AND event_type = $2;`, [
+                                paymentID,
+                                "PAYMENT.SALE.COMPLETED"
+                            ])
                         } else if (paymentStatus == 'cancel') { // ----------------- BILLING.SUBSCRIPTION.CANCELLED
                             console.log("cancelled")
                             const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
                                 payment_status: 'cancel',
                             }, 'payment_id');
                             await sql(updateUserPayment.sql, updateUserPayment.values)
+                            await sql(`DELETE FROM payments WHERE payment_id = $1 AND event_type = $2;`, [
+                                paymentID,
+                                "PAYMENT.SALE.COMPLETED"
+                            ])
                         } else if (paymentStatus == 'confirm') { // ----------------- PAYMENT.SALE.COMPLETED
                             console.log("confirm webhook")
-                            const insertPayment = await generateInsertStatement('payments', {
-                                payment_id: webhookEvent.resource.custom || webhookEvent.resource.custom_id,
-                                id: webhookEvent.resource.billing_agreement_id,
-                                event_type: webhookEvent.event_type,
-                                summary: webhookEvent.summary,
-                                create_time: webhookEvent.create_time,
-                                total: webhookEvent.resource.amount.total,
-                                currency: webhookEvent.resource.amount.currency,
-                            })
-                            await sql(insertPayment.sql, insertPayment.values);
-                            const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
-                                payment_status: 'confirm',
-                            }, 'payment_id');
-                            await sql(updateUserPayment.sql, updateUserPayment.values)
+                            if (webhookEvent.resource.billing_agreement_id.startsWith('I-')) {
+                                const insertPayment = await generateInsertStatement('payments', {
+                                    payment_id: webhookEvent.resource.custom || webhookEvent.resource.custom_id,
+                                    id: webhookEvent.resource.billing_agreement_id,
+                                    event_type: webhookEvent.event_type,
+                                    summary: webhookEvent.summary,
+                                    create_time: webhookEvent.create_time,
+                                    total: webhookEvent.resource?.amount?.total,
+                                    currency: webhookEvent.resource?.amount?.currency,
+                                })
+                                await sql(insertPayment.sql, insertPayment.values);
+                                const updateUserPayment = await generateUpdateStatement('users', webhookEvent.resource.custom || webhookEvent.resource.custom_id, {
+                                    payment_status: 'confirm',
+                                    billing_id: webhookEvent.resource.billing_agreement_id,
+                                    billing_create_time: webhookEvent.create_time,
+                                }, 'payment_id');
+                                await sql(updateUserPayment.sql, updateUserPayment.values)
+                            } else {
+                                console.log("ignored non-subscription payment")
+                            }
                         } else {
                             console.warn("unknown webhook type", paymentStatus)
                         }
@@ -417,26 +461,18 @@ async function checkOrder(req, res) {
             return;
         }
         if (token_db[req.cookies.auth_token].random) {
-            const subscriptionID = token_db[req.cookies.auth_token].random;
-            if (!subscriptionID || subscriptionID.trim() == '') {
+            const paymentID = token_db[req.cookies.auth_token].random;
+            if (!paymentID || paymentID.trim() == '') {
                 res.send(JSON.stringify({
                     error: 'Invalid order id'
                 }));
                 return;
             }
-            // find empty order with id
             const paymentsDB = await sql(`SELECT 1 FROM payments WHERE payment_id = $1 AND event_type = $2;`, [
-                subscriptionID,
+                paymentID,
                 "PAYMENT.SALE.COMPLETED"
             ])
-            // console.warn('paymentsDB:', paymentsDB.rows)
             if (paymentsDB.rows.length > 0) {
-                // found empty order with that id, fill user as the owner
-                // const updatePayment = await generateUpdateStatement('payments', orderID, {
-                //     discord_id: userData.id,
-                // }, 'id');
-                // const updatedPayment = await sql(updatePayment.sql, updatePayment.values)
-                // console.warn('updatedPayment', updatedPayment.rows)
                 res.send(JSON.stringify({
                     ok: true
                 }))
@@ -455,53 +491,74 @@ async function checkOrder(req, res) {
     }
 }
 
-// async function claimOrder(req, res) {
-//     try {
-//         const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
-//         if (isSecure) {
-//             if (currentOrigin.host != 'zeteor.roboticeva.com') {
-//                 res.send('Invalid Request');
-//                 return;
-//             }
-//         } else {
-//             if (currentOrigin.host != 'localhost') {
-//                 res.send('Invalid Request');
-//                 return;
-//             }
-//         }
-//         if (!req.cookies.auth_token) {
-//             res.send(JSON.stringify({
-//                 error: 'Not logged in'
-//             }));
-//             return;
-//         }
-//         const userData = token_db[req.cookies.auth_token];
-//         if (!userData) {
-//             res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-//             res.send(JSON.stringify({
-//                 error: 'Not logged in'
-//             }));
-//             return;
-//         }
-//         const subscriptionID = req.body.subscriptionID;
-//         if (!subscriptionID || subscriptionID.trim() == '') {
-//             res.send(JSON.stringify({
-//                 error: 'Invalid order id'
-//             }));
-//             return;
-//         }
-//         // update user with the new order id
-//         const updateUserPayment = await generateUpdateStatement('users', userData.id, {
-//             payment_id: subscriptionID,
-//         });
-//         await sql(updateUserPayment.sql, updateUserPayment.values)
-//         res.send(JSON.stringify({
-//             ok: true
-//         }))
-//     } catch (e) {
-//         res.status(500).send(e.message);
-//     }
-// }
+async function cancelOrder(req, res) {
+    try {
+        const currentOrigin = req.headers.referer ? new URL(req.headers.referer) : {};
+        if (isSecure) {
+            if (currentOrigin.host != 'zeteor.roboticeva.com') {
+                res.send(JSON.stringify({
+                    error: 'Invalid Request'
+                }));
+                return;
+            }
+        } else {
+            if (currentOrigin.host != 'localhost') {
+                res.send(JSON.stringify({
+                    error: 'Invalid Request'
+                }));
+                return;
+            }
+        }
+        if (!req.cookies.auth_token) {
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        const userData = token_db[req.cookies.auth_token];
+        if (!userData) {
+            res.setHeader("Set-Cookie", 'auth_token=; Path=/; Secure; HttpOnly; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+            res.send(JSON.stringify({
+                error: 'Not logged in'
+            }));
+            return;
+        }
+        if (token_db[req.cookies.auth_token].random) {
+            const paymentID = token_db[req.cookies.auth_token].random;
+            if (!paymentID || paymentID.trim() == '') {
+                res.send(JSON.stringify({
+                    error: 'Invalid order id'
+                }));
+                return;
+            }
+            // find empty order with id
+            const paymentsDB = await sql(`SELECT id FROM payments WHERE payment_id = $1 AND event_type = $2;`, [
+                paymentID,
+                "PAYMENT.SALE.COMPLETED"
+            ])
+            await sql(`DELETE FROM payments WHERE payment_id = $1 AND event_type = $2;`, [
+                paymentID,
+                "PAYMENT.SALE.COMPLETED"
+            ])
+            // console.warn('paymentsDB:', paymentsDB.rows)
+            if (paymentsDB.rows.length > 0) {
+                res.send(JSON.stringify({
+                    ok: true
+                }))
+            } else {
+                res.send(JSON.stringify({
+                    recheck: true
+                }))
+            }
+        } else {
+            res.send(JSON.stringify({
+                error: 'Invalid payment id'
+            }));
+        }
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
+}
 
 async function getPaypalLogs(req, res) { // http://localhost/paypal-logs
     const paymentsDB = await sql(`SELECT * FROM payments;`)
@@ -553,15 +610,15 @@ const paypalRoutes = [
         route: '/clean-paypal-logs2',
         func: cleanPaypalLogs2
     },
-    // {
-    //     method: 'POST',
-    //     route: '/claim-paypal',
-    //     func: claimOrder
-    // },
     {
         method: 'GET',
         route: '/check-paypal',
         func: checkOrder
+    },
+    {
+        method: 'GET',
+        route: '/cancel-paypal',
+        func: cancelOrder
     },
 ]
 

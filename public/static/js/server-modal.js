@@ -152,6 +152,7 @@ const serverModal = (serverImage, guild, guildID) => {
                     type: 'div',
                     class: 'popup-server-inputs',
                     html: `
+                    <h1>TODO: add ai name, save button, function calling, supported languages</h1>
                     <div class="form-group">
                         <label>
                             <textarea placeholder="Write Your Server AI System Message Prompt..."></textarea>

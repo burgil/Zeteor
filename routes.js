@@ -25,6 +25,7 @@ const routes = [
         address: '/ai',
         components_top: [
             'notifications',
+            'achievements',
             '<main>',
             'sidebar',
             '<section class="content">',
@@ -46,6 +47,7 @@ const routes = [
 
 const main_top_components = [
     'notifications',
+    'achievements',
     '<main>',
     'sidebar',
     '<section class="content">',

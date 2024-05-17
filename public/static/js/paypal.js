@@ -41,78 +41,80 @@ function purchaseValidator() {
 }
 const checkPremium = localStorage.getItem('waitingForSubscription'); // subscriptionID
 if (checkPremium) purchaseValidator();
-let paypalButton;
-paypal.Buttons({
-    style: {
-        // shape: 'rect',
-        // color: 'gold',
-        // layout: 'vertical',
-        // label: 'paypal'
-        layout: 'horizontal',
-        size: 'small',
-        color:  'blue',
-        label:  'pay',
-        height: 42,
-        tagline: 'false'
-    },
-    onError: function (err) {
-        if (err.message == 'Window is closed, can not determine type' || err.message == 'Detected popup close') return;
-        if (err.message.includes('returned status code: 500')) {
-            notify('Please try again! The payment gateway was temporary unavailable...', 'warning', 5000);
-        } else {
-            notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
-            console.error(err);
-        }
-    },
-    onCancel: function (data) {
-        // console.log("cancel", data)
-    },
-    onInit: function (data, actions) {
-        paypalButton = actions;
-        // paypalButton.disable();
-    },
-    onClick: function (data, thePromise) {
-        if (!invoiceID) {
-            paypalButton.disable();
-            thePromise.reject();
-            notify('Please wait for the interface to load...', 'warning', 3000);
-            paypalButton.enable();
-            return false;
-        } else {
-            confetti_show();
-            paypalButton.enable();
-            thePromise.resolve();
-        }
-    },
-    createSubscription: function (data, actions) {
-        // console.log("data", data)
-        // console.log("actions", actions)
-        // if (updatedSubscription && (status === "ACTIVE" || status === "SUSPENDED")) {
-        //     // if subscription exists, revise it by chaning the plan id
-        //     return actions.subscription.revise(subscriptionId, {
-        //         plan_id: 'P-6B898830LY4944547MZBTOXQ'
-        //     });
-        // }
-        return actions.subscription.create({
-            purchase_units: [{
-                custom_id: invoiceID,
-                id: invoiceID,
-                reference_id: invoiceID,
-                user_id: invoiceID,
-                invoice: invoiceID,
-                InvoiceID: invoiceID,
-                INVNUM: invoiceID,
-                invoice_id: invoiceID,
-            }],
-            application_context: {
-                brand_name: 'Zeteor: Premium Subscription',
-                shipping_preference: "NO_SHIPPING",
-                return_url: "https://zeteor.roboticeva.com/personas",
-                cancel_url: "https://zeteor.roboticeva.com/personas",
-            },
-            subscriber: {
-                name: {
-                    given_name: invoiceID
+if (document.getElementById('paypal-button-container-P-6B898830LY4944547MZBTOXQ')) {
+    let paypalButton;
+    paypal.Buttons({
+        style: {
+            // shape: 'rect',
+            // color: 'gold',
+            // layout: 'vertical',
+            // label: 'paypal'
+            layout: 'horizontal',
+            size: 'small',
+            color:  'blue',
+            label:  'pay',
+            height: 42,
+            tagline: 'false'
+        },
+        onError: function (err) {
+            if (err.message == 'Window is closed, can not determine type' || err.message == 'Detected popup close') return;
+            if (err.message.includes('returned status code: 500')) {
+                notify('Please try again! The payment gateway was temporary unavailable...', 'warning', 5000);
+            } else {
+                notify('Error: ' + err.message + ' - Check console, please contact support!', 'error', 30000);
+                console.error(err);
+            }
+        },
+        onCancel: function (data) {
+            // console.log("cancel", data)
+        },
+        onInit: function (data, actions) {
+            paypalButton = actions;
+            // paypalButton.disable();
+        },
+        onClick: function (data, thePromise) {
+            if (!invoiceID) {
+                paypalButton.disable();
+                thePromise.reject();
+                notify('Please wait for the interface to load...', 'warning', 3000);
+                paypalButton.enable();
+                return false;
+            } else {
+                confetti_show();
+                paypalButton.enable();
+                thePromise.resolve();
+            }
+        },
+        createSubscription: function (data, actions) {
+            return actions.subscription.create({
+                purchase_units: [{
+                    custom_id: invoiceID,
+                    id: invoiceID,
+                    reference_id: invoiceID,
+                    user_id: invoiceID,
+                    invoice: invoiceID,
+                    InvoiceID: invoiceID,
+                    INVNUM: invoiceID,
+                    invoice_id: invoiceID,
+                }],
+                application_context: {
+                    brand_name: 'Zeteor: Premium Subscription',
+                    shipping_preference: "NO_SHIPPING",
+                    return_url: "https://zeteor.roboticeva.com/personas",
+                    cancel_url: "https://zeteor.roboticeva.com/personas",
+                },
+                subscriber: {
+                    name: {
+                        given_name: invoiceID
+                    },
+                    custom_id: invoiceID,
+                    id: invoiceID,
+                    reference_id: invoiceID,
+                    user_id: invoiceID,
+                    invoice: invoiceID,
+                    InvoiceID: invoiceID,
+                    INVNUM: invoiceID,
+                    invoice_id: invoiceID,
                 },
                 custom_id: invoiceID,
                 id: invoiceID,
@@ -122,52 +124,18 @@ paypal.Buttons({
                 InvoiceID: invoiceID,
                 INVNUM: invoiceID,
                 invoice_id: invoiceID,
-            },
-            custom_id: invoiceID,
-            id: invoiceID,
-            reference_id: invoiceID,
-            user_id: invoiceID,
-            invoice: invoiceID,
-            InvoiceID: invoiceID,
-            INVNUM: invoiceID,
-            invoice_id: invoiceID,
-            auto_renewal: true,
-            quantity: 1,
-            plan_id: 'P-6B898830LY4944547MZBTOXQ'
-        });
-    },
-    onApprove: async function (data, actions) {
-        // console.log("data", data)
-        // console.log("actions", actions)
-        // return actions.order.capture().then(function (details) {
-        //   console.log("details", details)
-        //   alert(details.payer.name.given_name)
-        // })
-        try {
-            // const claimOrder = await fetch('/claim-paypal', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         subscriptionID: data.subscriptionID
-            //     })
-            // })
-            // const claimOrderResponse = await claimOrder.json();
-            // if (claimOrderResponse.ok) {
-            //     localStorage.setItem('subscriptionID', data.subscriptionID);
-            //     purchaseValidator();
-            // } else {
-            //     if (claimOrderResponse.error) {
-            //         notify('Error: ' + claimOrderResponse.error, 'error', 30000);
-            //     } else {
-            //         notify('Error: Order could not be claimed, please contact support!', 'error', 30000);
-            //     }
-            // }
-            localStorage.setItem('waitingForSubscription', 'true');
-            purchaseValidator();
-        } catch (e) {
-            notify('Error: ' + e.message + ' please contact support!', 'error', 30000)
+                auto_renewal: true,
+                quantity: 1,
+                plan_id: 'P-6B898830LY4944547MZBTOXQ'
+            });
+        },
+        onApprove: async function (data, actions) {
+            try {
+                localStorage.setItem('waitingForSubscription', 'true');
+                purchaseValidator();
+            } catch (e) {
+                notify('Error: ' + e.message + ' please contact support!', 'error', 30000)
+            }
         }
-    }
-}).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ');
+    }).render('#paypal-button-container-P-6B898830LY4944547MZBTOXQ');
+}
