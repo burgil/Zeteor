@@ -68,7 +68,7 @@ async function updateToken() {
         cachedToken = data;
         cachedToken.current_timestamp = Date.now();
         try {
-            fs.writeFileSync('../cachedToken.json', JSON.stringify(cachedToken), 'utf8');
+            fs.writeFileSync('./ignore/cachedToken.json', JSON.stringify(cachedToken), 'utf8');
         } catch (err) { }
     } catch (error) {
         console.error('Error:', error.message);

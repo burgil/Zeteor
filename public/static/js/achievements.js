@@ -127,23 +127,23 @@ function pauseAudio() {
 // Achievement('Achievement unlocked', 'Free &ndash; AI Persona Slot', 2);
 // Achievement('Achievement unlocked', 'Free &ndash; AI Persona Slot', 3);
 // Achievement('Achievement unlocked', 'Free &ndash; AI Persona Slot', 4);
-const max_blink = 4;
-const min_blink = 0;
-let lights = 1;
-let lightsDirection = true;
-if (!DEBUG_Achievement) setInterval(function () {
-    Achievement('Achievement unlocked', 'Free &ndash; AI Persona Slot', lights);
-    if (lightsDirection) {
-        lights += 1;
-        if (lights == max_blink + 1) {
-            lightsDirection = false;
-            lights = max_blink - 1;
-        }
-    } else {
-        lights -= 1;
-        if (lights == min_blink - 1) {
-            lightsDirection = true;
-            lights = min_blink + 1;
-        }
-    }
-}, 6000);
+// const max_blink = 4;
+// const min_blink = 0;
+// let lights = 1;
+// let lightsDirection = true;
+// if (!DEBUG_Achievement) setInterval(function () {
+//     Achievement('Achievement unlocked', 'Free &ndash; AI Persona Slot', lights);
+//     if (lightsDirection) {
+//         lights += 1;
+//         if (lights == max_blink + 1) {
+//             lightsDirection = false;
+//             lights = max_blink - 1;
+//         }
+//     } else {
+//         lights -= 1;
+//         if (lights == min_blink - 1) {
+//             lightsDirection = true;
+//             lights = min_blink + 1;
+//         }
+//     }
+// }, 6000);
